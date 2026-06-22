@@ -55,4 +55,27 @@ tasks:
       - sh: "[ '{{.GIT_TAG}}' != '<no value>' ]"
         msg: "Variable .GIT_TAG is not set"
 
-        
+  verify:
+    desc: |
+      Smoke-test the locally built image (run after task docker-build).
+      Checks /.version, nordvpn version, iptables kill-switch, and daemon socket.
+    cmds:
+      - bash scripts/verify.sh
+
+  check-version:
+    desc: Check if a newer NordVPN version is available in the official package repo
+    cmds:
+      - bash scripts/check-version.sh
+
+  bump:
+    desc: |
+      Bump NordVPN and image versions across all files, then show the diff.
+      Usage: task bump NORDVPN_VERSION=4.6.0 IMAGE_VERSION=5.6.0
+      Does NOT commit, tag, build, or push — human reviews diff and proceeds manually.
+    preconditions:
+      - sh: '[ -n "{{.NORDVPN_VERSION}}" ]'
+        msg: "NORDVPN_VERSION is required. Usage: task bump NORDVPN_VERSION=4.6.0 IMAGE_VERSION=5.6.0"
+      - sh: '[ -n "{{.IMAGE_VERSION}}" ]'
+        msg: "IMAGE_VERSION is required. Usage: task bump NORDVPN_VERSION=4.6.0 IMAGE_VERSION=5.6.0"
+    cmds:
+      - bash scripts/bump.sh "{{.NORDVPN_VERSION}}" "{{.IMAGE_VERSION}}"

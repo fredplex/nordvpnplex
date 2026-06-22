@@ -28,7 +28,9 @@ Package: https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/
 - Never bump base image (e.g. debian:bookworm-slim) without explicit instruction
 - Never modify Taskfile.yml unless asked
 - Changelog entries go in README.md under ## Changelog, newest first
+- No Renovate bot — renovate.json has been removed
+- GitHub Actions are in place: PR build-validation (no push), weekly version-detection, tag-triggered publish
 
 ## Current Pinned Version
 <!-- Update this after each successful rebuild -->
-NordVPN: x.x.x  |  Image tag: fredplex/nordvpn-unraid:x.x.x  |  Built: YYYY-MM-DD
+NordVPN: 4.5.0  |  Image tag: fredplex/nordvpn:5.5.0  |  Built: 2026-03-16

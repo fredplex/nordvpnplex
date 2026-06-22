@@ -1,3 +1,9 @@
+<!-- current-version: nordvpn=4.5.0 image=5.5.0 -->
+> **This fork:** `fredplex/nordvpn` — custom NordVPN image built for Unraid.
+> **Current image:** fredplex/nordvpn:5.5.0 — NordVPN 4.5.0
+
+---
+
 <p align="center">
     <a href="https://nordvpn.com/"><img src="https://github.com/bubuntux/nordvpn/raw/master/.img/NordVpn_logo.png"/></a>
     </br>

@@ -99,7 +99,8 @@ Taskfile.yml                      — local build/publish tasks (do not modify)
 README.md                         — user docs + Changelog
 CLAUDE.md                         — AI context and workflow rules
 AGENTS.md                         — this file
-renovate.json                     — Renovate bot config (see Known issues)
+docs/
+  build-and-publish.md            — full human + agent reference: workflow, triggers, manual steps, secrets setup
 .gitattributes                    — enforces LF line endings on all rootfs/ scripts
 .ai/
   current.md                      — live session state (update after each bump)
@@ -174,9 +175,21 @@ rootfs/
 
 ---
 
+## GitHub Actions workflows
+
+| Workflow | Trigger | Purpose |
+|---|---|---|
+| `.github/workflows/build-validate.yml` | PR → main | Runs `docker build` only — no push. Catches Dockerfile errors early. |
+| `.github/workflows/publish.yml` | Push of semver tag (e.g. `5.6.0`) | Builds and pushes `:latest` + `:<tag>` to Docker Hub. Requires `DOCKER_USERNAME` and `DOCKER_TOKEN` repo secrets. |
+| `.github/workflows/check-nordvpn-release.yml` | Weekly cron (Mon 08:00 UTC) + manual | Checks the NordVPN package repo; opens a draft PR if a newer version is available. |
+
+### Required GitHub repo secrets
+Set these in **Settings → Secrets and variables → Actions** before the publish workflow will work:
+- `DOCKER_USERNAME` — Docker Hub username (`fredplex`)
+- `DOCKER_TOKEN` — Docker Hub access token (generate at hub.docker.com → Account Settings → Security)
+
+---
+
 ## Known issues / open items
 
-- **Renovate bot** (`renovate.json`) is active and will open PRs for base image bumps.
-  These conflict with the "never bump base image without instruction" rule — close them without merging unless the owner explicitly requests an upgrade.
-- **README.md** currently mirrors the upstream `bubuntux/nordvpn` project (badges, examples, and issue links all point there). A project-specific README with the actual Changelog section is still needed.
-- **`CLAUDE.md` pinned version block** should be updated after every successful rebuild to reflect the current `NORDVPN_VERSION`, `IMAGE_VERSION`, and build date.
+- **README.md** currently mirrors the upstream `bubuntux/nordvpn` project (badges, examples, and issue links all point there). A project-specific README with the actual Changelog section is still needed (Tier 3 / R8).

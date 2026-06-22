@@ -1,0 +1,100 @@
+name: Check NordVPN Release
+
+# Runs weekly to detect new NordVPN versions in the official package repo.
+# If a newer version is found, opens a draft PR with the bump already applied.
+# The owner reviews, confirms IMAGE_VERSION, merges, then builds and tags manually.
+# Never builds or pushes an image.
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'   # Every Monday 08:00 UTC
+  workflow_dispatch:         # Allow manual trigger from GitHub Actions UI
+
+jobs:
+  check-and-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for new NordVPN version
+        id: check
+        run: |
+          REPO_URL="https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/"
+          CURRENT=$(grep "ARG NORDVPN_VERSION" Dockerfile | sed "s/ARG NORDVPN_VERSION='//;s/'$//")
+
+          LATEST=$(curl -sf "${REPO_URL}" \
+            | grep -oE 'nordvpn_[0-9]+\.[0-9]+\.[0-9]+_amd64\.deb' \
+            | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' \
+            | sort -V | uniq | tail -1)
+
+          if [[ -z "${LATEST}" ]]; then
+            echo "ERROR: Could not fetch version list from ${REPO_URL}" >&2
+            exit 1
+          fi
+
+          echo "current=${CURRENT}" >> "$GITHUB_OUTPUT"
+          echo "latest=${LATEST}" >> "$GITHUB_OUTPUT"
+
+          if [[ "${LATEST}" == "${CURRENT}" ]]; then
+            echo "update_available=false" >> "$GITHUB_OUTPUT"
+            echo "No update: ${CURRENT} is already the latest."
+          else
+            echo "update_available=true" >> "$GITHUB_OUTPUT"
+            echo "New version available: ${LATEST} (currently pinned: ${CURRENT})"
+          fi
+
+      - name: Calculate suggested IMAGE_VERSION
+        if: steps.check.outputs.update_available == 'true'
+        id: image_version
+        run: |
+          CURRENT_IMAGE=$(grep "ARG IMAGE_VERSION" Dockerfile | sed "s/ARG IMAGE_VERSION='//;s/'$//")
+          IFS='.' read -r major minor patch <<< "${CURRENT_IMAGE}"
+          SUGGESTED="${major}.${minor}.$((patch + 1))"
+          echo "current=${CURRENT_IMAGE}" >> "$GITHUB_OUTPUT"
+          echo "suggested=${SUGGESTED}" >> "$GITHUB_OUTPUT"
+
+      - name: Apply version bump
+        if: steps.check.outputs.update_available == 'true'
+        run: |
+          bash scripts/bump.sh \
+            "${{ steps.check.outputs.latest }}" \
+            "${{ steps.image_version.outputs.suggested }}"
+
+      - name: Open draft PR
+        if: steps.check.outputs.update_available == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: auto/nordvpn-${{ steps.check.outputs.latest }}
+          commit-message: "chore: bump NordVPN ${{ steps.check.outputs.current }} → ${{ steps.check.outputs.latest }}"
+          title: "chore: bump NordVPN ${{ steps.check.outputs.current }} → ${{ steps.check.outputs.latest }}"
+          body: |
+            NordVPN `${{ steps.check.outputs.latest }}` is now available in the official package repo.
+
+            ## Changes applied by automation
+            | Field | Before | After |
+            |---|---|---|
+            | `NORDVPN_VERSION` | `${{ steps.check.outputs.current }}` | `${{ steps.check.outputs.latest }}` |
+            | `IMAGE_VERSION` | `${{ steps.image_version.outputs.current }}` | `${{ steps.image_version.outputs.suggested }}` *(suggested — adjust if needed)* |
+
+            ## Before merging
+            - [ ] Confirm `IMAGE_VERSION` is correct (suggested: `${{ steps.image_version.outputs.suggested }}`)
+            - [ ] Review the full diff
+            - [ ] Check [NordVPN release notes](https://nordvpn.com/blog/nordvpn-linux-release-notes/) for any breaking changes
+
+            ## After merging
+            ```bash
+            git pull
+            task docker-build
+            task verify
+            git tag -a ${{ steps.image_version.outputs.suggested }} -m "bump to NordVPN ${{ steps.check.outputs.latest }}"
+            git push --tags    # triggers the publish workflow
+            ```
+
+            > **Draft PR** — do not merge until IMAGE_VERSION has been reviewed.
+          draft: true
