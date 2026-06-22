@@ -61,9 +61,8 @@ Look for `nordvpn_<NORDVPN_VERSION>_amd64.deb`. If the file is not listed, do no
 3. Show a unified diff of every planned change; wait for approval
 4. Apply changes
 5. Owner runs `task docker-build` locally to verify the image
-6. Owner creates the git tag manually: `git tag -a <IMAGE_VERSION> -m "bump to NordVPN <NORDVPN_VERSION>"`
-7. Owner pushes tag and runs `task docker-publish`
-8. Update `.ai/current.md` to reflect the new version, build date, and pushed tags
+6. Owner runs `task release` — reads both versions from Dockerfile, creates the annotated tag, and pushes it; this triggers the GitHub publish workflow automatically
+7. Update `.ai/current.md` to reflect the new version, build date, and pushed tags
 
 ### Hard constraints
 - Never push to the remote — owner pushes manually after verifying the local image

@@ -208,17 +208,18 @@ Expected output:
 === 4 passed | 0 failed | 0 warnings ===
 ```
 
-**5. Create and push the release tag**
+**5. Tag and push to trigger the publish workflow**
 ```bash
-git tag -a <IMAGE_VERSION> -m "bump to NordVPN <NORDVPN_VERSION>"
-git push --tags
+task release
 ```
-Example:
-```bash
-git tag -a 5.6.0 -m "bump to NordVPN 4.6.0"
-git push --tags
-```
-This triggers the publish workflow. Monitor it at:
+This reads `IMAGE_VERSION` and `NORDVPN_VERSION` directly from the Dockerfile — no manual
+input required. It will:
+- Confirm the working tree is clean (fails if uncommitted changes exist)
+- Confirm the tag does not already exist (prevents accidental double-release)
+- Create the annotated git tag: `git tag -a <IMAGE_VERSION> -m "bump to NordVPN <NORDVPN_VERSION>"`
+- Push the tag: `git push --tags`
+
+Monitor the resulting publish workflow at:
 **GitHub → Actions → Publish to Docker Hub**
 
 ---
@@ -250,7 +251,7 @@ git add Dockerfile README.md CLAUDE.md .ai/current.md
 git commit -m "chore: bump NordVPN 4.5.0 → 4.6.0"
 ```
 
-**4–5.** Same as Option A steps 3–5 (`task docker-build` → `task verify` → tag → push).
+**4–5.** Same as Option A steps 3–5 (`task docker-build` → `task verify` → `task release`).
 
 ---
 
@@ -275,12 +276,12 @@ task check-version
 
 ### Trigger the publish workflow manually
 
-The publish workflow is designed to fire on a tag push. To trigger it:
+The publish workflow fires on a tag push. The easiest way:
 ```bash
-git tag -a <IMAGE_VERSION> -m "bump to NordVPN <NORDVPN_VERSION>"
-git push --tags
+task release
 ```
-There is no "Run workflow" button for the publish workflow because it requires the tag to exist — the tag name becomes the Docker image tag.
+This reads both versions from the Dockerfile and handles tagging and pushing in one step.
+There is no "Run workflow" button in the GitHub UI for this workflow — the tag push is the trigger, and the tag name becomes the Docker image tag.
 
 ---
 
