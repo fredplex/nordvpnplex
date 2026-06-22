@@ -34,7 +34,7 @@ NordVPN package repo ──► Weekly GitHub Action ──► Draft PR (human re
                                            task verify  (local)
                                                         │
                                                         ▼
-                                     git tag + git push --tags
+                                          task release
                                                         │
                                                         ▼
                                        GitHub Action: publish ──► Docker Hub
@@ -99,11 +99,45 @@ NordVPN package repo ──► Weekly GitHub Action ──► Draft PR (human re
                               ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  PUBLISH (GitHub Actions — automatic on tag push)                   │
-│  git tag -a <IMAGE_VERSION> -m "bump to NordVPN <NORDVPN_VERSION>" │
-│  git push --tags                                                    │
+│  task release                                                       │
+│  → creates annotated tag, pushes it                                 │
 │  → GitHub Action builds and pushes :latest + :<tag> to Docker Hub  │
 └─────────────────────────────────────────────────────────────────────┘
 ```
+
+### In plain language — who does what
+
+**Detecting a new NordVPN release**
+- GitHub Actions runs automatically every Monday, OR
+- You run `task check-version` locally, OR
+- An agent runs `task check-version` on request
+- If a new version is found → GitHub Actions opens a **draft PR** with all files already bumped
+
+**Reviewing the bump (human)**
+- Open the draft PR on GitHub
+- Confirm `IMAGE_VERSION` is correct (automation suggests a patch bump)
+- Skim the [NordVPN release notes](https://nordvpn.com/blog/nordvpn-linux-release-notes/) for anything breaking
+- Merge the PR
+
+**Building and verifying (human, local)**
+- `git pull`
+- `task docker-build` — builds the image locally, tagged with the git hash
+- `task verify` — checks NordVPN version, kill-switch, and daemon socket
+- If anything fails, fix and rebuild before continuing
+
+**Publishing (human triggers, GitHub does the work)**
+- `task release` — creates the annotated git tag and pushes it
+- GitHub Actions automatically builds and pushes `fredplex/nordvpn:latest` + `fredplex/nordvpn:<tag>` to Docker Hub
+
+**If an agent is doing a manual bump (no automated PR)**
+- Agent runs `task bump NORDVPN_VERSION=x.x.x IMAGE_VERSION=y.y.y`
+- Agent shows the diff and waits for human approval
+- Human takes over from the build step onward — agent never builds, tags, or pushes
+
+**What is never automated**
+- Merging a PR
+- Running the local build and verify
+- Pushing the git tag
 
 ---
 
@@ -200,7 +234,7 @@ Expected output:
     NordVPN target: 4.6.0
 
 --- Stateless checks ---
-  PASS  /.version = <hash>
+  PASS  IMAGE_VERSION env = <hash>
   PASS  nordvpn --version = 4.6.0
   PASS  iptables OUTPUT policy DROP (kill-switch functional)
 
