@@ -108,6 +108,7 @@ rootfs/
   etc/
     cont-init.d/
       00-firewall                 — iptables kill switch (drops all traffic before VPN is up)
+      00-version                  — prints IMAGE_VERSION banner (reads IMAGE_VERSION ENV set at build time)
       10-tun                      — creates /dev/net/tun if missing
       20-inet / 20-inet6          — IPv4/IPv6 interface setup
       30-route / 30-route6        — routing table setup for local network access
@@ -117,7 +118,6 @@ rootfs/
       finish                      — s6 finish hook
       data/check                  — s6 readiness check
   usr/bin/
-    version_message               — prints /.version at startup (contains IMAGE_VERSION or git hash; see note)
     nord_login                    — authenticates via TOKEN / TOKENFILE env var
     nord_config                   — applies TECHNOLOGY, DNS, FIREWALL, MESHNET, LAN_DISCOVERY env vars
     nord_connect                  — connects with exponential backoff retry; runs PRE/POST_CONNECT hooks
@@ -126,7 +126,8 @@ rootfs/
 ```
 
 ### Container startup sequence
-`version_message → nord_login → nord_config → nord_connect → nord_watch`
+s6 cont-init.d (in order): `00-firewall → 00-version → 10-tun → 20-inet/inet6 → 30-route/route6 → 40-allowlist`
+then CMD: `nord_login → nord_config → nord_connect → nord_watch`
 
 ### Line endings — critical on Windows
 `.gitattributes` enforces **LF** line endings for all files under `rootfs/`. Shell scripts with CRLF endings will fail inside the container with `bad interpreter` or silent parse errors. When creating or editing any `rootfs/` file on Windows, verify your editor is not converting to CRLF. Git handles this automatically on checkout via `.gitattributes`, but double-check when creating new scripts.

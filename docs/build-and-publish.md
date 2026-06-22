@@ -158,10 +158,12 @@ Three workflows run automatically. None of them push an image without a human-cr
 **Secrets needed:** `DOCKER_USERNAME` and `DOCKER_TOKEN` (see [Section 7](#7-one-time-setup-docker-hub-credentials-in-github)).
 
 > **Note on image version vs. git hash:**
-> `task docker-build` (local) passes the git commit hash as `IMAGE_VERSION`, so local test
-> images have the hash in `/.version`. Published images (via GitHub Actions) receive the
-> semantic tag as `IMAGE_VERSION`. This is intentional — `task verify` checks for the hash,
-> confirming the local build; the published image carries the human-readable version.
+> `task docker-build` (local) passes the git commit hash as `IMAGE_VERSION` via `--build-arg`,
+> so local test images have the hash in the `IMAGE_VERSION` environment variable and OCI label.
+> Published images receive the semver tag as `IMAGE_VERSION`. This is intentional —
+> `task verify` checks for the hash (confirming the local build); the published image carries
+> the human-readable version. Query version without running the container:
+> `docker inspect <image> --format '{{index .Config.Labels "org.opencontainers.image.version"}}'`
 
 ---
 

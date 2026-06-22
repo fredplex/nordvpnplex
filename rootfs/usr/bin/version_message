@@ -1,7 +1,0 @@
-#!/usr/bin/with-contenv /bin/bash
-
-echo "--------------------------"
-echo "NordVPN Docker Client v."$(cat /.version)
-echo "--------------------------"
-
-exit 0

@@ -33,12 +33,16 @@ fi
 # ---------------------------------------------------------------------------
 echo "--- Stateless checks ---"
 
-# 1. /.version must contain the git hash (local build behaviour — see AGENTS.md)
-ACTUAL_VERSION="$(docker run --rm "${IMAGE_REF}" cat /.version 2>/dev/null || echo 'ERROR')"
+# 1. IMAGE_VERSION env must contain the git hash (local build behaviour — see AGENTS.md)
+#    Published images carry the semver tag; local builds carry the git hash.
+#    Uses docker inspect — no container startup required.
+ACTUAL_VERSION="$(docker inspect "${IMAGE_REF}" \
+  --format '{{range .Config.Env}}{{println .}}{{end}}' \
+  | grep '^IMAGE_VERSION=' | cut -d= -f2 || echo 'ERROR')"
 if [[ "${ACTUAL_VERSION}" == "${GIT_HASH}" ]]; then
-  pass "/.version = ${GIT_HASH}"
+  pass "IMAGE_VERSION env = ${GIT_HASH}"
 else
-  fail "/.version: expected '${GIT_HASH}', got '${ACTUAL_VERSION}'"
+  fail "IMAGE_VERSION env: expected '${GIT_HASH}', got '${ACTUAL_VERSION}'"
 fi
 
 # 2. nordvpn --version must report the pinned NORDVPN_VERSION
