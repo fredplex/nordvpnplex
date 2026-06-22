@@ -1,13 +1,14 @@
 # Current Session State
 
 ## Status
-Idle / Up to date at NordVPN x.x.x
+Idle / Up to date at NordVPN 4.5.0
 
 ## Last Action
-Built and verified x.x.x on YYYY-MM-DD. Pushed as fredplex/nordvpn-unraid:x.x.x + :latest.
+Built and verified 4.5.0 on 2026-03-16. Pushed as `fredplex/nordvpn:5.5.0` + `:latest`.
 
 ## Next Action
-Watch for NordVPN x.x.x release. Run version bump workflow when available.
+Watch for NordVPN 4.6.x release. Run version-bump workflow when available.
 
 ## Open Issues
-- None
+- README.md still mirrors upstream bubuntux/nordvpn project; needs project-specific rewrite
+- CLAUDE.md pinned version block still shows placeholder x.x.x — update after next bump
