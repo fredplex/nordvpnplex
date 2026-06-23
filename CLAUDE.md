@@ -1,36 +1,40 @@
-# nordvpn-unraid — Claude Code Context
+# CLAUDE.md
 
-## Purpose
-Builds a NordVPN Docker container optimized for Unraid. Rebuilt manually each
-time NordVPN releases a new client version. No CI automation — this is a
-deliberate human-in-the-loop update cycle.
+This file is read automatically by Claude Code at the start of every session.
 
-## Repo Layout
-- `Dockerfile`          — primary build file; version numbers live here
-- `taskfile.yml`        — local build using taskfile build tool from http://taskfile.dev
-- `README.md`           — typical project README file
+**Read [`AGENTS.md`](AGENTS.md) first.** It is the primary entry point for nordvpn and contains architecture, key boundaries, validation gates, and working rules.
 
-## Version Bump Locations (ALL must be updated together)
-1. `Dockerfile` — ARG NORDVPN_VERSION 
-2. `Dockerfile` — ARG IMAGE_VERSION should move or add org.opencontainers.image.version at some point
-3. `README.md`  — "Current version: x.x.x" badge / line
+## Quick Commands
 
-## Standard Update Workflow
-1. Confirm new NordVPN version number with me before touching any file
-2. Show a diff of every change before applying
-1. Do NOT push — I push manually after verifying the local image
+```bash
+task docker-build    # Build local test image (tagged with git hash)
+task verify          # Smoke-test the local image (4 checks)
+task check-version   # Check NordVPN Debian repo for newer versions
+task bump NORDVPN_VERSION=x.x.x IMAGE_VERSION=y.y.y   # Apply version bump
+task release         # Create annotated git tag + push (triggers GitHub publish)
+task                 # (no args) print current git tag and hash
+```
 
-## NordVPN Version Source
-Official releases: https://nordvpn.com/blog/nordvpn-linux-release-notes/
-Package: https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/
+> **No npm in this project.** This is a Docker container build project — no Node.js runtime.
+
+## Session Start Protocol
+
+1. Read `AGENTS.md` → `.ai/current.md` → `.ai/tasks/active.md` → `.ai/SESSION_NOTES.md` (last entry only)
+2. Report back: Current State / Next Task / Ambiguity / Fragile Areas
+3. **Wait for human confirmation before writing anything**
+4. First write action: `git checkout -b <type>/<name>`
+
+Full onboarding workflow: `.ai/workflows/onboarding.md`
 
 ## Constraints
-- Never bump base image (e.g. debian:bookworm-slim) without explicit instruction
-- Never modify Taskfile.yml unless asked
-- Changelog entries go in README.md under ## Changelog, newest first
-- No Renovate bot — renovate.json has been removed
-- GitHub Actions are in place: PR build-validation (no push), weekly version-detection, tag-triggered publish
+
+- **Never push to the remote** — owner pushes manually after verifying the local image
+- **Never bump the base image** (`ghcr.io/linuxserver/baseimage-ubuntu:noble`) without explicit instruction
+- **Never modify `Taskfile.yml`** without explicit instruction
+- Changelog entries go in `README.md` under `## Changelog`, newest first
+- No Renovate bot — `renovate.json` has been removed
 
 ## Current Pinned Version
+
 <!-- Update this after each successful rebuild -->
 NordVPN: 4.5.0  |  Image tag: fredplex/nordvpn:5.5.0  |  Built: 2026-03-16
