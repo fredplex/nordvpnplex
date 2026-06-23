@@ -12,6 +12,13 @@ on:
         description: 'NordVPN version (blank = use pinned, "latest" = auto-discover newest, or specify x.y.z)'
         required: false
         default: ''
+  workflow_call:
+    inputs:
+      nordvpn_version:
+        type: string
+        description: 'NordVPN version (blank = use pinned, "latest" = auto-discover newest, or specify x.y.z)'
+        required: false
+        default: ''
 
 jobs:
   publish-dev:
@@ -68,6 +75,7 @@ jobs:
           tags: |
             fredplex/nordvpn:dev
             fredplex/nordvpn:dev-${{ github.sha }}
+            fredplex/nordvpn:dev-${{ steps.version.outputs.version }}
 
       - name: Smoke test — IMAGE_VERSION label
         run: |
@@ -117,6 +125,7 @@ jobs:
           echo "  Dev image published successfully"
           echo "  Tag:    fredplex/nordvpn:dev"
           echo "  Tag:    fredplex/nordvpn:dev-${{ github.sha }}"
+          echo "  Tag:    fredplex/nordvpn:dev-${{ steps.version.outputs.version }}"
           echo "  NordVPN: ${{ steps.version.outputs.version }} (${{ steps.version.outputs.source }})"
           echo "  IMAGE_VERSION: dev-${{ github.sha }}"
           echo "============================================"

@@ -46,7 +46,7 @@ else
 fi
 
 # 2. nordvpn --version must report the pinned NORDVPN_VERSION
-ACTUAL_NORDVPN="$(docker run --rm "${IMAGE_REF}" nordvpn --version 2>/dev/null \
+ACTUAL_NORDVPN="$(docker run --rm --entrypoint /bin/bash "${IMAGE_REF}" -c "nordvpn --version" 2>/dev/null \
   | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo 'ERROR')"
 if [[ "${ACTUAL_NORDVPN}" == "${NORDVPN_VERSION}" ]]; then
   pass "nordvpn --version = ${NORDVPN_VERSION}"

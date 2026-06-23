@@ -4,6 +4,19 @@ Archive of completed tasks with commit hashes.
 
 ---
 
+## 2026-06-23 — Unified build & release pipeline (feature/unified-builds)
+
+**Branch**: `feature/unified-builds` | **Commits**: `3cbf9f5`…`ce02c0b`
+
+- Implemented reusable dev publish GHA workflow with version-specific tags (`:dev-<version>`)
+- Upgraded release checker cron to daily schedule and configured it to trigger auto-dev builds when updates are found
+- Created automated PR-merge production CD pipeline that release-tags and builds when `Dockerfile` version changes are merged
+- Added manual dispatch option to production/dev workflows for manual runs/rebuilds
+- Updated operator guides (`docs/build-and-publish.md`, `docs/user-guide.md`, `docs/quick-build-checklist.md`)
+- Normalised line endings of scripts and files to LF format to prevent Windows CRLF interpretation errors
+
+---
+
 ## 2026-06-23 — Owner user guide (docs/user-guide)
 
 **Branch**: `docs/user-guide` | **Commit**: `d5e1002`

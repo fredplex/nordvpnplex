@@ -50,18 +50,18 @@ Authoritative inventory of all features in **fredplex/nordvpn**.
 | Feature | Status | Notes |
 |---------|--------|-------|
 | `task docker-build` | ✅ Implemented | Builds local test image tagged with git hash |
-| `task verify` (smoke tests) | ✅ Implemented | 4 checks: ENV, nordvpn version, iptables, daemon socket |
+| `task verify` (smoke tests) | ✅ Implemented | 3 stateless checks (uses entrypoint override) + 1 runtime daemon socket check |
 | `task check-version` | ✅ Implemented | Scrapes NordVPN Debian repo; shows latest 5 versions vs pinned |
 | `task bump` | ✅ Implemented | Single-command version bump; verifies package exists first |
-| `task release` | ✅ Implemented | Creates annotated git tag + pushes; triggers GitHub publish workflow |
+| `task release` | ✅ Implemented | Creates annotated git tag + pushes (retained as local release fallback) |
 | GitHub Actions: build-validate | ✅ Implemented | `docker build` on PR → main; no push |
-| GitHub Actions: publish | ✅ Implemented | Tag push → build + push `:latest` + `:<tag>` to Docker Hub |
-| GitHub Actions: check-nordvpn-release | ✅ Implemented | Weekly cron: detect new NordVPN version, open draft PR |
+| GitHub Actions: publish | ✅ Implemented | PR merge (main push), tag push, or manual: builds, tests, publishes to Docker Hub, auto-tags git |
+| GitHub Actions: check-nordvpn-release | ✅ Implemented | Daily cron: check repo, auto-run dev build & verify, open draft PR if successful |
 | `task dev-build` | ✅ Implemented | Builds `:dev` + `:dev-<hash>`; optional NORDVPN_VERSION override |
 | `task dev-push` | ✅ Implemented | Pushes `:dev` + `:dev-<hash>` to Docker Hub |
 | `task dev-latest` | ✅ Implemented | Auto-discovers newest NordVPN version + builds dev image |
 | `task dev-clean` | ✅ Implemented | Removes local `:dev` and `:dev-*` images |
-| GitHub Actions: publish-dev | ✅ Implemented | Manual trigger; builds, smoke-tests, pushes `:dev` + `:dev-<sha>` |
+| GitHub Actions: publish-dev | ✅ Implemented | Manual/Auto trigger: builds, tests, pushes `:dev`, `:dev-<sha>`, `:dev-<version>` |
 
 ---
 
@@ -75,6 +75,7 @@ Authoritative inventory of all features in **fredplex/nordvpn**.
 
 ## Recently Shipped
 
+- Unified release pipeline — 2026-06-23 (GHA-centric release on PR merge, daily cron version checker + dev build, manual dispatch, verify script entrypoint override, LF normalisation)
 - Version mechanism refactor — 2026-06-22 (removed `/.version`, added `ENV IMAGE_VERSION` + OCI labels, moved banner to `cont-init.d/00-version`)
 - Build/publish workflow — 2026-06-22 (added scripts/bump.sh, check-version.sh, verify.sh; Taskfile tasks; 3 GitHub Actions)
 - AI agent docs — 2026-06-23 (prime-ai-docs.mjs scaffold + nordvpn content merge)

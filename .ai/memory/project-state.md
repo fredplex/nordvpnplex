@@ -14,10 +14,10 @@ Current product posture and approved scope for **nordvpn**.
 
 **Product feel**:
 - Reliable, low-maintenance VPN gateway — starts cleanly, fails safe (kill switch), reconnects automatically
-- Owner-controlled release cadence — no surprises, no auto-publishes without a human review
+- Owner-controlled release cadence — gated by human PR merge, with GHA automating the build, test, tag, and publish steps
 
 **This is not**:
-- A fully automated CI/CD pipeline (human-in-the-loop is intentional)
+- A fully automated pipeline without review (human PR review & merge is the release gate)
 - A web app or API — there is no Node.js, no npm, no frontend
 
 ---
@@ -37,8 +37,9 @@ Key areas:
 - WireGuard/NordLynx default, OpenVPN fallback
 - Meshnet support (peer routing and LAN discovery)
 - Watchdog reconnection (`nord_watch` polling)
-- Automated version detection + draft PR via GitHub Actions
-- Local smoke-test suite (`task verify` — 4 checks)
+- Automated version detection daily + auto dev build/test & draft PR
+- GHA release CD pipeline triggered by PR merges
+- Smoke-test suite (uses entrypoint override for stateless checks)
 
 ---
 
@@ -90,9 +91,9 @@ See `.ai/memory/architecture-decisions.md` for the detailed model.
 
 ## Testing
 
-- **Unit tests**: None (shell scripts; tested via smoke test)
-- **Smoke tests**: `task verify` — 4 checks (ENV, nordvpn --version, iptables policy, daemon socket)
-- **CI/CD**: GitHub Actions — `build-validate.yml` on PR (docker build only); `publish.yml` on tag push
+- **Unit tests**: None
+- **Smoke tests**: `task verify` — 4 checks (entrypoint overridden for stateless checks to prevent capabilities/HOME errors)
+- **CI/CD**: GitHub Actions — `build-validate.yml` (on PRs); `publish-dev.yml` (manual/auto checker); `publish.yml` (on PR merges to main / tags / manual dispatch)
 
 ---
 
