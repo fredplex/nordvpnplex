@@ -5,6 +5,32 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-06-23 (chore/prime-template-update)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Applied prime-ai-docs 1.1.0 template — merged new structural additions into our AGENTS.md | 616fd82 |
+| 2 | `.ai/README.md` updated to 1.0.1 — filled in current phase placeholder | 616fd82 |
+| 3 | Added `.ai-prime-versions.json` — per-file version record for future smart updates | 616fd82 |
+
+### Key decisions
+
+- New file structure wins (PRIME.md protocol): extracted only the new structural sections from 1.1.0 template (Version subsection in Required Reading; Use a Branch-Based Workflow in Working Rules) — our nordvpn content preserved verbatim from backup
+- `.ai-prime-versions.json` committed (not gitignored) — required so smart update mode works on future re-primes
+
+### Validation
+
+- Not run — docs-only changes, no Dockerfile or rootfs modifications
+
+### Fragile areas
+
+- `README.md` still mirrors upstream `bubuntux/nordvpn` — Tier 3, deferred
+- `CLAUDE.md` pinned version block needs update after next bump
+
+---
+
 ## Session Close — 2026-06-23 (ai-docs-merge)
 
 ### Completed this session

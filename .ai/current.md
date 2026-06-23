@@ -10,9 +10,10 @@
 
 ### Recently shipped
 
-- Version mechanism refactor (2026-06-22) — replaced `/.version` file with `ENV IMAGE_VERSION` + OCI labels; moved version banner to `cont-init.d/00-version`; updated `verify.sh` to use `docker inspect`
-- Streamlined build/publish workflow (2026-06-22) — added `scripts/bump.sh`, `scripts/check-version.sh`, `scripts/verify.sh`; added `task bump`, `task check-version`, `task verify`, `task release`; created GitHub Actions for weekly version detection, PR build validation, and tag-triggered publish
+- prime-ai-docs 1.1.0 template update (2026-06-23) — AGENTS.md updated to template 1.1.0 (Version subsection + branch-based workflow rule); `.ai/README.md` updated to 1.0.1 (current phase filled in); `.ai-prime-versions.json` added
 - AI agent collaboration system (2026-06-23) — prime-ai-docs.mjs scaffold + all placeholder sections filled with nordvpn-specific content; merged from session backup
+- Version mechanism refactor (2026-06-22) — replaced `/.version` file with `ENV IMAGE_VERSION` + OCI labels; moved version banner to `cont-init.d/00-version`
+- Streamlined build/publish workflow (2026-06-22) — `task bump`, `task check-version`, `task verify`, `task release`; 3 GitHub Actions
 
 ### Next step
 
@@ -22,34 +23,30 @@ When the next bump lands: merge PR → `task docker-build` → `task verify` →
 
 ---
 
-## Session Handoff — 2026-06-23 (ai-docs-merge)
+## Session Handoff — 2026-06-23 (chore/prime-template-update)
 
 ### What was just completed
 
 | Commit | Change |
 |--------|--------|
-| 22dcb8c | Add AI agent collaboration system and fill in nordvpn-specific docs |
-| 9a9ad72 | Add plain-language workflow recap to build-and-publish.md |
-| af4ecab | Refactor version mechanism: OCI labels + ENV replaces /.version file |
-| 723b9db | Add task release to simplify tag-and-push step |
-| c11d563 | Add automated workflow, build tooling, and full process documentation |
+| 616fd82 | Apply prime-ai-docs 1.1.0 template updates and merge nordvpn content |
 
 ### Stopping point
 
-- Branch: `ai-base` — pushed, pending merge to `main`
+- Branch: `chore/prime-template-update` — pushed, pending merge to `main`
 - Working tree: clean
-- No functional code changes this session — docs and AI agent workspace only
+- Docs-only changes — no functional code modified
 
 ### Decisions / reasoning
 
-- Used PRIME.md merge protocol: new file structure wins; extracted human-authored content from backup into equivalent sections in all new template files
-- All 9 template files filled with nordvpn-specific content (no placeholders remain)
-- The `.ai-prime-backup/` directory and scaffolding scripts were deleted by owner after merge completed
+- Script ran a second time (1.1.0) and backed up our AGENTS.md to `.ai-prime-backup/2026-06-23-02-42-16/`
+- New structural additions from 1.1.0 template extracted and merged into our content — backup content not discarded
+- `.ai-prime-versions.json` added: enables future smart updates (script only overwrites files with improved templates)
 
 ### Fragile areas
 
-- `README.md` still mirrors upstream `bubuntux/nordvpn` project — project-specific rewrite deferred (Tier 3 / R8)
-- `CLAUDE.md` pinned version block needs update after next successful bump
+- `README.md` still mirrors upstream `bubuntux/nordvpn` — Tier 3 deferred
+- `CLAUDE.md` pinned version block needs update after next bump
 
 ---
 

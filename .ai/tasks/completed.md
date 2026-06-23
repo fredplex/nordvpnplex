@@ -4,6 +4,16 @@ Archive of completed tasks with commit hashes.
 
 ---
 
+## 2026-06-23 — prime-ai-docs 1.1.0 template update (chore/prime-template-update)
+
+**Branch**: `chore/prime-template-update` | **Commit**: `616fd82`
+
+- `AGENTS.md` updated to template 1.1.0: added Version subsection to Required Reading; added Use a Branch-Based Workflow subsection to Working Rules; all nordvpn content preserved from backup
+- `.ai/README.md` updated to template 1.0.1: filled in current phase placeholder
+- `.ai-prime-versions.json` added: per-file version record enables smart updates on future re-primes
+
+---
+
 ## 2026-06-23 — AI agent collaboration system (ai-docs-merge)
 
 **Branch**: `ai-base` | **Commit**: `22dcb8c`
