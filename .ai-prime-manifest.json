@@ -1,12 +1,12 @@
 {
-  "templateVersion": "1.0.0",
-  "primedAt": "2026-06-23T01:41:32.147Z",
+  "templateVersion": "1.1.0",
+  "primedAt": "2026-06-23T02:42:16.106Z",
   "targetDir": "C:\\Users\\fredp\\Documents\\GitHub\\nordvpn",
-  "mode": "add",
+  "mode": "update",
   "context": {
     "date": "2026-06-23",
     "name": "nordvpn",
-    "description": "Nordvpn Container",
+    "description": "NordVPN Container",
     "stack": "",
     "install": "npm ci",
     "dev": "npm run dev",
@@ -16,103 +16,107 @@
   "files": [
     {
       "path": "CLAUDE.md",
-      "status": "overwritten"
+      "status": "current"
     },
     {
       "path": "AGENTS.md",
-      "status": "overwritten"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "1.1.0"
     },
     {
       "path": ".ai/README.md",
-      "status": "created"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "1.0.1"
     },
     {
       "path": ".ai/current.md",
-      "status": "overwritten"
+      "status": "current"
     },
     {
       "path": ".ai/SESSION_NOTES.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": ".ai/memory/project-state.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": ".ai/memory/architecture-decisions.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": ".ai/rules/engineering-rules.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": ".ai/rules/security-rules.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": ".ai/rules/mutation-rules.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": ".ai/workflows/onboarding.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": ".ai/workflows/implementation.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": ".ai/workflows/validation.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": ".ai/workflows/review.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": ".ai/tasks/active.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": ".ai/tasks/completed.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": ".ai/prompts/onboarding-prompt.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": ".ai/prompts/intermediate-phase-prompt.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": ".ai/prompts/session-close-prompt.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": "docs/README.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": "docs/architecture.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": "docs/project-rules.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": "docs/feature-state.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": "docs/tech-stack.md",
-      "status": "created"
+      "status": "current"
     },
     {
       "path": "docs/testing.md",
-      "status": "created"
+      "status": "current"
     }
   ]
 }

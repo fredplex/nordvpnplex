@@ -132,10 +132,15 @@ Before significant work, read relevant files:
 - `.ai/workflows/onboarding.md` — getting started
 - `.ai/workflows/implementation.md` — plan → code → test → validate
 - `.ai/workflows/validation.md` — testing gates
+- `.ai/workflows/review.md` — code review checklist
 
 ### Tasks
 - `.ai/current.md` — live handoff state
 - `.ai/tasks/active.md` — what is in flight or queued next
+
+### Version
+- `.ai-prime-version` — template version used to generate this project
+- `.ai-prime-versions.json` — per-file version record; used by the script's smart update to detect which files have improved templates available
 
 ---
 
@@ -323,7 +328,9 @@ task docker-build
 task verify
 ```
 
-### Before declaring a version bump done
+For narrower per-change-type validation chains, see `.ai/workflows/validation.md`.
+
+### Before Declaring Done
 ```bash
 task docker-build    # Must succeed (image builds)
 task verify          # Must pass all 4 checks
@@ -342,8 +349,18 @@ task verify          # Must pass all 4 checks
 
 ### Before Starting Any Work
 
-1. **Create a task branch** — `git checkout -b <type>/<name>` (`feature/`, `fix/`, `chore/`, `docs/`). Never work on `main` directly.
+These two steps are mandatory before any write action, without exception:
+
+1. **Create a task branch** — `git checkout -b <type>/<name>` (`feature/`, `fix/`, `chore/`, `docs/`). This is always the first write action. Never work on `main` directly.
 2. **For multi-step work: write a plan first** — create `.ai/plans/<name>.md` covering background, scope, phases, and execution order. Present it for human approval before implementing anything.
+
+Do not skip either step, even for small tasks. The branch protects `main`; the plan ensures alignment before effort is spent.
+
+### Use a Branch-Based Workflow
+- **Never work on the `main` branch directly.**
+- Always create and switch to a task-specific branch (`feature/<name>`, `fix/<name>`, `chore/<name>`) as the very first write action.
+- **Obtain explicit human approval** before committing and pushing any changes.
+- At session end, **obtain explicit human approval** to merge your task branch into `main`.
 
 ### Keep Changes Focused
 - One logical change per commit
