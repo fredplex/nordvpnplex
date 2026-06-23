@@ -5,6 +5,35 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-06-23 (docs/user-guide)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Created `docs/user-guide.md` — complete owner operational reference | d5e1002 |
+| 2 | Added index entry in `docs/README.md` pointing to the new guide | d5e1002 |
+| 3 | Created `.ai/plans/user-guide.md` — approved plan committed alongside the work | d5e1002 |
+
+### Key decisions
+
+- Scope correction mid-plan: Docker Hub credentials setup was initially excluded ("stays in build-and-publish.md"), added back in after owner review — a user guide must be self-contained
+- Mermaid diagram approved for the workflow flowchart (owner preference)
+- `task docker-push` / `task docker-publish` documented for the first time — not covered in any prior doc
+- New doc does not replace `docs/build-and-publish.md`; both coexist (build-and-publish is agent+human detailed reference; user-guide is owner quick reference)
+- User guide will feed future README.md rewrite (Tier 3, not yet approved)
+
+### Validation
+
+- Not run — docs-only changes, no Dockerfile or rootfs modifications
+
+### Fragile areas
+
+- `README.md` still mirrors upstream `bubuntux/nordvpn` — Tier 3, deferred
+- `CLAUDE.md` pinned version block needs update after next bump
+
+---
+
 ## Session Close — 2026-06-23 (chore/prime-template-update)
 
 ### Completed this session
@@ -77,7 +106,3 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 ### Known follow-ups
 
 - Fill in all placeholder sections in `AGENTS.md`, `docs/`, and `.ai/memory/` before first agent session.
-
-### Validation
-
-- Not run — scaffold only, no source code changed.

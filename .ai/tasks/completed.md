@@ -4,6 +4,16 @@ Archive of completed tasks with commit hashes.
 
 ---
 
+## 2026-06-23 — Owner user guide (docs/user-guide)
+
+**Branch**: `docs/user-guide` | **Commit**: `d5e1002`
+
+- Created `docs/user-guide.md` — complete owner operational reference: all 9 task commands, 3 GitHub Actions with manual trigger instructions, both version bump paths (automated and manual), 23-row runtime env var table, Docker Hub credentials setup, 8 troubleshooting entries
+- Added index entry in `docs/README.md`
+- Mermaid workflow diagram; `task docker-push` / `task docker-publish` documented for first time
+
+---
+
 ## 2026-06-23 — prime-ai-docs 1.1.0 template update (chore/prime-template-update)
 
 **Branch**: `chore/prime-template-update` | **Commit**: `616fd82`
