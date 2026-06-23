@@ -1,0 +1,118 @@
+{
+  "templateVersion": "1.0.0",
+  "primedAt": "2026-06-23T01:41:32.147Z",
+  "targetDir": "C:\\Users\\fredp\\Documents\\GitHub\\nordvpn",
+  "mode": "add",
+  "context": {
+    "date": "2026-06-23",
+    "name": "nordvpn",
+    "description": "Nordvpn Container",
+    "stack": "",
+    "install": "npm ci",
+    "dev": "npm run dev",
+    "validate": "npm run validate:local",
+    "test": "npm run test:e2e"
+  },
+  "files": [
+    {
+      "path": "CLAUDE.md",
+      "status": "overwritten"
+    },
+    {
+      "path": "AGENTS.md",
+      "status": "overwritten"
+    },
+    {
+      "path": ".ai/README.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/current.md",
+      "status": "overwritten"
+    },
+    {
+      "path": ".ai/SESSION_NOTES.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/memory/project-state.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/memory/architecture-decisions.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/rules/engineering-rules.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/rules/security-rules.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/rules/mutation-rules.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/workflows/onboarding.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/workflows/implementation.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/workflows/validation.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/workflows/review.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/tasks/active.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/tasks/completed.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/prompts/onboarding-prompt.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/prompts/intermediate-phase-prompt.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/prompts/session-close-prompt.md",
+      "status": "created"
+    },
+    {
+      "path": "docs/README.md",
+      "status": "created"
+    },
+    {
+      "path": "docs/architecture.md",
+      "status": "created"
+    },
+    {
+      "path": "docs/project-rules.md",
+      "status": "created"
+    },
+    {
+      "path": "docs/feature-state.md",
+      "status": "created"
+    },
+    {
+      "path": "docs/tech-stack.md",
+      "status": "created"
+    },
+    {
+      "path": "docs/testing.md",
+      "status": "created"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+vibe-coding-template v1.0.0
+Primed: 2026-06-23T01:41:32.146Z
+
+To check if a newer version of the template is available:
+  node prime-ai-docs.mjs --version
+
+To update: see PRIME.md — "If you are updating templates (re-prime)"

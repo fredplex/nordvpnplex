@@ -55,4 +55,49 @@ tasks:
       - sh: "[ '{{.GIT_TAG}}' != '<no value>' ]"
         msg: "Variable .GIT_TAG is not set"
 
-        
+  verify:
+    desc: |
+      Smoke-test the locally built image (run after task docker-build).
+      Checks /.version, nordvpn version, iptables kill-switch, and daemon socket.
+    cmds:
+      - bash scripts/verify.sh
+
+  check-version:
+    desc: Check if a newer NordVPN version is available in the official package repo
+    cmds:
+      - bash scripts/check-version.sh
+
+  bump:
+    desc: |
+      Bump NordVPN and image versions across all files, then show the diff.
+      Usage: task bump NORDVPN_VERSION=4.6.0 IMAGE_VERSION=5.6.0
+      Does NOT commit, tag, build, or push — human reviews diff and proceeds manually.
+    preconditions:
+      - sh: '[ -n "{{.NORDVPN_VERSION}}" ]'
+        msg: "NORDVPN_VERSION is required. Usage: task bump NORDVPN_VERSION=4.6.0 IMAGE_VERSION=5.6.0"
+      - sh: '[ -n "{{.IMAGE_VERSION}}" ]'
+        msg: "IMAGE_VERSION is required. Usage: task bump NORDVPN_VERSION=4.6.0 IMAGE_VERSION=5.6.0"
+    cmds:
+      - bash scripts/bump.sh "{{.NORDVPN_VERSION}}" "{{.IMAGE_VERSION}}"
+
+  release:
+    desc: |
+      Tag the current commit and push to trigger the GitHub publish workflow.
+      Reads IMAGE_VERSION and NORDVPN_VERSION from Dockerfile — no manual input required.
+      Run after: task docker-build && task verify
+    vars:
+      DF_NORDVPN:
+        sh: grep "ARG NORDVPN_VERSION" Dockerfile | sed "s/ARG NORDVPN_VERSION='//;s/'$//"
+      DF_IMAGE:
+        sh: grep "ARG IMAGE_VERSION" Dockerfile | sed "s/ARG IMAGE_VERSION='//;s/'$//"
+    preconditions:
+      - sh: '[ -z "$(git status --porcelain)" ]'
+        msg: "Working tree is not clean. Commit or stash all changes before releasing."
+      - sh: '! git tag | grep -qx "{{.DF_IMAGE}}"'
+        msg: "Tag {{.DF_IMAGE}} already exists. Has this version already been released?"
+    cmds:
+      - echo "Tagging {{.DF_IMAGE}} — NordVPN {{.DF_NORDVPN}}"
+      - git tag -a "{{.DF_IMAGE}}" -m "bump to NordVPN {{.DF_NORDVPN}}"
+      - echo "Pushing tag to origin — this triggers the GitHub publish workflow..."
+      - git push --tags
+      - echo "Done. Monitor at https://github.com/fredplex/nordvpnplex/actions"
