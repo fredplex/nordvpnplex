@@ -86,8 +86,8 @@ tasks:
     cmds:
       - docker push "{{.REGISTRY}}/{{.IMAGE}}:dev"
       - docker push "{{.REGISTRY}}/{{.IMAGE}}:dev-{{.GIT_HASH}}"
-      - echo "Pushed: {{.REGISTRY}}/{{.IMAGE}}:dev"
-      - echo "Pushed: {{.REGISTRY}}/{{.IMAGE}}:dev-{{.GIT_HASH}}"
+      - 'echo "Pushed: {{.REGISTRY}}/{{.IMAGE}}:dev"'
+      - 'echo "Pushed: {{.REGISTRY}}/{{.IMAGE}}:dev-{{.GIT_HASH}}"'
 
   dev-latest:
     desc: |
