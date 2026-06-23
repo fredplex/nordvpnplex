@@ -60,8 +60,8 @@ services:
     network_mode: service:vpn
     depends_on:
       - vpn
-      
-# The torrent service would be available at http://localhost:8080/ 
+
+# The torrent service would be available at http://localhost:8080/
 # or anywhere inside of the local network http://192.168.1.xxx:8080
  ```
 
@@ -70,7 +70,7 @@ services:
 version: "3"
 services:
   proxy:
-    image: traefik:v2.4         # Review traefik documentation https://doc.traefik.io/traefik/ 
+    image: traefik:v2.4         # Review traefik documentation https://doc.traefik.io/traefik/
     container_name: traefik
     command:
       - --api.insecure=true
@@ -104,8 +104,8 @@ services:
       - traefik.http.routers.torrent.rule=Host(`custom-host`)
     depends_on:
       - vpn
-      
-# Make sure that custom-host resolves to the ip address of the server 
+
+# Make sure that custom-host resolves to the ip address of the server
 # for example /etc/hosts contains 127.0.0.1  custom-host
 # the torrent service would be available at http://custom-host
 ```
@@ -115,7 +115,7 @@ services:
 version: "3"
 services:
   proxy:
-    image: traefik:v2.4             # Review traefik documentation https://doc.traefik.io/traefik/ 
+    image: traefik:v2.4             # Review traefik documentation https://doc.traefik.io/traefik/
     container_name: traefik
     command:
       - --api.insecure=true
@@ -177,7 +177,7 @@ services:
       - traefik.http.services.torrent.loadbalancer.server.port=8080
       - traefik.http.routers.torrent.rule=Host(`mytorrent.duckdns.org`) # Replace with your domain
     restart: unless-stopped
-    
+
 # Make sure that you can access your server from the internet
 # for example configure dmz on your router
 # the torrent service would be available at https://mytorrent.duckdns.org
@@ -190,8 +190,8 @@ services:
 * `CONNECT`  -  [country]/[server]/[country_code]/[city]/[group] or [country] [city], if none provide you will connect to  the recommended server.
    - Provide a [country] argument to connect to a specific country. For example: Australia , Use `docker run --rm ghcr.io/bubuntux/nordvpn nordvpn countries` to get the list of countries.
    - Provide a [server] argument to connect to a specific server. For example: jp35 , [Full List](https://nordvpn.com/servers/tools/)
-   - Provide a [country_code] argument to connect to a specific country. For example: us 
-   - Provide a [city] argument to connect to a specific city. For example: 'Hungary Budapest' , Use `docker run --rm ghcr.io/bubuntux/nordvpn nordvpn cities [country]` to get the list of cities. 
+   - Provide a [country_code] argument to connect to a specific country. For example: us
+   - Provide a [city] argument to connect to a specific city. For example: 'Hungary Budapest' , Use `docker run --rm ghcr.io/bubuntux/nordvpn nordvpn cities [country]` to get the list of cities.
    - Provide a [group] argument to connect to a specific servers group. For example: P2P , Use `docker run --rm ghcr.io/bubuntux/nordvpn nordvpn groups` to get the full list.
    - --group value  Specify a server group to connect to. For example: '--group p2p us'
 * `PRE_CONNECT` - Command to execute before attempt to connect.
@@ -201,7 +201,7 @@ services:
 * `FIREWALL`  - Enable or Disable.
 * `OBFUSCATE`  - Enable or Disable. When enabled, this feature allows to bypass network traffic sensors which aim to detect usage of the protocol and log, throttle or block it (only valid when using OpenVpn).
 * `PROTOCOL`   - TCP or UDP (only valid when using OpenVPN).
-* `TECHNOLOGY` - Specify Technology to use (NordLynx by default): 
+* `TECHNOLOGY` - Specify Technology to use (NordLynx by default):
    * OpenVPN    - Traditional connection.
    * NordLynx   - NordVpn wireguard implementation (3x-5x times faster than OpenVPN).
 * `ALLOW_LIST` - List of domains that are going to be accessible _outside_ vpn (IE rarbg.to,yts.mx).
@@ -221,6 +221,6 @@ services:
 
 If you have any problems with or questions about this image, please contact me through a [GitHub issue](https://github.com/bubuntux/nordvpn/issues).
 
-# Disclaimer 
+# Disclaimer
 This project is independently developed for personal use, there is no affiliation with NordVpn or Nord Security companies,
 Nord Security companies are not responsible for and have no control over the nature, content and availability of this project.
