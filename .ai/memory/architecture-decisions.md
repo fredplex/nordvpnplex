@@ -9,22 +9,33 @@ Key architectural choices that define how this codebase works.
 ## Data Flow
 
 ```
-NordVPN Debian repo ──► Weekly GitHub Action ──► Draft PR (human reviews + merges)
+NordVPN Debian repo ──► Daily GitHub Action (checks versions)
+                                │
+                        (If update found)
+                                │
+                                ▼
+                       GHA auto dev-build
+                                │
+                       (Runs smoke tests)
+                                │
+                                ▼
+                        GHA opens draft PR ──► Owner reviews & merges PR
                                                         │
-                                               git pull (local)
+                                                        ▼
+                                            GHA publish.yml (runs CD)
                                                         │
-                                            task docker-build (local)
-                                                        │
-                                             task verify (local)
-                                                        │
-                                             task release (tag + push)
-                                                        │
-                                       GitHub Action: publish.yml
-                                                        │
-                                                  Docker Hub
-                                         fredplex/nordvpn:latest
-                                         fredplex/nordvpn:<tag>
+                                            (Runs stateless tests)
+                                                        ├──────────────────────┐
+                                                        │                      │
+                                                        ▼                      ▼
+                                                    Docker Hub             Git Tag push
+                                              :latest, :<version>        (back to repo)
 ```
+
+**Alternative release paths**:
+- **Manual Dev Publish**: Owner triggers GHA `Publish Dev to Docker Hub` with optional version override. Pushes `:dev`, `:dev-<sha>`, and `:dev-<version>`.
+- **Manual Prod Publish**: Owner triggers GHA `Publish to Docker Hub` manually with version inputs. Runs tests and publishes.
+- **Local Fallback**: Owner bumps versions using `task bump`, builds/verifies locally, and runs `task release` to tag and trigger GHA CD.
 
 ---
 
@@ -77,9 +88,9 @@ Container is stateless between restarts. The only persistent state is:
 
 ### Decision: Human-in-the-loop publish gate
 
-**Choice**: No automated image push. Owner must run `task release` manually after local verification.
-**Rationale**: Owner is the sole maintainer. Automated publish without local verification could push a broken image to Docker Hub and break Unraid users.
-**Gotcha**: `task release` reads both versions directly from the Dockerfile — do not run it if Dockerfile edits are not committed.
+**Choice**: Human review of the auto-created draft PR is the final release gate. GitHub Actions automates the build, test, tag, and publish steps *after* approval.
+**Rationale**: GHA checks versions daily, auto-builds & tests a dev image, and opens a draft PR only if those tests pass. This provides verification data *before* the owner merges. Merging the PR then triggers GHA to run CD, performing a final smoke test check before pushing to Docker Hub.
+**Gotcha**: Pushes are fully automated, but still completely gated by the owner merging the PR. Manually tagging or running local `task release` is no longer the primary path (though retained as a fallback).
 
 ---
 
