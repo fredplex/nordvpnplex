@@ -12,34 +12,39 @@
 
 - Version mechanism refactor (2026-06-22) — replaced `/.version` file with `ENV IMAGE_VERSION` + OCI labels; moved version banner to `cont-init.d/00-version`; updated `verify.sh` to use `docker inspect`
 - Streamlined build/publish workflow (2026-06-22) — added `scripts/bump.sh`, `scripts/check-version.sh`, `scripts/verify.sh`; added `task bump`, `task check-version`, `task verify`, `task release`; created GitHub Actions for weekly version detection, PR build validation, and tag-triggered publish
-- AI agent docs scaffolded via `prime-ai-docs.mjs` (2026-06-23) — merged with nordvpn-specific content from session backup
+- AI agent collaboration system (2026-06-23) — prime-ai-docs.mjs scaffold + all placeholder sections filled with nordvpn-specific content; merged from session backup
 
 ### Next step
 
-Watch for NordVPN 4.6.x release. Run version-bump workflow when available.
-Weekly GitHub Action (Monday 08:00 UTC) will open a draft PR automatically if a new version is detected.
+Watch for NordVPN 4.6.x release. Weekly GitHub Action (Monday 08:00 UTC) will open a draft PR automatically. Run `task check-version` to check manually.
+
+When the next bump lands: merge PR → `task docker-build` → `task verify` → `task release`.
 
 ---
 
-## Session Handoff — 2026-06-23
+## Session Handoff — 2026-06-23 (ai-docs-merge)
 
 ### What was just completed
 
 | Commit | Change |
 |--------|--------|
-| — | prime-ai-docs.mjs scaffolded `.ai/` + `docs/` structure; backup at `.ai-prime-backup/2026-06-23-01-41-32/` |
-| — | Merged nordvpn-specific content from backup into new template files |
+| 22dcb8c | Add AI agent collaboration system and fill in nordvpn-specific docs |
+| 9a9ad72 | Add plain-language workflow recap to build-and-publish.md |
+| af4ecab | Refactor version mechanism: OCI labels + ENV replaces /.version file |
+| 723b9db | Add task release to simplify tag-and-push step |
+| c11d563 | Add automated workflow, build tooling, and full process documentation |
 
 ### Stopping point
 
-- Branch: `ai-base`
-- Working tree: modified (AGENTS.md, CLAUDE.md, .ai/ files filled in)
-- No validation run — docs-only changes
+- Branch: `ai-base` — pushed, pending merge to `main`
+- Working tree: clean
+- No functional code changes this session — docs and AI agent workspace only
 
 ### Decisions / reasoning
 
-- Used PRIME.md merge protocol: new file structure wins; extracted human-authored content from backup into equivalent sections
-- Backup contained full AGENTS.md, CLAUDE.md, .ai/current.md — all merged into the new structure
+- Used PRIME.md merge protocol: new file structure wins; extracted human-authored content from backup into equivalent sections in all new template files
+- All 9 template files filled with nordvpn-specific content (no placeholders remain)
+- The `.ai-prime-backup/` directory and scaffolding scripts were deleted by owner after merge completed
 
 ### Fragile areas
 
