@@ -3,3 +3,4 @@ text eol=lf
 /rootfs/etc/cont-init.d/* text eol=lf
 /rootfs/etc/services.d/nordvpn/data/* text eol=lf
 /rootfs/etc/services.d/nordvpn/* text eol=lf
+/scripts/* text eol=lf
