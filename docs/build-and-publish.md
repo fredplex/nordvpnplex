@@ -23,34 +23,31 @@ image appearing on Docker Hub. It is written for both humans and AI agents.
 ## 1. Architecture overview
 
 ```
-NordVPN package repo ──► Weekly GitHub Action ──► Draft PR (human reviews)
+NordVPN package repo ──► Daily GitHub Action ──► Auto-builds Dev container (:dev-<version>)
                                                         │
                                                         ▼
-                                               Human merges PR
+                                                 Opens Draft PR
                                                         │
                                                         ▼
-                                         task docker-build  (local)
+                                           Human tests dev container,
+                                           reviews, and Merges PR
                                                         │
                                                         ▼
-                                           task verify  (local)
-                                                        │
-                                                        ▼
-                                          task release
-                                                        │
-                                                        ▼
-                                       GitHub Action: publish ──► Docker Hub
-                                        fredplex/nordvpn:latest
-                                        fredplex/nordvpn:<tag>
+                                         GHA Release Pipeline:
+                                         - Builds Prod image
+                                         - Executes 3 smoke tests
+                                         - Pushes :latest + :<tag> to Docker Hub
+                                         - Auto-creates & pushes Git Tag back to repo
 ```
 
 ### Human gates (deliberate — never automated away)
 
-| Gate | Why it exists |
+| Gate | Why it exists / How it works |
 |---|---|
-| Review and merge the draft PR | Confirm `IMAGE_VERSION`, review diff, check release notes |
-| Run `task docker-build` locally | Verify the image actually builds on your machine |
-| Run `task verify` locally | Confirm the right NordVPN version is installed and kill-switch works |
-| Create and push the git tag | Controls exactly when the publish fires — you decide the moment |
+| Review the draft PR | Confirm `IMAGE_VERSION` and `NORDVPN_VERSION`, check release notes. |
+| Test the Dev Build | Pull `fredplex/nordvpn:dev-<version>` to verify stability on Unraid. |
+| Merge the PR | Triggers the automated release pipeline (the primary deploy switch). |
+| CLI Fallback release | Pushing a tag locally (`task release`) still works to trigger production publish directly. |
 
 ---
 
@@ -91,67 +88,52 @@ or similar errors.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  DETECTION                                                          │
-│  Automated (weekly) or manual: task check-version                   │
-│  → new version found → GitHub opens a draft PR                     │
+│  DETECTION & DEV BUILD                                              │
+│  Daily Action check → new version found → Auto-builds Dev image    │
+│  → Smoke-tests dev image → Pushes :dev-<version> to Docker Hub      │
 └─────────────────────────────┬───────────────────────────────────────┘
-                              │ Human reviews draft PR
+                              │ GHA opens draft PR
                               ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  BUMP                                                               │
-│  Confirm IMAGE_VERSION in PR, merge                                 │
-│  (or run locally: task bump NORDVPN_VERSION=x.x.x IMAGE_VERSION=y) │
+│  PR REVIEW & TEST                                                   │
+│  Owner pulls & tests :dev-<version> on Unraid                      │
+│  Owner confirms versions in PR and merges                           │
 └─────────────────────────────┬───────────────────────────────────────┘
-                              │ Human runs locally
+                              │ Human merges PR to main
                               ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  BUILD & VERIFY (local)                                             │
-│  task docker-build   ← builds image tagged with git hash           │
-│  task verify         ← smoke-tests version, kill-switch, daemon    │
-└─────────────────────────────┬───────────────────────────────────────┘
-                              │ Human creates and pushes tag
-                              ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  PUBLISH (GitHub Actions — automatic on tag push)                   │
-│  task release                                                       │
-│  → creates annotated tag, pushes it                                 │
-│  → GitHub Action builds and pushes :latest + :<tag> to Docker Hub  │
+│  PRODUCTION RELEASE (GitHub Actions)                                │
+│  Merge triggers release pipeline → Builds Prod image                │
+│  → Executes 3 smoke tests → Pushes :latest & :<tag> to Docker Hub   │
+│  → Auto-pushes Git Tag back to repo                                 │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
 ### In plain language — who does what
 
-**Detecting a new NordVPN release**
-- GitHub Actions runs automatically every Monday, OR
-- You run `task check-version` locally, OR
-- An agent runs `task check-version` on request
-- If a new version is found → GitHub Actions opens a **draft PR** with all files already bumped
+**Detecting and building dev container**
+- GitHub Actions runs automatically every day at 08:00 UTC.
+- If a new version is found, it immediately builds and verifies a dev container, pushes it as `fredplex/nordvpn:dev-<version>`, and opens a **draft PR**.
 
-**Reviewing the bump (human)**
-- Open the draft PR on GitHub
-- Confirm `IMAGE_VERSION` is correct (automation suggests a patch bump)
-- Skim the [NordVPN release notes](https://nordvpn.com/blog/nordvpn-linux-release-notes/) for anything breaking
-- Merge the PR
+**Reviewing and testing (human)**
+- Pull and test the dev container on your local system or Unraid template: `docker pull fredplex/nordvpn:dev-<version>`.
+- Confirm `IMAGE_VERSION` is correct in the PR (automation suggests a patch bump).
+- Skim the [NordVPN release notes](https://nordvpn.com/blog/nordvpn-linux-release-notes/) for anything breaking.
+- Merge the PR.
 
-**Building and verifying (human, local)**
-- `git pull`
-- `task docker-build` — builds the image locally, tagged with the git hash
-- `task verify` — checks NordVPN version, kill-switch, and daemon socket
-- If anything fails, fix and rebuild before continuing
+**Publishing and tagging (automated)**
+- Merging the PR triggers the release workflow on GitHub.
+- GHA builds the release image, verifies it with 3 smoke tests, and pushes `fredplex/nordvpn:latest` + `fredplex/nordvpn:<tag>` to Docker Hub.
+- GHA automatically tags the commit and pushes the tag back to the repository.
 
-**Publishing (human triggers, GitHub does the work)**
-- `task release` — creates the annotated git tag and pushes it
-- GitHub Actions automatically builds and pushes `fredplex/nordvpn:latest` + `fredplex/nordvpn:<tag>` to Docker Hub
-
-**If an agent is doing a manual bump (no automated PR)**
-- Agent runs `task bump NORDVPN_VERSION=x.x.x IMAGE_VERSION=y.y.y`
-- Agent shows the diff and waits for human approval
-- Human takes over from the build step onward — agent never builds, tags, or pushes
+**If an agent is doing a manual bump (no PR)**
+- Agent runs `task bump NORDVPN_VERSION=x.x.x IMAGE_VERSION=y.y.y`.
+- Agent shows the diff and waits for human approval.
+- Human commits and pushes to `main` to trigger the automated release pipeline.
 
 **What is never automated**
-- Merging a PR
-- Running the local build and verify
-- Pushing the git tag
+- Merging the Pull Request.
+- Deciding when to promote the dev build to production.
 
 ---
 
@@ -162,14 +144,15 @@ version) without going through the full release ceremony. Dev images are pushed 
 `:dev` tag, which is separate from `:latest` and semver tags. They never trigger the
 production publish workflow.
 
-#### Dual tagging
+#### Dual / Triple Tagging
 
-Every dev build produces two tags:
+Every dev build produces three tags pointing to the same image:
 
 | Tag | Purpose |
 |-----|---------|
 | `fredplex/nordvpn:dev` | Moving tag — always the latest dev build. Use in Unraid templates for testing. |
 | `fredplex/nordvpn:dev-<hash>` | Immutable tag — traceable to the exact commit. Useful for rollback or comparison. |
+| `fredplex/nordvpn:dev-<nordvpn_version>` | Version-traceable tag (e.g. `dev-4.6.0`) for validating specific releases. |
 
 Both point to the same image. `IMAGE_VERSION` is set to `dev-<hash>` so you can confirm
 you're running a dev build via `docker inspect`.
@@ -339,89 +322,65 @@ For full dev workflow documentation, see [§3.5 Dev workflow](#35-dev-workflow).
 
 ### Option A — Automated path (recommended)
 
-When the weekly action detects a new version, it opens a draft PR. The steps from that point:
+When the daily check detects a new version, it builds/verifies a dev container, pushes it, and opens a draft PR. The steps:
 
-**1. Review the draft PR on GitHub**
-- Check the diff: `Dockerfile`, `README.md`, `CLAUDE.md`, `.ai/current.md`
-- Confirm `IMAGE_VERSION` is appropriate (automation suggests a patch bump)
-- Check the [NordVPN release notes](https://nordvpn.com/blog/nordvpn-linux-release-notes/) for breaking changes
-- Merge the PR when satisfied
+**1. Pull and Test the Dev Image**
+- The draft PR template lists the tag `fredplex/nordvpn:dev-<version>`. Pull and test it:
+  ```bash
+  docker pull fredplex/nordvpn:dev-<version>
+  ```
+- Verify the VPN connects and network routing works as expected.
 
-**2. Pull the merged changes locally**
-```bash
-git pull
-```
+**2. Review the draft PR on GitHub**
+- Check the file diff: `Dockerfile`, `README.md`, `CLAUDE.md`, `.ai/current.md`.
+- Confirm `IMAGE_VERSION` is correct (automation suggests a patch bump — modify in the PR if you want a minor/major bump instead).
+- Check the [NordVPN release notes](https://nordvpn.com/blog/nordvpn-linux-release-notes/) for breaking changes.
 
-**3. Build the image locally**
-```bash
-task docker-build
-```
-This builds `fredplex/nordvpn:<git-hash>` for testing.
+**3. Merge the PR**
+- Merge the draft PR. **Merging the PR is the explicit trigger.**
 
-**4. Smoke-test the image**
-```bash
-task verify
-```
-Expected output:
-```
-=== Verifying fredplex/nordvpn:<hash> ===
-    NordVPN target: 4.6.0
+**4. Monitor the Release Pipeline**
+- Merging the PR triggers the `Publish to Docker Hub` release pipeline automatically.
+- GHA builds the release image, verifies it with 3 smoke tests, publishes it, and automatically tags the git commit with the release version tag.
+- Monitor this at: **GitHub → Actions → Publish to Docker Hub**.
 
---- Stateless checks ---
-  PASS  IMAGE_VERSION env = <hash>
-  PASS  nordvpn --version = 4.6.0
-  PASS  iptables OUTPUT policy DROP (kill-switch functional)
-
---- Runtime check (daemon socket) ---
-  PASS  nordvpnd socket present at /run/nordvpn/nordvpnd.sock
-
-=== 4 passed | 0 failed | 0 warnings ===
-```
-
-**5. Tag and push to trigger the publish workflow**
-```bash
-task release
-```
-This reads `IMAGE_VERSION` and `NORDVPN_VERSION` directly from the Dockerfile — no manual
-input required. It will:
-- Confirm the working tree is clean (fails if uncommitted changes exist)
-- Confirm the tag does not already exist (prevents accidental double-release)
-- Create the annotated git tag: `git tag -a <IMAGE_VERSION> -m "bump to NordVPN <NORDVPN_VERSION>"`
-- Push the tag: `git push --tags`
-
-Monitor the resulting publish workflow at:
-**GitHub → Actions → Publish to Docker Hub**
+**5. Pull Git Tag**
+- Once the pipeline succeeds, pull locally to fetch the automatically created Git Release Tag:
+  ```bash
+  git pull
+  ```
 
 ---
 
-### Option B — Fully manual path
+### Option B — Fallback / Manual path
 
-Use this if you want to bump immediately without waiting for the weekly action.
+Use this if you want to bump immediately without waiting for the daily checker, or if you prefer to build/verify locally.
 
 **1. Check what's available**
 ```bash
 task check-version
 ```
-Output shows pinned version, available versions, and the exact `task bump` command to run.
 
 **2. Apply the bump**
 ```bash
 task bump NORDVPN_VERSION=4.6.0 IMAGE_VERSION=5.6.0
 ```
-This script:
-- Validates the version format
-- Confirms `nordvpn_4.6.0_amd64.deb` exists in the official repo
-- Updates `Dockerfile`, `README.md`, `CLAUDE.md`, `.ai/current.md`
-- Shows `git diff` for review
+This updates `Dockerfile`, `README.md`, `CLAUDE.md`, `.ai/current.md` and prints the diff.
 
-**3. Review and commit**
+**3. Commit and push**
 ```bash
-git diff          # review changes
 git add Dockerfile README.md CLAUDE.md .ai/current.md
 git commit -m "chore: bump NordVPN 4.5.0 → 4.6.0"
+git push origin main
 ```
+Merging or pushing directly to `main` triggers the automated release pipeline (runs build/smoke-tests/push and pushes the git tag).
 
-**4–5.** Same as Option A steps 3–5 (`task docker-build` → `task verify` → `task release`).
+*Alternatively, to release completely from CLI (bypassing automated git tagging):*
+```bash
+task docker-build
+task verify      # Local 4-check verification (includes runtime daemon check)
+task release     # Tags git locally and pushes, triggering publish workflow
+```
 
 ---
 

@@ -7,15 +7,18 @@ name: Check NordVPN Release
 
 on:
   schedule:
-    - cron: '0 8 * * 1'   # Every Monday 08:00 UTC
+    - cron: '0 8 * * *'   # Every day at 08:00 UTC
   workflow_dispatch:         # Allow manual trigger from GitHub Actions UI
 
 jobs:
-  check-and-pr:
+  check-version:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
+    outputs:
+      update_available: ${{ steps.check.outputs.update_available }}
+      current_version: ${{ steps.check.outputs.current }}
+      latest_version: ${{ steps.check.outputs.latest }}
+      current_image_version: ${{ steps.image_version.outputs.current }}
+      suggested_image_version: ${{ steps.image_version.outputs.suggested }}
 
     steps:
       - name: Checkout
@@ -58,43 +61,64 @@ jobs:
           echo "current=${CURRENT_IMAGE}" >> "$GITHUB_OUTPUT"
           echo "suggested=${SUGGESTED}" >> "$GITHUB_OUTPUT"
 
+  publish-dev:
+    needs: check-version
+    if: needs.check-version.outputs.update_available == 'true'
+    uses: ./.github/workflows/publish-dev.yml
+    with:
+      nordvpn_version: ${{ needs.check-version.outputs.latest_version }}
+    secrets: inherit
+
+  create-pr:
+    needs: [check-version, publish-dev]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Apply version bump
-        if: steps.check.outputs.update_available == 'true'
         run: |
           bash scripts/bump.sh \
-            "${{ steps.check.outputs.latest }}" \
-            "${{ steps.image_version.outputs.suggested }}"
+            "${{ needs.check-version.outputs.latest_version }}" \
+            "${{ needs.check-version.outputs.suggested_image_version }}"
 
       - name: Open draft PR
-        if: steps.check.outputs.update_available == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: auto/nordvpn-${{ steps.check.outputs.latest }}
-          commit-message: "chore: bump NordVPN ${{ steps.check.outputs.current }} → ${{ steps.check.outputs.latest }}"
-          title: "chore: bump NordVPN ${{ steps.check.outputs.current }} → ${{ steps.check.outputs.latest }}"
+          branch: auto/nordvpn-${{ needs.check-version.outputs.latest_version }}
+          commit-message: "chore: bump NordVPN ${{ needs.check-version.outputs.current_version }} → ${{ needs.check-version.outputs.latest_version }}"
+          title: "chore: bump NordVPN ${{ needs.check-version.outputs.current_version }} → ${{ needs.check-version.outputs.latest_version }}"
           body: |
-            NordVPN `${{ steps.check.outputs.latest }}` is now available in the official package repo.
+            NordVPN `${{ needs.check-version.outputs.latest_version }}` is now available in the official package repo.
+
+            A development build has already been successfully built, tested, and published to Docker Hub:
+            * **Dev Image**: `fredplex/nordvpn:dev-${{ needs.check-version.outputs.latest_version }}`
+            * **Moving Dev Tag**: `fredplex/nordvpn:dev`
 
             ## Changes applied by automation
             | Field | Before | After |
             |---|---|---|
-            | `NORDVPN_VERSION` | `${{ steps.check.outputs.current }}` | `${{ steps.check.outputs.latest }}` |
-            | `IMAGE_VERSION` | `${{ steps.image_version.outputs.current }}` | `${{ steps.image_version.outputs.suggested }}` *(suggested — adjust if needed)* |
+            | `NORDVPN_VERSION` | `${{ needs.check-version.outputs.current_version }}` | `${{ needs.check-version.outputs.latest_version }}` |
+            | `IMAGE_VERSION` | `${{ needs.check-version.outputs.current_image_version }}` | `${{ needs.check-version.outputs.suggested_image_version }}` *(suggested — adjust if needed)* |
 
-            ## Before merging
-            - [ ] Confirm `IMAGE_VERSION` is correct (suggested: `${{ steps.image_version.outputs.suggested }}`)
-            - [ ] Review the full diff
-            - [ ] Check [NordVPN release notes](https://nordvpn.com/blog/nordvpn-linux-release-notes/) for any breaking changes
+            ## Before merging (Testing Instructions)
+            1. Pull the dev build to your testing system (e.g. Unraid):
+               ```bash
+               docker pull fredplex/nordvpn:dev-${{ needs.check-version.outputs.latest_version }}
+               ```
+            2. Update your test container to use this image and verify the VPN connects and traffic flows correctly.
+            3. Review the PR file diff.
+            4. Check [NordVPN release notes](https://nordvpn.com/blog/nordvpn-linux-release-notes/) for any breaking changes.
 
             ## After merging
-            ```bash
-            git pull
-            task docker-build
-            task verify
-            git tag -a ${{ steps.image_version.outputs.suggested }} -m "bump to NordVPN ${{ steps.check.outputs.latest }}"
-            git push --tags    # triggers the publish workflow
-            ```
+            Merging this PR will automatically trigger the production release pipeline:
+            - A production image will be built and verified.
+            - It will be pushed as `fredplex/nordvpn:latest` and `fredplex/nordvpn:${{ needs.check-version.outputs.suggested_image_version }}`.
+            - A git release tag `${{ needs.check-version.outputs.suggested_image_version }}` will be automatically pushed back to git.
 
-            > **Draft PR** — do not merge until IMAGE_VERSION has been reviewed.
+            > **Draft PR** — do not merge until you have tested the dev image and reviewed the parameters.
           draft: true

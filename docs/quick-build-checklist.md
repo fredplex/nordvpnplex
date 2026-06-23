@@ -78,7 +78,9 @@ Then proceed to "Release to Docker Hub" below.
 
 ---
 
-## Release to Docker Hub
+## Release to Docker Hub (Local Manual Fallback)
+
+Use this path if you need to manually tag and push a release from your local command line, bypassing the automatic merge-triggered tagging.
 
 **Prerequisites:**
 - Local build passes: `task docker-build` and `task verify`
@@ -94,7 +96,7 @@ task release
 **What it does:**
 - Creates an annotated git tag
 - Pushes the tag
-- GitHub Actions automatically builds and publishes to Docker Hub
+- GitHub Actions automatically builds and publishes the production image to Docker Hub
 
 **Monitor:**
 - GitHub → Actions → Publish to Docker Hub
@@ -177,30 +179,30 @@ task dev-clean
 
 ## Typical Release Workflow
 
-This is the full flow after a new NordVPN version is detected:
+This is the standard automated flow after a new NordVPN version is detected:
 
-1. **Review draft PR on GitHub** (if GitHub Actions created one)
-   - Confirm `IMAGE_VERSION` is correct
-   - Merge the PR
+1. **Pull and Test the Dev Container**
+   - Grab the tag from the draft PR:
+     ```powershell
+     docker pull fredplex/nordvpn:dev-<version>
+     ```
+   - Verify that the container runs and connects successfully.
 
-2. **Pull locally**
-   ```powershell
-   git pull
-   ```
+2. **Review draft PR on GitHub**
+   - Confirm `IMAGE_VERSION` in the `Dockerfile` is correct.
+   - Click **Merge pull request** to approve and trigger the production release.
 
-3. **Build and verify**
-   ```powershell
-   task docker-build
-   task verify
-   ```
+3. **Monitor the Pipeline**
+   - Watch the build/smoke-tests/publish process under **GitHub → Actions → Publish to Docker Hub**.
 
-4. **Publish**
-   ```powershell
-   task release
-   ```
+4. **Pull Git Tag**
+   - Run a pull locally to sync the automatically created Git Release Tag:
+     ```powershell
+     git pull
+     ```
 
-5. **Update `.ai/current.md`** (optional, but recommended)
-   - Edit `.ai/current.md` with new version numbers and build date
+5. **Update `.ai/current.md`**
+   - Update version numbers and build date.
 
 Done. Image is on Docker Hub.
 

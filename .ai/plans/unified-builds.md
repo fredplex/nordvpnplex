@@ -114,26 +114,26 @@ If you need to rebuild a production release (e.g., if a build fails due to netwo
 3. [x] Validate that manual triggering still works exactly as before.
 
 
-### Phase 2: Daily Check & Auto-Dev Build
-1. Update `.github/workflows/check-nordvpn-release.yml` schedule.
-2. Add a step to call `publish-dev` using the discovered version.
-3. Update the PR template script within the check workflow to output test instructions linking the generated dev image.
+### Phase 2: Daily Check & Auto-Dev Build [COMPLETED]
+1. [x] Update `.github/workflows/check-nordvpn-release.yml` schedule.
+2. [x] Add a step to call `publish-dev` using the discovered version.
+3. [x] Update the PR template script within the check workflow to output test instructions linking the generated dev image.
 
-### Phase 3: Production Release Pipeline (Human-in-the-Loop)
-1. Update `.github/workflows/publish.yml` to trigger on pushes to `main` involving `Dockerfile` version modifications.
-2. In the workflow, build the production image, run verification checks, push tags, and use a GitHub Actions step to push the git tag back to the repository if it doesn't exist (using a bot commit or GITHUB_TOKEN).
-3. Secure the push back to `main`/tag to prevent recursive workflow triggers.
+### Phase 3: Production Release Pipeline (Human-in-the-Loop) [COMPLETED]
+1. [x] Update `.github/workflows/publish.yml` to trigger on pushes to `main` involving `Dockerfile` version modifications.
+2. [x] In the workflow, build the production image, run verification checks, push tags, and use a GitHub Actions step to push the git tag back to the repository if it doesn't exist (using a bot commit or GITHUB_TOKEN).
+3. [x] Secure the push back to `main`/tag to prevent recursive workflow triggers.
 
-### Phase 4: Documentation Updates
+### Phase 4: Documentation Updates [COMPLETED]
 Update the three core operator documents in `docs/` to clearly reflect the new GHA-centric CD flow:
-1. **[MODIFY] [user-guide.md](file:///c:/Users/fredp/Documents/GitHub/nordvpnplex/docs/user-guide.md)**:
+1. [x] **[MODIFY] [user-guide.md](file:///c:/Users/fredp/Documents/GitHub/nordvpnplex/docs/user-guide.md)**:
    - Update the flow diagram (Mermaid) to show the new daily cron detection -> auto dev build -> draft PR -> merge PR -> auto prod release.
    - Add a explicit **Responsibility Matrix** table showing who/what is responsible for each step (Cron, GHA runner, Owner).
    - Document GHA `publish.yml` manual triggers for rebuilds.
-2. **[MODIFY] [build-and-publish.md](file:///c:/Users/fredp/Documents/GitHub/nordvpnplex/docs/build-and-publish.md)**:
+2. [x] **[MODIFY] [build-and-publish.md](file:///c:/Users/fredp/Documents/GitHub/nordvpnplex/docs/build-and-publish.md)**:
    - Update Section 3 (Complete workflow at a glance) to show the CD workflow.
    - Refactor Section 5 (Step-by-step: version bump and publish) to guide the user through testing the auto-built dev image, reviewing, merging the PR, and monitoring the auto-tagging publish.
-3. **[MODIFY] [quick-build-checklist.md](file:///c:/Users/fredp/Documents/GitHub/nordvpnplex/docs/quick-build-checklist.md)**:
+3. [x] **[MODIFY] [quick-build-checklist.md](file:///c:/Users/fredp/Documents/GitHub/nordvpnplex/docs/quick-build-checklist.md)**:
    - Simplify the standard release checklist to "Merge PR on GitHub -> verify GHA tag & push complete".
    - Keep the local `task release` checklist marked clearly as a **Local Manual Fallback** path.
 
