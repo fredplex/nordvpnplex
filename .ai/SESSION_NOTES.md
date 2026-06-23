@@ -5,6 +5,47 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-06-23 (feature/dev-workflow)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | `Taskfile.yml` — `dev-build`, `dev-push`, `dev-latest`, `dev-clean` tasks | `e6da122` |
+| 2 | `.github/workflows/publish-dev.yml` — CI dev workflow with 3 smoke tests | `e6da122` |
+| 3 | `scripts/dev-build.sh`, `dev-latest.sh`, `dev-clean.sh` — extracted for cross-platform | `52ea716` |
+| 4 | `docs/build-and-publish.md` — §3.5 Dev workflow + §4.4 + §2 WSL2 prereqs | `e6da122`, `d096d65` |
+| 5 | `docs/user-guide.md` — §9 Dev builds + Publish Dev subsection + WSL2 note | `e6da122`, `d096d65` |
+| 6 | `docs/quick-build-checklist.md` — Dev Build section + WSL2 prereqs | `e6da122`, `d096d65` |
+| 7 | `docs/feature-state.md` — 5 dev workflow entries | `e6da122` |
+| 8 | `README.md` — WSL2 requirement note | `d096d65` |
+| 9 | `.ai/plans/dev-workflow.md` — implementation plan | `e6da122` |
+| 10 | `.ai/current.md` — handoff updates | `e6da122`, this commit |
+
+### Key decisions
+
+- **Dual tagging**: `:dev` (moving, consumer-facing) + `:dev-<hash>` (immutable, traceable)
+- **CI smoke tests**: 3 stateless checks run post-push in the workflow; runtime daemon check deferred as too heavy for CI
+- **`task dev-latest`**: always builds with the newest available version (even if same as pinned) — "latest available, I want a dev image of it"
+- **Cross-platform**: inline bash extracted to `scripts/dev-*.sh` following existing project pattern; Windows requires WSL2 + Docker Desktop integration + Git Bash
+- **`task dev-clean`**: silent on missing images — safe to run anytime
+- **WSL2 docs**: added to README.md, build-and-publish.md (§2 + §3.5), user-guide.md (§9), quick-build-checklist.md
+
+### Validation
+
+- `task dev-latest` confirmed working (exit 0) on Windows with WSL2
+- All YAML syntax errors resolved
+- No npm/test framework — project validation is `task docker-build` + `task verify`
+
+### Fragile areas
+
+- `:dev` tag is overwritten on every push — not for production
+- Windows users MUST have WSL2 + Docker Desktop WSL integration enabled
+- `README.md` still mirrors upstream `bubuntux/nordvpn` — Tier 3 deferred
+- CI smoke tests add ~30s to the `publish-dev` workflow — acceptable for manual trigger
+
+---
+
 ## Session Close — 2026-06-23 (docs/quick-build-checklist)
 
 ### Completed this session

@@ -42,9 +42,9 @@ When the next bump lands: merge PR → `task docker-build` → `task verify` →
 
 ### Stopping point
 
-- Branch: `feature/dev-workflow` — pending review and push
-- Working tree: staged files ready for commit
-- All 7 steps implemented per plan
+- Branch: `feature/dev-workflow` — all commits pushed, ready to merge to `main`
+- Working tree: clean
+- All 7 planned steps implemented + 5 follow-up fixes
 
 ### Decisions / reasoning
 
@@ -52,12 +52,14 @@ When the next bump lands: merge PR → `task docker-build` → `task verify` →
 - CI smoke tests (3 stateless checks) run before reporting success; runtime daemon check deferred
 - `task dev-latest` always builds with the newest available version (even if same as pinned)
 - CI input `"latest"` auto-discovers from NordVPN repo — no manual version lookup
-- `task dev-clean` is silent on missing images — safe to run anytime
+- Inline bash scripts extracted to `scripts/dev-*.sh` for cross-platform compatibility (Windows needs WSL2 + Git Bash)
+- WSL2 requirement documented in README.md, build-and-publish.md, user-guide.md, and quick-build-checklist.md
 
 ### Fragile areas
 
 - `:dev` tag is overwritten on every push — not for production; users must switch back to `:latest`
 - CI smoke tests pull then run the dev image — adds ~30s to the workflow; acceptable for manual trigger
+- Windows users must have WSL2 + Docker Desktop WSL integration enabled for dev tasks
 - `README.md` still mirrors upstream `bubuntux/nordvpn` — Tier 3 deferred
 
 ---

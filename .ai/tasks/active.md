@@ -8,7 +8,7 @@ Current work in progress.
 
 **Active**: None.
 
-Last completed: Created `docs/user-guide.md` — owner operational reference (2026-06-23, commit d5e1002).
+Last completed: Dev build & publish workflow (2026-06-23, branch `feature/dev-workflow`, commits `e6da122`…`b186c6b`).
 
 ---
 
@@ -50,6 +50,7 @@ Last completed: Created `docs/user-guide.md` — owner operational reference (20
 
 ## Recently Completed
 
+- **Dev build & publish workflow** (2026-06-23, `feature/dev-workflow`) — `task dev-build`, `dev-push`, `dev-latest`, `dev-clean`; `publish-dev.yml` CI workflow with smoke tests; WSL2 docs; cross-platform scripts
 - Owner user guide — `docs/user-guide.md` created (2026-06-23, commit d5e1002)
 - Quick build checklist — `docs/quick-build-checklist.md` created (2026-06-23)
 - AI agent docs scaffolded via `prime-ai-docs.mjs` (2026-06-23)
