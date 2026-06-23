@@ -8,7 +8,7 @@ Current work in progress.
 
 **Active**: None.
 
-Last completed: Dev build & publish workflow (2026-06-23, branch `feature/dev-workflow`, commits `e6da122`…`b186c6b`).
+Last completed: Unified build & release pipeline (2026-06-23, branch `feature/unified-builds`, commits `3cbf9f5`…`ce02c0b`).
 
 ---
 
@@ -50,6 +50,7 @@ Last completed: Dev build & publish workflow (2026-06-23, branch `feature/dev-wo
 
 ## Recently Completed
 
+- **Unified build & release pipeline** (2026-06-23, `feature/unified-builds`) — GHA-centric release on PR merge, daily checker with auto-dev build, manual prod/dev run options, and updated docs (§3.5, §4.4, §5)
 - **Dev build & publish workflow** (2026-06-23, `feature/dev-workflow`) — `task dev-build`, `dev-push`, `dev-latest`, `dev-clean`; `publish-dev.yml` CI workflow with smoke tests; WSL2 docs; cross-platform scripts
 - Owner user guide — `docs/user-guide.md` created (2026-06-23, commit d5e1002)
 - Quick build checklist — `docs/quick-build-checklist.md` created (2026-06-23)

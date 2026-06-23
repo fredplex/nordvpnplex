@@ -5,6 +5,39 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-06-23 (feature/unified-builds)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | `.github/workflows/publish-dev.yml` — converted to reusable workflow, added `:dev-<version>` tags | `3cbf9f5` |
+| 2 | `.github/workflows/check-nordvpn-release.yml` — daily cron, auto-trigger dev build & verify, PR template body update | `475ca72` |
+| 3 | `.github/workflows/publish.yml` — redesigned as CD release on PR merge, manual dispatch option, local smoke test, git tag push | `475ca72` |
+| 4 | `scripts/verify.sh` — added `--entrypoint /bin/bash` override to bypass s6 init for stateless version check | `ce02c0b` |
+| 5 | `.gitattributes` — updated for script/file paths; normalized all files to LF endings | `64c5751` |
+| 6 | Documentation updates — `docs/build-and-publish.md`, `docs/user-guide.md`, `docs/quick-build-checklist.md` | `475ca72` |
+| 7 | `.ai/tasks/` — updated task checklists and archives | `this commit` |
+| 8 | `.ai/current.md` & `SESSION_NOTES.md` — updated project state files | `this commit` |
+
+### Key decisions
+
+- **Safety Checks in release CD pipeline**: Configured the push trigger on `main` branch to require both a path filter (`paths: ['Dockerfile']`) and a git diff grep check verifying that the versions were actually bumped. This guarantees we don't build/deploy on unrelated merges.
+- **Stateless Verification Overrides**: Overriding the entrypoint to `/bin/bash` in `verify.sh` resolves s6 `/init` setup failures caused by lack of networking privileges and missing `$HOME` during testing, which makes local verification robust on Windows and limited capability environments.
+- **Git Tag CD Release Loop**: When a PR version bump is merged, GHA automatically tags the commit and pushes the tag, trigger-matching release tags, which publishes standard semver tagged images to Docker Hub.
+
+### Validation
+
+- Bounded local testing: `task docker-build` and `task verify` run and pass cleanly using temporary version `4.6.0` override (as `4.5.0` has been deprecated and deleted from the NordVPN Debian package pool).
+- Docker inspect checks (IMAGE_VERSION metadata check, nordvpn version extraction, iptables drop rule checks) all completed successfully.
+
+### Fragile areas
+
+- **Debian Repo Package Expiry**: NordVPN package availability in the Debian repository is subject to upstream purging. If old versions are purged, local default builds will fail, requiring a manual bump or dev override build.
+- **LF Line Ending Strictness**: Line endings for scripts in `/scripts` and `/rootfs` must strictly remain LF. If checked out on Windows and auto-converted by git, they will cause execution failures inside the container.
+
+---
+
 ## Session Close — 2026-06-23 (feature/dev-workflow)
 
 ### Completed this session
