@@ -8,7 +8,7 @@ Current work in progress.
 
 **Active**: None.
 
-Last completed: Merged nordvpn-specific content from `.ai-prime-backup/2026-06-23-01-41-32/` into all new template files (2026-06-23).
+Last completed: Applied prime-ai-docs 1.1.0 template updates to AGENTS.md and `.ai/README.md` (2026-06-23, commit 616fd82).
 
 ---
 
