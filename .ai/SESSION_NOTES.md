@@ -5,6 +5,31 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-06-23 (docs/quick-build-checklist)
+
+### Completed this session
+
+| # | Item |
+|---|------|
+| 1 | Added an operator-focused build/release checklist at `docs/quick-build-checklist.md` covering local build, verify, bump, release, and GitHub PR validation |
+| 2 | Added a docs index entry so the checklist is discoverable from `docs/README.md` |
+| 3 | Updated `.ai/current.md` and `.ai/tasks/active.md` with the new handoff state |
+
+### Key decisions
+
+- Kept the checklist concise and copy-paste oriented; the full operational details remain in `docs/user-guide.md` and `docs/build-and-publish.md`.
+- This change is documentation-only and does not alter runtime behavior.
+
+### Validation
+
+- Not run — docs-only change; the repository’s local validation path relies on `task`, which is not installed in the current shell environment.
+
+### Fragile areas
+
+- The local validation workflow depends on the `task` binary being available; the current environment reported `task: The term 'task' is not recognized`.
+
+---
+
 ## Session Close — 2026-06-23 (docs/user-guide)
 
 ### Completed this session

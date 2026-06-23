@@ -51,6 +51,7 @@ Last completed: Created `docs/user-guide.md` — owner operational reference (20
 ## Recently Completed
 
 - Owner user guide — `docs/user-guide.md` created (2026-06-23, commit d5e1002)
+- Quick build checklist — `docs/quick-build-checklist.md` created (2026-06-23)
 - AI agent docs scaffolded via `prime-ai-docs.mjs` (2026-06-23)
 - Merged backup AGENTS.md, CLAUDE.md, .ai/current.md into new template structure (2026-06-23)
 - Filled in all new template files with nordvpn-specific content (2026-06-23)
