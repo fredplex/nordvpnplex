@@ -8,7 +8,7 @@ Current work in progress.
 
 **Active**: None.
 
-Last completed: Applied prime-ai-docs 1.1.0 template updates to AGENTS.md and `.ai/README.md` (2026-06-23, commit 616fd82).
+Last completed: Created `docs/user-guide.md` — owner operational reference (2026-06-23, commit d5e1002).
 
 ---
 
@@ -40,20 +40,19 @@ Last completed: Applied prime-ai-docs 1.1.0 template updates to AGENTS.md and `.
 - [ ] `.ai/current.md` updated with new versions and date
 - [ ] `CLAUDE.md` pinned version block updated
 
+### README.md rewrite (Tier 3 — deferred, not yet approved)
+
+**Status**: Deferred
+**Goal**: Replace the upstream `bubuntux/nordvpn` mirror with a project-specific README
+**Note**: `docs/user-guide.md` content feeds this when approved
+
 ---
 
 ## Recently Completed
 
+- Owner user guide — `docs/user-guide.md` created (2026-06-23, commit d5e1002)
 - AI agent docs scaffolded via `prime-ai-docs.mjs` (2026-06-23)
 - Merged backup AGENTS.md, CLAUDE.md, .ai/current.md into new template structure (2026-06-23)
-- Filled in all new template files with nordvpn-specific content (2026-06-23):
-  - `.ai/memory/project-state.md`
-  - `.ai/memory/architecture-decisions.md`
-  - `.ai/rules/mutation-rules.md`
-  - `docs/architecture.md`
-  - `docs/tech-stack.md`
-  - `docs/project-rules.md`
-  - `docs/feature-state.md`
-  - `docs/testing.md`
+- Filled in all new template files with nordvpn-specific content (2026-06-23)
 - Version mechanism refactor (2026-06-22) — `/.version` → `ENV IMAGE_VERSION` + OCI labels
 - Build/publish workflow streamlining (2026-06-22) — bump.sh, check-version.sh, verify.sh; task release; 3 GitHub Actions
