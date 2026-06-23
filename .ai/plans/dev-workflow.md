@@ -1,6 +1,6 @@
 # Dev Build & Publish Workflow
 
-Created: 2026-06-23 | Status: Pending review (augmented — owner decisions applied)
+Created: 2026-06-23 | Status: Complete (commit e6da122, branch feature/dev-workflow)
 
 ## Decisions from owner review
 

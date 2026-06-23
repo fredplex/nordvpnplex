@@ -235,7 +235,7 @@ Three workflows run in the repo. None of them push an image without a human-crea
 
 ### Check NordVPN Release
 
-**File:** `.github/workflows/check-nordvpn-release.yml`  
+**File:** `.github/workflows/check-nordvpn-release.yml`
 **Trigger:** Every Monday at 08:00 UTC, or manually via the GitHub Actions UI
 
 What it does:
@@ -260,7 +260,7 @@ The draft PR includes:
 
 ### Build Validation
 
-**File:** `.github/workflows/build-validate.yml`  
+**File:** `.github/workflows/build-validate.yml`
 **Trigger:** Any pull request targeting `main`
 
 What it does:
@@ -277,7 +277,7 @@ to run it on demand.
 
 ### Publish to Docker Hub
 
-**File:** `.github/workflows/publish.yml`  
+**File:** `.github/workflows/publish.yml`
 **Trigger:** Push of a git tag matching `[0-9]+.[0-9]+.[0-9]+` (e.g. `5.6.0`)
 
 What it does:
@@ -288,7 +288,7 @@ What it does:
    - `fredplex/nordvpn:latest`
    - `fredplex/nordvpn:<tag>` (e.g. `fredplex/nordvpn:5.6.0`)
 
-**To trigger:** Run `task release` — it creates and pushes the tag in one step.  
+**To trigger:** Run `task release` — it creates and pushes the tag in one step.
 There is no "Run workflow" button in the GitHub UI for this workflow; the tag push is the
 trigger, and the tag name becomes the Docker image tag.
 
@@ -299,7 +299,7 @@ trigger, and the tag name becomes the Docker image tag.
 
 ### Publish Dev to Docker Hub
 
-**File:** `.github/workflows/publish-dev.yml`  
+**File:** `.github/workflows/publish-dev.yml`
 **Trigger:** Manual — GitHub Actions UI (`workflow_dispatch`)
 
 What it does:
@@ -319,7 +319,7 @@ What it does:
    - **Explicit** (e.g. `4.6.0`) — use that version
 4. Click **Run workflow**
 
-**Secrets needed:** `DOCKER_USERNAME` and `DOCKER_TOKEN`.  
+**Secrets needed:** `DOCKER_USERNAME` and `DOCKER_TOKEN`.
 For full details, see [§9 Dev builds for testing](#9-dev-builds-for-testing).
 
 ---

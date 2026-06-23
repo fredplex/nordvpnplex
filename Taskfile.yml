@@ -5,7 +5,7 @@ version: '3'
 vars:
   REGISTRY: fredplex
   IMAGE: nordvpn
-  GIT_HASH: 
+  GIT_HASH:
     sh: git log --format="%h" -n 1
   GIT_TAG:
     sh: git tag --points-at HEAD
@@ -45,7 +45,7 @@ tasks:
       - docker-push
     desc: |
             Publish this release as LATEST
-    cmds: 
+    cmds:
       - echo 'Version {{.GIT_TAG}} with GIT Hash {{.GIT_HASH}} being released'
       - docker tag "{{.REGISTRY}}/{{.IMAGE}}:{{.GIT_HASH}}" "{{.REGISTRY}}/{{.IMAGE}}:latest"
       - docker tag "{{.REGISTRY}}/{{.IMAGE}}:{{.GIT_HASH}}" "{{.REGISTRY}}/{{.IMAGE}}:{{.GIT_TAG}}"
