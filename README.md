@@ -2,6 +2,11 @@
 > **This fork:** `fredplex/nordvpn` — custom NordVPN image built for Unraid.
 > **Current image:** fredplex/nordvpn:5.5.0 — NordVPN 4.5.0
 
+**WSL2 required on Windows**: Docker Desktop must use the WSL2 backend with WSL integration
+enabled, and Git Bash must be installed. The build scripts use `bash`, `curl`, `sed`, and
+`grep` — these are not available in PowerShell or CMD. See the
+[build and publish docs](docs/build-and-publish.md#2-prerequisites) for setup details.
+
 ---
 
 <p align="center">

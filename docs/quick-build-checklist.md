@@ -2,6 +2,13 @@
 
 One-page operator reference for common build and release tasks.
 
+> **Windows prerequisite**: Docker Desktop must use **WSL2 backend** with WSL integration
+> enabled, and Git Bash must be installed. Without WSL2, bash-based tasks (`verify`,
+> `dev-build`, `dev-latest`, `dev-clean`) will fail. Verify:
+> 1. Docker Desktop → Settings → General → "Use WSL 2 based engine" is checked
+> 2. Docker Desktop → Settings → Resources → WSL Integration → your distro is enabled
+> 3. `bash --version` works in your terminal
+
 ---
 
 ## Test Build (Local)

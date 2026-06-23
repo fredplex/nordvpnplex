@@ -65,6 +65,19 @@ NordVPN package repo ──► Weekly GitHub Action ──► Draft PR (human re
 | Git | [git-scm.com](https://git-scm.com/) | Tag and push releases |
 | curl + bash | Included in Git Bash on Windows | Used by helper scripts |
 
+**Windows users**: Docker Desktop must use the **WSL2 backend** with **WSL integration**
+enabled. The `task dev-build`, `task dev-latest`, and `task dev-clean` commands run
+bash scripts that require a Linux-compatible shell. Verify:
+
+1. **Docker Desktop → Settings → General** — "Use WSL 2 based engine" is checked
+2. **Docker Desktop → Settings → Resources → WSL Integration** — your WSL distro
+   (e.g. Ubuntu) is enabled
+3. Git Bash is installed (included with [Git for Windows](https://git-scm.com/))
+4. `bash` is available in your terminal (`bash --version`)
+
+Without WSL2 integration, the dev build tasks will fail with `sed: executable file not found`
+or similar errors.
+
 ### GitHub repo secrets (one-time setup — see [Section 7](#7-one-time-setup-docker-hub-credentials-in-github))
 
 | Secret | Value |
@@ -160,6 +173,11 @@ Every dev build produces two tags:
 
 Both point to the same image. `IMAGE_VERSION` is set to `dev-<hash>` so you can confirm
 you're running a dev build via `docker inspect`.
+
+> **Windows users**: Docker Desktop must run on the **WSL2 backend** with WSL integration
+> enabled, and Git Bash must be installed. The dev build scripts use `bash`, `curl`, `sed`,
+> and `grep` — these are available in Git Bash but not in PowerShell or CMD. See
+> [§2 Prerequisites](#2-prerequisites) for setup details.
 
 #### Local paths
 

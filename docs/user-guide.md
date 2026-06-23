@@ -535,6 +535,11 @@ Dev images let you test the container — with the current or a new NordVPN vers
 going through the full release ceremony. Dev images live under the `:dev` tag on Docker Hub,
 separate from `:latest` and semver tags.
 
+> **Windows users**: Docker Desktop must use the **WSL2 backend** with WSL integration
+> enabled, and Git Bash must be installed. Without WSL2, the dev build tasks will fail with
+> `sed: executable file not found` or similar errors. See
+> [§2 Prerequisites in build-and-publish.md](build-and-publish.md#2-prerequisites) for setup.
+
 ### Quick reference
 
 | Command | Purpose |
