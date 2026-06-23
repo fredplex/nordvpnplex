@@ -62,21 +62,7 @@ tasks:
     vars:
       NORDVPN_VERSION: '{{.NORDVPN_VERSION | default ""}}'
     cmds:
-      - |
-        NORDVPN_BUILD_ARG=""
-        if [ -n "{{.NORDVPN_VERSION}}" ]; then
-          NORDVPN_BUILD_ARG="--build-arg=NORDVPN_VERSION={{.NORDVPN_VERSION}}"
-          echo "Dev build — NordVPN override: {{.NORDVPN_VERSION}}"
-        else
-          echo "Dev build — using pinned NordVPN version from Dockerfile"
-        fi
-        docker build --platform linux/amd64 . -f Dockerfile \
-          -t "{{.REGISTRY}}/{{.IMAGE}}:dev" \
-          -t "{{.REGISTRY}}/{{.IMAGE}}:dev-{{.GIT_HASH}}" \
-          --build-arg="IMAGE_VERSION=dev-{{.GIT_HASH}}" \
-          ${NORDVPN_BUILD_ARG}
-        echo "Tagged: {{.REGISTRY}}/{{.IMAGE}}:dev"
-        echo "Tagged: {{.REGISTRY}}/{{.IMAGE}}:dev-{{.GIT_HASH}}"
+      - bash scripts/dev-build.sh "{{.GIT_HASH}}" "{{.NORDVPN_VERSION}}"
 
   dev-push:
     deps:
@@ -93,46 +79,13 @@ tasks:
     desc: |
             Scrape NordVPN repo for the newest available version, then build a dev image with it.
     cmds:
-      - |
-        REPO_URL="https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/"
-        PINNED=$(grep "ARG NORDVPN_VERSION" Dockerfile | sed "s/ARG NORDVPN_VERSION='//;s/'$//")
-        LATEST=$(curl -sf "${REPO_URL}" \
-          | grep -oE 'nordvpn_[0-9]+\.[0-9]+\.[0-9]+_amd64\.deb' \
-          | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' \
-          | sort -V | uniq | tail -1)
-
-        if [ -z "${LATEST}" ]; then
-          echo "ERROR: Could not fetch version list from ${REPO_URL}" >&2
-          exit 1
-        fi
-
-        echo "Pinned:    ${PINNED}"
-        echo "Latest:    ${LATEST}"
-        echo ""
-        echo "Building dev image with NordVPN ${LATEST}..."
-        docker build --platform linux/amd64 . -f Dockerfile \
-          -t "{{.REGISTRY}}/{{.IMAGE}}:dev" \
-          -t "{{.REGISTRY}}/{{.IMAGE}}:dev-{{.GIT_HASH}}" \
-          --build-arg="IMAGE_VERSION=dev-{{.GIT_HASH}}" \
-          --build-arg="NORDVPN_VERSION=${LATEST}"
-        echo ""
-        echo "Tagged: {{.REGISTRY}}/{{.IMAGE}}:dev"
-        echo "Tagged: {{.REGISTRY}}/{{.IMAGE}}:dev-{{.GIT_HASH}}"
+      - bash scripts/dev-latest.sh "{{.GIT_HASH}}"
 
   dev-clean:
     desc: |
             Remove local dev images (:dev and :dev-* tags).
     cmds:
-      - |
-        echo "Removing local dev images..."
-        docker rmi "{{.REGISTRY}}/{{.IMAGE}}:dev" 2>/dev/null && echo "  Removed :dev" || echo "  :dev not found"
-        DEV_HASHES=$(docker images "{{.REGISTRY}}/{{.IMAGE}}" --filter "reference={{.REGISTRY}}/{{.IMAGE}}:dev-*" -q 2>/dev/null)
-        if [ -n "${DEV_HASHES}" ]; then
-          echo "${DEV_HASHES}" | xargs -r docker rmi 2>/dev/null && echo "  Removed :dev-* tags" || echo "  Some :dev-* tags could not be removed"
-        else
-          echo "  No :dev-* tags found"
-        fi
-        echo "Done."
+      - bash scripts/dev-clean.sh
 
   verify:
     desc: |
