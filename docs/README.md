@@ -8,6 +8,7 @@ This folder contains the comprehensive product, architecture, and operational do
 
 **Start here**:
 - **`AGENTS.md`** (repo root) — agent onboarding entry point
+- **`docs/user-guide.md`** — owner's complete operational reference (commands, workflows, env vars)
 - **`docs/project-rules.md`** — product vision and boundaries
 - **`docs/architecture.md`** — architecture philosophy and design decisions
 
