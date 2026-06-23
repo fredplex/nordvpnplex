@@ -11,6 +11,7 @@ image appearing on Docker Hub. It is written for both humans and AI agents.
 1. [Architecture overview](#1-architecture-overview)
 2. [Prerequisites](#2-prerequisites)
 3. [Complete workflow at a glance](#3-complete-workflow-at-a-glance)
+   - [3.5 Dev workflow](#35-dev-workflow)
 4. [Automated triggers (GitHub Actions)](#4-automated-triggers-github-actions)
 5. [Step-by-step: version bump and publish](#5-step-by-step-version-bump-and-publish)
 6. [Manual triggers](#6-manual-triggers)
@@ -141,9 +142,99 @@ NordVPN package repo ──► Weekly GitHub Action ──► Draft PR (human re
 
 ---
 
+### 3.5 Dev workflow
+
+Dev images are for **testing only** — they let you validate a build (current or new NordVPN
+version) without going through the full release ceremony. Dev images are pushed under the
+`:dev` tag, which is separate from `:latest` and semver tags. They never trigger the
+production publish workflow.
+
+#### Dual tagging
+
+Every dev build produces two tags:
+
+| Tag | Purpose |
+|-----|---------|
+| `fredplex/nordvpn:dev` | Moving tag — always the latest dev build. Use in Unraid templates for testing. |
+| `fredplex/nordvpn:dev-<hash>` | Immutable tag — traceable to the exact commit. Useful for rollback or comparison. |
+
+Both point to the same image. `IMAGE_VERSION` is set to `dev-<hash>` so you can confirm
+you're running a dev build via `docker inspect`.
+
+#### Local paths
+
+**Build with the currently pinned NordVPN version:**
+```bash
+task dev-build
+```
+
+**Build with a specific NordVPN version (e.g. testing a new release):**
+```bash
+task dev-build NORDVPN_VERSION=4.6.0
+```
+
+**Auto-discover the latest available NordVPN version and build with it:**
+```bash
+task dev-latest
+```
+This scrapes the NordVPN Debian repo, finds the newest `.deb`, prints pinned vs latest,
+and builds a dev image with that version. No manual version lookup needed.
+
+**Push the dev image to Docker Hub:**
+```bash
+task dev-push
+```
+Pushes both `:dev` and `:dev-<hash>`. Requires local Docker Hub login.
+
+**Clean up local dev images:**
+```bash
+task dev-clean
+```
+Removes `:dev` and all `:dev-*` tags from your local Docker daemon. Does not touch
+`:latest`, semver tags, or hash-tagged production images.
+
+#### CI path (GitHub Actions)
+
+Trigger a dev build from the GitHub Actions UI — no local Docker needed:
+
+1. Go to **Actions → Publish Dev to Docker Hub**
+2. Click **Run workflow**
+3. Choose the NordVPN version:
+   - **Leave blank** — use the pinned version from `Dockerfile`
+   - **Type `latest`** — auto-discover the newest available version from the NordVPN repo
+   - **Type an explicit version** (e.g. `4.6.0`) — use that exact version
+4. Click **Run workflow**
+
+The workflow builds the image, runs 3 stateless smoke tests (IMAGE_VERSION label,
+`nordvpn --version`, iptables kill-switch), then pushes `:dev` and `:dev-<sha>` to
+Docker Hub. All steps are logged; a summary is printed at the end.
+
+#### Consuming the dev image
+
+```bash
+docker pull fredplex/nordvpn:dev
+```
+
+In Unraid: update your container template to use `fredplex/nordvpn:dev` as the repository.
+Switch back to `fredplex/nordvpn:latest` when done testing.
+
+> **Warning**: `:dev` is a moving tag — every `dev-push` or CI run overwrites it. Not for
+> production use. Use `:dev-<hash>` if you need to pin to a specific dev build.
+
+#### When to use dev vs production
+
+| Scenario | Use |
+|----------|-----|
+| Test a new NordVPN version before committing to a bump | `task dev-latest` → test → then `task bump` |
+| Validate container changes in Unraid without a release | `task dev-build` → `task dev-push` → test in Unraid |
+| Smoke-test a specific NordVPN version via CI | Actions → Publish Dev (type version) |
+| Official release to all users | `task release` (production path — see §3 and §5) |
+
+---
+
 ## 4. Automated triggers (GitHub Actions)
 
-Three workflows run automatically. None of them push an image without a human-created git tag.
+Four workflows run automatically or on-demand. None of them push a production image without a human-created git tag.
 
 ### 4.1 Weekly version check
 
@@ -198,6 +289,31 @@ Three workflows run automatically. None of them push an image without a human-cr
 > `task verify` checks for the hash (confirming the local build); the published image carries
 > the human-readable version. Query version without running the container:
 > `docker inspect <image> --format '{{index .Config.Labels "org.opencontainers.image.version"}}'`
+
+---
+
+### 4.4 Manual dev publish
+
+**File:** `.github/workflows/publish-dev.yml`
+**Trigger:** Manual — GitHub Actions UI (`workflow_dispatch`)
+**What it does:**
+1. Resolves the NordVPN version (pinned, explicit override, or auto-discover via `"latest"`)
+2. Logs in to Docker Hub
+3. Builds the image with `IMAGE_VERSION=dev-<sha>`
+4. Pushes two tags to Docker Hub:
+   - `fredplex/nordvpn:dev` (moving — always the latest dev build)
+   - `fredplex/nordvpn:dev-<sha>` (immutable — traceable to the commit)
+5. Runs 3 stateless smoke tests: IMAGE_VERSION label, `nordvpn --version`, iptables kill-switch
+
+**Human action required:** Trigger manually from the Actions UI and choose the NordVPN version.
+**Secrets needed:** `DOCKER_USERNAME` and `DOCKER_TOKEN`.
+
+**Input options:**
+- **Blank** — uses the NordVPN version pinned in `Dockerfile`
+- **`latest`** — auto-discovers the newest available version from the NordVPN Debian repo
+- **Explicit version** (e.g. `4.6.0`) — uses that exact version
+
+For full dev workflow documentation, see [§3.5 Dev workflow](#35-dev-workflow).
 
 ---
 

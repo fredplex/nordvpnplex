@@ -10,6 +10,7 @@
 
 ### Recently shipped
 
+- Dev build & publish workflow (2026-06-23, `feature/dev-workflow`) — `task dev-build`, `task dev-push`, `task dev-latest`, `task dev-clean`; new `publish-dev.yml` CI workflow with smoke tests; updated all product docs
 - Owner user guide (2026-06-23, `docs/user-guide`) — `docs/user-guide.md` created: complete owner reference covering all task commands, GitHub Actions, both version bump paths, full env var table, Docker Hub setup, and troubleshooting
 - Quick build checklist (2026-06-23, `docs/quick-build-checklist`) — added a one-page operator reference for local build, verify, bump, release, and troubleshooting steps
 - prime-ai-docs 1.1.0 template update (2026-06-23) — AGENTS.md updated to template 1.1.0; `.ai/README.md` updated to 1.0.1; `.ai-prime-versions.json` added
@@ -25,32 +26,39 @@ When the next bump lands: merge PR → `task docker-build` → `task verify` →
 
 ---
 
-## Session Handoff — 2026-06-23 (docs/user-guide)
+## Session Handoff — 2026-06-23 (feature/dev-workflow)
 
 ### What was just completed
 
-| Commit | Change |
-|--------|--------|
-| d5e1002 | docs: add owner user guide with commands, workflows, env vars, and troubleshooting |
+| # | Item |
+|---|------|
+| 1 | `Taskfile.yml` — added `dev-build`, `dev-push`, `dev-latest`, `dev-clean` tasks |
+| 2 | `.github/workflows/publish-dev.yml` — new CI workflow with smoke tests |
+| 3 | `docs/build-and-publish.md` — added §3.5 Dev workflow + §4.4 Manual dev publish |
+| 4 | `docs/user-guide.md` — added §9 Dev builds + Publish Dev subsection in §4 |
+| 5 | `docs/quick-build-checklist.md` — added Dev Build (Testing) section |
+| 6 | `docs/feature-state.md` — added 5 dev workflow entries |
+| 7 | `.ai/current.md` — updated handoff (this file) |
 
 ### Stopping point
 
-- Branch: `docs/user-guide` — pushed, pending merge to `main`
-- Working tree: clean
-- Docs-only changes — no functional code modified
+- Branch: `feature/dev-workflow` — pending review and push
+- Working tree: staged files ready for commit
+- All 7 steps implemented per plan
 
 ### Decisions / reasoning
 
-- `docs/user-guide.md` is a new file; `docs/build-and-publish.md` stays as the detailed agent+human reference
-- Mermaid diagram chosen for the main workflow flowchart (GitHub renders natively)
-- Docker Hub credentials setup included in scope (was initially excluded from plan, corrected before implementation)
-- `task docker-push` and `task docker-publish` documented as lower-level/bypass alternatives to `task release`
-- User guide will feed the future README rewrite (Tier 3, not yet approved)
+- Dual tagging (`:dev` + `:dev-<hash>`) provides both convenience and traceability
+- CI smoke tests (3 stateless checks) run before reporting success; runtime daemon check deferred
+- `task dev-latest` always builds with the newest available version (even if same as pinned)
+- CI input `"latest"` auto-discovers from NordVPN repo — no manual version lookup
+- `task dev-clean` is silent on missing images — safe to run anytime
 
 ### Fragile areas
 
-- `README.md` still mirrors upstream `bubuntux/nordvpn` — Tier 3 deferred; `docs/user-guide.md` content feeds this when approved
-- `CLAUDE.md` pinned version block needs update after next bump
+- `:dev` tag is overwritten on every push — not for production; users must switch back to `:latest`
+- CI smoke tests pull then run the dev image — adds ~30s to the workflow; acceptable for manual trigger
+- `README.md` still mirrors upstream `bubuntux/nordvpn` — Tier 3 deferred
 
 ---
 

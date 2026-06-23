@@ -57,6 +57,11 @@ Authoritative inventory of all features in **fredplex/nordvpn**.
 | GitHub Actions: build-validate | ✅ Implemented | `docker build` on PR → main; no push |
 | GitHub Actions: publish | ✅ Implemented | Tag push → build + push `:latest` + `:<tag>` to Docker Hub |
 | GitHub Actions: check-nordvpn-release | ✅ Implemented | Weekly cron: detect new NordVPN version, open draft PR |
+| `task dev-build` | ✅ Implemented | Builds `:dev` + `:dev-<hash>`; optional NORDVPN_VERSION override |
+| `task dev-push` | ✅ Implemented | Pushes `:dev` + `:dev-<hash>` to Docker Hub |
+| `task dev-latest` | ✅ Implemented | Auto-discovers newest NordVPN version + builds dev image |
+| `task dev-clean` | ✅ Implemented | Removes local `:dev` and `:dev-*` images |
+| GitHub Actions: publish-dev | ✅ Implemented | Manual trigger; builds, smoke-tests, pushes `:dev` + `:dev-<sha>` |
 
 ---
 

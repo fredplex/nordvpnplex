@@ -119,6 +119,55 @@ git push -u origin feature/my-change
 
 ---
 
+## Dev Build (Testing)
+
+Use this to build and push a dev image for testing without affecting the production `:latest` tag.
+
+### Local dev build and push
+
+```powershell
+# Build with currently pinned NordVPN version
+task dev-build
+
+# Build with a specific NordVPN version
+task dev-build NORDVPN_VERSION=4.6.0
+
+# Auto-discover newest NordVPN version and build with it
+task dev-latest
+
+# Push to Docker Hub (requires docker login)
+task dev-push
+```
+
+**What it does:**
+- Tags the image as `fredplex/nordvpn:dev` (moving) and `fredplex/nordvpn:dev-<hash>` (immutable)
+- Sets `IMAGE_VERSION=dev-<hash>` inside the container
+- Never touches `:latest` or creates git tags
+
+### Consuming the dev image
+
+```powershell
+docker pull fredplex/nordvpn:dev
+```
+
+In Unraid: change your container template repository to `fredplex/nordvpn:dev`.
+Switch back to `fredplex/nordvpn:latest` when done testing.
+
+### CI dev build (GitHub Actions)
+
+1. GitHub → **Actions** → **Publish Dev to Docker Hub**
+2. Click **Run workflow**
+3. NordVPN version: blank = pinned, `latest` = auto-discover, or type `x.y.z`
+4. Click **Run workflow** — builds, smoke-tests, pushes `:dev` + `:dev-<sha>`
+
+### Cleanup
+
+```powershell
+task dev-clean
+```
+
+---
+
 ## Typical Release Workflow
 
 This is the full flow after a new NordVPN version is detected:
