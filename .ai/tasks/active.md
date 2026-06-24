@@ -6,11 +6,13 @@ Current work in progress.
 
 ## Current Status
 
-**Active**: None.
+**Active**: **Current State Audit & Workflows Unification** (`chore/audit-improvements`)
+- [x] Phase 1: Workspace Hygiene & Scraping Consolidation
+- [ ] Phase 2: Workflow Refactoring & CI Unification
+- [ ] Phase 3: Local Dev tag Alignment & Taskfile UX
+- [ ] Phase 4: Reference Documentation Updates
 
-Last completed: **Native release notifications** (2026-06-24, `chore/publish-native-notify`) — `publish.yml` publishes a GitHub Release on success (emails watchers); native Actions emails on failure; no secrets. See `.ai/tasks/completed.md`.
-
-**Owner one-time action**: set repo **Watch → Custom → Releases** so the success emails arrive.
+Last completed: **Native release notifications** (2026-06-24, `chore/publish-native-notify`).
 
 **Watching**: next NordVPN release — the daily checker auto-builds/tests a dev image and opens a draft PR.
 

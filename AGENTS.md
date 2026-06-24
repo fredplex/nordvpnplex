@@ -193,15 +193,15 @@ Look for `nordvpn_<NORDVPN_VERSION>_amd64.deb`. If not listed, do not proceed.
 
 ### Version bump locations — ALL must change in one commit
 
-| File | Field |
-|---|---|
-| `Dockerfile` line 6 | `ARG NORDVPN_VERSION='x.x.x'` |
-| `Dockerfile` line 7 | `ARG IMAGE_VERSION='x.x.x'` |
-| `README.md` | "Current version" line |
-| `CLAUDE.md` | `## Current Pinned Version` block |
-| `.ai/current.md` | all fields |
+| File | Field | Type of Edit |
+|---|---|---|
+| `Dockerfile` line 6 | `ARG NORDVPN_VERSION='x.x.x'` | Automatic (via `task bump`) |
+| `Dockerfile` line 7 | `ARG IMAGE_VERSION='x.x.x'` | Automatic (via `task bump`) |
+| `README.md` | "Current version" line | Automatic (via `task bump`) |
+| `CLAUDE.md` | `## Current Pinned Version` block | Automatic (via `task bump`) |
+| `.ai/current.md` | all fields | Manual (handoff state) |
 
-**Preferred:** run `task bump NORDVPN_VERSION=x.x.x IMAGE_VERSION=y.y.y` — the script handles all edits and verifies the package exists first.
+**Preferred:** run `task bump NORDVPN_VERSION=x.x.x IMAGE_VERSION=y.y.y` — the script handles the first 4 edits automatically and verifies the package exists first. You must then update `.ai/current.md` manually.
 
 ### Steps
 1. Confirm both version strings with owner before touching any file

@@ -8,18 +8,10 @@ set -euo pipefail
 REGISTRY="fredplex"
 IMAGE="nordvpn"
 GIT_HASH="${1:?Usage: bash scripts/dev-latest.sh <GIT_HASH>}"
-REPO_URL="https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/"
 
 PINNED=$(grep "ARG NORDVPN_VERSION" Dockerfile | sed "s/ARG NORDVPN_VERSION='//;s/'$//")
-LATEST=$(curl -sf "${REPO_URL}" \
-  | grep -oE 'nordvpn_[0-9]+\.[0-9]+\.[0-9]+_amd64\.deb' \
-  | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' \
-  | sort -V | uniq | tail -1)
+LATEST=$(bash scripts/get-latest-version.sh)
 
-if [ -z "${LATEST}" ]; then
-  echo "ERROR: Could not fetch version list from ${REPO_URL}" >&2
-  exit 1
-fi
 
 echo "Pinned:    ${PINNED}"
 echo "Latest:    ${LATEST}"

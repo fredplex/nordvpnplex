@@ -6,21 +6,14 @@ set -euo pipefail
 # currently published in the official Debian package repo.
 # Run from repo root.
 
-REPO_URL="https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/"
 CURRENT="$(grep "ARG NORDVPN_VERSION" Dockerfile | sed "s/ARG NORDVPN_VERSION='//;s/'$//")"
 
 echo "Pinned version : ${CURRENT}"
-echo "Checking       : ${REPO_URL}"
 echo ""
 
-AVAILABLE="$(curl -sf "${REPO_URL}" \
-  | grep -oE 'nordvpn_[0-9]+\.[0-9]+\.[0-9]+_amd64\.deb' \
-  | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' \
-  | sort -V \
-  | uniq)"
-
-if [[ -z "${AVAILABLE}" ]]; then
-  echo "ERROR: Could not fetch or parse the package list from the repo." >&2
+# Call get-latest-version.sh with --all to inspect available versions
+if ! AVAILABLE="$(bash scripts/get-latest-version.sh --all)"; then
+  echo "ERROR: Failed to retrieve version list." >&2
   exit 1
 fi
 
@@ -38,3 +31,4 @@ else
   echo "  To bump, run:"
   echo "    task bump NORDVPN_VERSION=${LATEST} IMAGE_VERSION=<new-image-version>"
 fi
+
