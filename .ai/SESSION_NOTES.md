@@ -5,6 +5,34 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-06-24 (current state audit & workflows unification)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Hygiene cleanup — pruned stale/unused boilerplate, moved old plans/debug files to archive | `ef7fcd6` |
+| 2 | Consolidated version scraping — created `scripts/get-latest-version.sh`, refactored checking scripts | `ef7fcd6` |
+| 3 | Parameterized `verify.sh` — supported custom IMAGE_REF, expected NORDVPN/IMAGE versions | `388f7c0` |
+| 4 | CI Test Unification — call `verify.sh` instead of duplicate tests in GHA workflows, added paths filter on main merges | `388f7c0` |
+| 5 | Aligned dev builds — updated scripts and Taskfile to build, tag, and push `:dev`, `:dev-<hash>`, `:dev-<version>`, and `:<image_version>-dev` (and bake `<image_version>-dev` in container metadata) | `31c49aa`, `537c9ae` |
+| 6 | Refactored Taskfile default command and preconditions to handle headless/tagless checkouts gracefully | `31c49aa` |
+| 7 | Documentation updates — updated all reference documentation and audit checklists | `537c9ae` |
+
+### Key decisions
+
+- **Consolidate Web scrapers into single script**: `scripts/get-latest-version.sh` now manages all HTML parsing and sorting of official Debian pool releases, providing a unified version source for dev builds and automatic daily checks.
+- **Unify CI and local smoke tests**: Calling `verify.sh` with parameterization ensures all verification gates (stateless and runtime) are running identical code locally and inside GitHub Actions runner environments.
+- **Bake aligned dev tags into container metadata**: Setting `IMAGE_VERSION` to `<image_version>-dev` inside development builds ensures container logs banner and labels cleanly identify dev builds while adhering to standard production metadata schemas.
+
+### Validation
+
+- Local: `task dev-build` built, tagged `:5.5.1-dev` and `:dev-${version}` successfully.
+- Local: `bash scripts/verify.sh fredplex/nordvpn:5.5.1-dev 5.1.0 5.5.1-dev` passed all 4 checks cleanly.
+- Remote: Pushed to remote branch `chore/audit-improvements`. Ready for owner final review.
+
+---
+
 ## Session Close — 2026-06-24 (native release notifications)
 
 ### Completed this session

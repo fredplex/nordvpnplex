@@ -6,11 +6,11 @@ Current work in progress.
 
 ## Current Status
 
-**Active**: **Current State Audit & Workflows Unification** (`chore/audit-improvements`)
+**Active**: None. Ready for owner's final review to merge `chore/audit-improvements` to `main`.
 - [x] Phase 1: Workspace Hygiene & Scraping Consolidation
 - [x] Phase 2: Workflow Refactoring & CI Unification
-- [ ] Phase 3: Local Dev tag Alignment & Taskfile UX
-- [ ] Phase 4: Reference Documentation Updates
+- [x] Phase 3: Local Dev tag Alignment & Taskfile UX
+- [x] Phase 4: Reference Documentation Updates
 
 Last completed: **Native release notifications** (2026-06-24, `chore/publish-native-notify`).
 
@@ -56,6 +56,7 @@ Last completed: **Native release notifications** (2026-06-24, `chore/publish-nat
 
 ## Recently Completed
 
+- **Current State Audit & Workflows Unification** (2026-06-24, `chore/audit-improvements`) — Hygiene cleanup (boilerplate removal, file archiving), package scraping consolidation (`get-latest-version.sh`), parameterized `verify.sh` for customizable runs, CI smoke test unification, local & CI dev tag alignment (`dev`, `dev-<hash>`, `dev-<version>`, and `<image_version>-dev`), and full reference documentation updates.
 - **Unified build & release pipeline** (2026-06-23, `feature/unified-builds`) — GHA-centric release on PR merge, daily checker with auto-dev build, manual prod/dev run options, and updated docs (§3.5, §4.4, §5)
 - **Dev build & publish workflow** (2026-06-23, `feature/dev-workflow`) — `task dev-build`, `dev-push`, `dev-latest`, `dev-clean`; `publish-dev.yml` CI workflow with smoke tests; WSL2 docs; cross-platform scripts
 - Owner user guide — `docs/user-guide.md` created (2026-06-23, commit d5e1002)
