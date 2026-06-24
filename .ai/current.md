@@ -10,6 +10,7 @@
 
 ### Recently shipped
 
+- Native release notifications (2026-06-24, `chore/publish-native-notify`) — `publish.yml` now ends with `gh release create` (built-in `GITHUB_TOKEN`, no secrets): a GitHub Release on success emails repo watchers; native GitHub Actions emails cover failures. Documented across all five product docs with explicit agent/human/GitHub roles. Owner one-time setup: Watch → Custom → Releases.
 - NordVPN 5.1.0 released (2026-06-24, PR #4 → merge `c52bd52`, bump `aa54713`) — published `fredplex/nordvpn:latest` + `:5.5.1` (NordVPN 5.1.0) to Docker Hub; git tag `5.5.1`. Validated end-to-end: CI smoke tests, dev runtime connect (Spain #189), real egress via Madrid exit IP, and the production release CD (`publish.yml` run `28110330929`).
 - bump.sh no longer clobbers `.ai/current.md` (2026-06-24, `fix/bump-preserve-current-md`, merge `8cc1082`) — removed the templated overwrite; version bumps now edit only Dockerfile, README.md, CLAUDE.md. This handoff doc is maintained by hand.
 - CI smoke-test fix (2026-06-24, `fix/publish-dev-smoke-test`, merge `3e80185`, fix `fc8a147`) — the "nordvpn version" smoke test in `publish-dev.yml` and `publish.yml` now runs `nordvpn --version` via `--entrypoint /bin/bash`, bypassing s6 init. Previously it ran through the default `/init` entrypoint without `NET_ADMIN`; `00-firewall` failed, s6 halted init, the CMD never ran, and the check failed with empty output (`expected '5.1.0', got ''`). Mirrors the existing `scripts/verify.sh:49` pattern.

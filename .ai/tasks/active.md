@@ -8,7 +8,9 @@ Current work in progress.
 
 **Active**: None.
 
-Last completed: **NordVPN 5.1.0 released** (2026-06-24, PR #4 → merge `c52bd52`) + `bump.sh` clobber fix (merge `8cc1082`). Image `fredplex/nordvpn:latest` / `:5.5.1` live on Docker Hub; git tag `5.5.1`. See `.ai/tasks/completed.md`.
+Last completed: **Native release notifications** (2026-06-24, `chore/publish-native-notify`) — `publish.yml` publishes a GitHub Release on success (emails watchers); native Actions emails on failure; no secrets. See `.ai/tasks/completed.md`.
+
+**Owner one-time action**: set repo **Watch → Custom → Releases** so the success emails arrive.
 
 **Watching**: next NordVPN release — the daily checker auto-builds/tests a dev image and opens a draft PR.
 

@@ -1,6 +1,6 @@
 # Publish notifications — go GitHub-native
 
-Created: 2026-06-24 | Status: Pending review
+Created: 2026-06-24 | Status: Complete (merged via `chore/publish-native-notify`; commits `7c61b2a` + `add8fdc`)
 
 ## Background
 

@@ -5,6 +5,61 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-06-24 (native release notifications)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | `publish.yml` — replaced `Tag git release` with `Publish GitHub Release` (`gh release create`, built-in `GITHUB_TOKEN`, no secrets) | `7c61b2a` |
+| 2 | Docs — release-notification design + agent/human/GitHub roles across all 5 product docs (architecture, build-and-publish §4.5, feature-state, quick-build-checklist, user-guide §7 Step 4) | `add8fdc` |
+| 3 | `.ai/plans/publish-notifications.md` — plan (archived on close) | `7c61b2a` |
+| 4 | Handoff docs (current.md, SESSION_NOTES, tasks, memory) | `this commit` |
+
+### Background
+
+After shipping 5.1.0, the owner asked how they'd be notified of workflow results. The
+production release was silent (a bare tag push notifies no one). An SMTP email step was
+drafted then **reverted** in favour of a GitHub-native approach.
+
+### Key decisions
+
+- **GitHub-native only, no secrets.** Success = `gh release create` publishes a GitHub
+  Release → native email to repo watchers. Failure = GitHub's built-in Actions emails.
+  No SMTP, no third-party action, no app password. Bonus: a real Releases page.
+- **Replace, don't add.** `gh release create` makes the tag **and** the Release, so it
+  replaces the old manual tag step. Dropped the `github.ref_type != 'tag'` guard so the
+  manual `task release` path also notifies; `gh release view` dedups.
+- **Lightweight tag accepted** (was annotated) — release notes carry the context.
+- **Skip backfilling** existing tags (`5.5.0`, `5.5.1`) into Releases — only future
+  releases get a Release object.
+
+### Roles captured in docs (agent / human / GitHub)
+
+- **Agent**: implements on a branch, shows diffs, never merges/pushes without approval;
+  receives no notifications.
+- **Human (owner)**: one-time Watch → Releases + confirm Actions failure emails; receives
+  and acts on success/failure emails; remains the release gate.
+- **GitHub**: runs the workflow, `gh release create` makes the tag + Release, emails
+  watchers on release and the owner on failure.
+
+### Validation
+
+- `bash -n` on the release step: clean. Consistency grep: no stale "pushes Git Tag back"
+  wording remains in the five docs.
+- **Pending owner action**: set **Watch → Custom → Releases** so the success emails
+  arrive. End-to-end proof comes on the next real release (or a manual `publish.yml`
+  dispatch), which will create a GitHub Release + email.
+
+### Fragile areas
+
+- **Notifications require owner opt-in**: without Watch → Releases, the success email is
+  not delivered (the workflow still succeeds and the Release still appears).
+- **Lightweight vs annotated tag**: future tooling that expects an annotated release tag
+  message should read the GitHub Release notes instead.
+
+---
+
 ## Session Close — 2026-06-24 (bump.sh fix + NordVPN 5.1.0 release)
 
 ### Completed this session
