@@ -173,7 +173,7 @@ The project separates NordVPN's client application version from the container pr
 | Build Type | Pushed Tags (Docker Hub) | `IMAGE_VERSION` inside container | Target `NORDVPN_VERSION` |
 |---|---|---|---|
 | **Production Release** | `:latest`, `:<IMAGE_VERSION>` | SemVer (e.g. `5.5.0`) | Pinned version from Dockerfile |
-| **Development Build** | `:dev`, `:dev-<git_hash>`, `:dev-<nordvpn_version>` | `dev-<git_hash>` | Pinned version (or manual input override) |
+| **Development Build** | `:dev`, `:dev-<git_hash>`, `:dev-<nordvpn_version>`, `:<image_version>-dev` | `:<image_version>-dev` (e.g. `5.5.0-dev`) | Pinned version (or manual input override) |
 | **Local Test Build** | (None / Local only) | `<git_hash>` (e.g. `ce02c0b`) | Pinned version |
 
 ### 3. Runtime & Metadata Representation

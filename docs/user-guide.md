@@ -37,7 +37,7 @@ the official Debian package repo, pinned to a specific version.
 flowchart TD
     A([NordVPN package repo]) -->|Daily GitHub Action\nor manual trigger| B[Check for new version]
     B -->|New version found| C[GHA: Build Dev Image & Verify]
-    C --> D[GHA: Push dev-x.y.z & dev-sha to Docker Hub]
+    C --> D[GHA: Push dev tags to Docker Hub]
     D --> E[GHA: Open draft PR\nwith dev image test links]
     E -->|Owner pulls dev image\ntests on Unraid| F[Owner Reviews Draft PR]
     F -->|PR Merged by Owner| G[GHA Release Pipeline:\nBuild Production & Verify]
@@ -51,11 +51,11 @@ flowchart TD
 | Step / Stage | Executed By | Purpose / Responsibility |
 |--------------|-------------|--------------------------|
 | **Version Detection** | GitHub Actions Cron (Daily) | Scrapes the NordVPN repo to detect if a new package exists. |
-| **Dev Image & Smoke Test** | GitHub Actions Workflow | Automatically builds, runs 3 smoke tests, and publishes the dev image on version detection. |
+| **Dev Image & Smoke Test** | GitHub Actions Workflow | Automatically builds, runs unified smoke tests (verify.sh), and publishes dev tags on version detection. |
 | **Draft PR Creation** | GitHub Actions Workflow | Bumps version configurations and opens a draft PR containing tests/instructions. |
-| **Verification & Testing** | Owner (Human) | Pulls the newly generated version-specific dev tag and tests it on a real Unraid system. |
+| **Verification & Testing** | Owner (Human) | Pulls the newly generated version-aligned dev tag (`:<image_version>-dev`) and tests it on a real Unraid system. |
 | **Release Approval** | Owner (Human Gate) | Merges the draft PR into the `main` branch to trigger production deployment. |
-| **Production Build & Test** | GitHub Actions Workflow | Rebuilds the production release image and runs 3 automated smoke tests. |
+| **Production Build & Test** | GitHub Actions Workflow | Rebuilds the production release image and runs unified smoke tests (verify.sh). |
 | **Docker Hub Release** | GitHub Actions Workflow | Publishes `:latest` and `:<IMAGE_VERSION>` production tags. |
 | **Git Release & Notification** | GitHub Actions Workflow | `gh release create` creates the version tag + a **GitHub Release**; publishing the Release emails repo watchers (the success notification). |
 | **Failure Notification** | GitHub | Native GitHub Actions emails notify the owner if any release step fails. |
@@ -73,7 +73,7 @@ flowchart TD
 
 | Gate | Why it exists / How it works |
 |------|------------------------------|
-| **Test the Dev Build** | Pull `fredplex/nordvpn:dev-<version>` to verify connectivity and compatibility before release. |
+| **Test the Dev Build** | Pull `fredplex/nordvpn:<image_version>-dev` to verify connectivity and compatibility before release. |
 | **PR Review and Merge** | You decide exactly when the release happens by reviewing the parameters and merging the PR. |
 | **Manual Fallback Release** | If bypass is needed, local `task release` commands can manually tag and push. |
 
@@ -96,9 +96,9 @@ All local operations use [Taskfile](https://taskfile.dev). Run from the repo roo
 | `task env` | Print all environment variables (alphabetical) | Debugging |
 | `task docker-push` | Push image with git-hash tag directly to Docker Hub | Advanced / bypass GA |
 | `task docker-publish` | Tag + push as `:latest` and `:<git-tag>` directly | Advanced / bypass GA |
-| `task dev-build` | Build `:dev` + `:dev-<hash>` (optional NORDVPN_VERSION override) | Dev testing |
-| `task dev-latest` | Auto-discover newest NordVPN + build `:dev` | Dev testing |
-| `task dev-push` | Push `:dev` + `:dev-<hash>` to Docker Hub | Dev testing |
+| `task dev-build` | Build `:dev`, `:dev-<hash>`, `:dev-<version>`, and `:<image_version>-dev` | Dev testing |
+| `task dev-latest` | Auto-discover newest NordVPN + build dev tags | Dev testing |
+| `task dev-push` | Push all dev tags to Docker Hub | Dev testing |
 | `task dev-clean` | Remove local `:dev` and `:dev-*` images | Cleanup |
 
 ---
@@ -294,7 +294,7 @@ What it does:
 
 **File:** `.github/workflows/publish.yml`
 **Triggers:**
-- **Push / Merge to `main`**: Fired automatically when a pull request is merged into `main`. The workflow checks if the `Dockerfile` version `ARG`s were modified in the commit; if so, it builds, runs 3 smoke tests, publishes production tags, and pushes the Git tag back to the repository.
+- **Push / Merge to `main`**: Fired automatically when a pull request is merged into `main`. The workflow checks if the `Dockerfile` version `ARG`s were modified in the commit (using `paths` filters); if so, it builds, runs unified smoke tests (`verify.sh`), publishes production tags, and pushes the Git tag back to the repository.
 - **Git Tag push**: Pushing a semver tag (e.g. `5.6.0`) will build, test, and publish that version directly.
 - **Manual Trigger**: Triggered via **Actions → Publish to Docker Hub → Run workflow** with optional version input overrides.
 
@@ -302,7 +302,7 @@ What it does:
 1. Resolves target versions (reads from tag name, manual input, or parsed from the `Dockerfile`).
 2. Runs Layer 2 checks to confirm an actual version modification is present (if triggered by branch push).
 3. Logs in to Docker Hub and builds the image.
-4. Runs 3 stateless smoke tests (IMAGE_VERSION label, `nordvpn --version`, iptables kill-switch).
+4. Runs unified smoke tests via `scripts/verify.sh` (validates `IMAGE_VERSION` label/variable, `nordvpn --version`, iptables kill-switch, and nordvpnd socket).
 5. If tests pass, pushes production tags:
    - `fredplex/nordvpn:latest`
    - `fredplex/nordvpn:<version>` (e.g. `fredplex/nordvpn:5.6.0`)
@@ -319,12 +319,13 @@ What it does:
 
 What it does:
 1. Resolves the NordVPN version (pinned, explicit override, or auto-discover via `"latest"`).
-2. Builds the image with `IMAGE_VERSION=dev-<sha>`.
+2. Builds the image with `IMAGE_VERSION=<image_version>-dev` (e.g. `5.5.1-dev`).
 3. Pushes tags to Docker Hub:
    - `fredplex/nordvpn:dev` (moving tag)
    - `fredplex/nordvpn:dev-<sha>` (immutable hash tag)
    - `fredplex/nordvpn:dev-<nordvpn_version>` (traceable version tag)
-4. Runs 3 smoke tests before reporting success.
+   - `fredplex/nordvpn:<image_version>-dev` (aligned dev tag)
+4. Runs unified smoke tests (`verify.sh`) before reporting success.
 
 **To trigger manually:**
 1. GitHub → **Actions** → **Publish Dev to Docker Hub**
@@ -349,7 +350,7 @@ The daily GitHub Action automatically detects new versions, publishes a dev cont
 **1. Test the Dev Build**
 - The draft PR template will link the auto-built dev image. Pull and test this image on Unraid or another test environment:
   ```bash
-  docker pull fredplex/nordvpn:dev-<version>
+  docker pull fredplex/nordvpn:<image_version>-dev
   ```
 - Verify the VPN connects and network routing works as expected.
 
@@ -362,7 +363,7 @@ The daily GitHub Action automatically detects new versions, publishes a dev cont
 
 **4. Monitor the Pipeline**
 - Merging the PR triggers the `Publish to Docker Hub` pipeline automatically. 
-- GHA builds the image, runs 3 smoke tests, publishes to Docker Hub, and pushes the Git tag back to the repository. Monitor this under **GitHub → Actions → Publish to Docker Hub**.
+- GHA builds the image, runs unified smoke tests via `verify.sh`, publishes to Docker Hub, and pushes the Git tag back to the repository. Monitor this under **GitHub → Actions → Publish to Docker Hub**.
 
 **5. Pull Git Tag**
 - Once the pipeline succeeds, run `git pull` locally to fetch the automatically created Git Release Tag:
@@ -571,19 +572,22 @@ separate from `:latest` and semver tags.
 
 | Command | Purpose |
 |---------|---------|
-| `task dev-build` | Build `:dev` + `:dev-<hash>` with pinned NordVPN version |
-| `task dev-build NORDVPN_VERSION=x.y.z` | Build `:dev` with a specific NordVPN version |
-| `task dev-latest` | Auto-discover newest NordVPN version + build `:dev` with it |
-| `task dev-push` | Push `:dev` + `:dev-<hash>` to Docker Hub |
+| `task dev-build` | Build `:dev`, `:dev-<hash>`, `:dev-<version>`, and `:<image_version>-dev` with pinned version |
+| `task dev-build NORDVPN_VERSION=x.y.z` | Build dev tags with a specific NordVPN version |
+| `task dev-latest` | Auto-discover newest NordVPN version + build dev tags with it |
+| `task dev-push` | Push all dev tags to Docker Hub |
 | `task dev-clean` | Remove all local `:dev` and `:dev-*` images |
 
-### Dual / Triple Tagging
+### Dev Tagging Conventions
 
-Every dev build produces three tags pointing to the same image:
+Every dev build produces four tags pointing to the same image:
 
 - **`:dev`** — moving tag, always the latest dev build. Use in Unraid templates for testing.
 - **`:dev-<hash>`** — immutable, traceable to the exact git commit hash.
 - **`:dev-<nordvpn_version>`** — version-traceable tag (e.g. `dev-4.6.0`), allowing easy validation of specific NordVPN package releases.
+- **`:<image_version>-dev`** — version-aligned dev tag (e.g. `5.5.1-dev`), matching production image version metadata structures.
+
+All four tags point to the same image. `IMAGE_VERSION` inside the container is set to `<image_version>-dev` (e.g. `5.5.1-dev`) so you can confirm you're running a dev build via `docker inspect`.
 
 ### Local workflow
 
@@ -617,15 +621,15 @@ Trigger a dev build without local Docker:
    - **Explicit** (e.g. `4.6.0`) — use that exact version
 4. Click **Run workflow**
 
-The workflow builds, runs smoke tests, and pushes `:dev` + `:dev-<sha>` to Docker Hub.
+The workflow builds, runs unified smoke tests via `verify.sh`, and pushes the 4 dev tags (including `:dev`, `:dev-<sha>`, `:dev-<version>`, and `:<image_version>-dev`) to Docker Hub.
 
 ### Consuming the dev image
 
 ```bash
-docker pull fredplex/nordvpn:dev
+docker pull fredplex/nordvpn:5.5.1-dev
 ```
 
-In Unraid: update your container template repository to `fredplex/nordvpn:dev`. Switch back
+In Unraid: update your container template repository to `fredplex/nordvpn:<image_version>-dev` (or `dev`). Switch back
 to `fredplex/nordvpn:latest` when done testing.
 
 ### Cleanup
@@ -643,5 +647,5 @@ task dev-clean
 | Smoke-test via CI | Actions → Publish Dev |
 | Official release | `task release` (production path) |
 
-> **Warning**: `:dev` is overwritten on every push. Not for production. Use `:dev-<hash>` if
+> **Warning**: `:dev` is overwritten on every push. Not for production. Use `:<image_version>-dev` or `:dev-<hash>` if
 > you need to pin to a specific dev build.

@@ -200,12 +200,12 @@ The execution is split into four phases:
 * [x] 3. Modify the `default` task precondition in `Taskfile.yml` to output commit info without requiring a git tag.
 * [x] 4. Verify all tasks function locally.
 
-### Phase 4: Reference Documentation Updates (Risk: Low)
+### Phase 4: Reference Documentation Updates (Risk: Low) - [COMPLETE]
 Update references to GHA triggers, unified testing, scraping helpers, and new dev tags:
-1. **[architecture.md](file:///c:/Users/fredp/Documents/GitHub/nordvpnplex/docs/architecture.md)**: Update the data flow diagram, build manifestation table, and gotchas list to document the new `paths` filter, `get-latest-version.sh` scraper, and `:dev-<version>`/`:<image_version>-dev` dev tags.
-2. **[build-and-publish.md](file:///c:/Users/fredp/Documents/GitHub/nordvpnplex/docs/build-and-publish.md)**: Document `image-version-dev` tagging, trigger path updates, `verify.sh` runner execution in CI, and options for manual workflows.
-3. **[quick-build-checklist.md](file:///c:/Users/fredp/Documents/GitHub/nordvpnplex/docs/quick-build-checklist.md)**: Align local dev/production quick checklists, adding references to `:dev-<version>` and `:<image_version>-dev` tagging verification commands.
-4. **[user-guide.md](file:///c:/Users/fredp/Documents/GitHub/nordvpnplex/docs/user-guide.md)**: Update flowcharts, task commands tables, dev build instructions, and GHA lists to reflect all consolidated and aligned logic.
+* [x] 1. **[architecture.md](file:///c:/Users/fredp/Documents/GitHub/nordvpnplex/docs/architecture.md)**: Update the data flow diagram, build manifestation table, and gotchas list to document the new `paths` filter, `get-latest-version.sh` scraper, and `:dev-<version>`/`:<image_version>-dev` dev tags.
+* [x] 2. **[build-and-publish.md](file:///c:/Users/fredp/Documents/GitHub/nordvpnplex/docs/build-and-publish.md)**: Document `image-version-dev` tagging, trigger path updates, `verify.sh` runner execution in CI, and options for manual workflows.
+* [x] 3. **[quick-build-checklist.md](file:///c:/Users/fredp/Documents/GitHub/nordvpnplex/docs/quick-build-checklist.md)**: Align local dev/production quick checklists, adding references to `:dev-<version>` and `:<image_version>-dev` tagging verification commands.
+* [x] 4. **[user-guide.md](file:///c:/Users/fredp/Documents/GitHub/nordvpnplex/docs/user-guide.md)**: Update flowcharts, task commands tables, dev build instructions, and GHA lists to reflect all consolidated and aligned logic.
 
 ---
 

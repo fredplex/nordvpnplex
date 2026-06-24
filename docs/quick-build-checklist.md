@@ -163,17 +163,17 @@ task dev-push
 ```
 
 **What it does:**
-- Tags the image as `fredplex/nordvpn:dev` (moving) and `fredplex/nordvpn:dev-<hash>` (immutable)
-- Sets `IMAGE_VERSION=dev-<hash>` inside the container
+- Tags the image as `fredplex/nordvpn:dev` (moving), `fredplex/nordvpn:dev-<hash>`, `fredplex/nordvpn:dev-<version>`, and `fredplex/nordvpn:<image_version>-dev` (aligned dev tag)
+- Sets `IMAGE_VERSION=<image_version>-dev` (e.g. `5.5.1-dev`) inside the container
 - Never touches `:latest` or creates git tags
 
 ### Consuming the dev image
 
 ```powershell
-docker pull fredplex/nordvpn:dev
+docker pull fredplex/nordvpn:5.5.1-dev
 ```
 
-In Unraid: change your container template repository to `fredplex/nordvpn:dev`.
+In Unraid: change your container template repository to `fredplex/nordvpn:<image_version>-dev` (or `dev`).
 Switch back to `fredplex/nordvpn:latest` when done testing.
 
 ### CI dev build (GitHub Actions)
@@ -181,7 +181,7 @@ Switch back to `fredplex/nordvpn:latest` when done testing.
 1. GitHub → **Actions** → **Publish Dev to Docker Hub**
 2. Click **Run workflow**
 3. NordVPN version: blank = pinned, `latest` = auto-discover, or type `x.y.z`
-4. Click **Run workflow** — builds, smoke-tests, pushes `:dev` + `:dev-<sha>`
+4. Click **Run workflow** — builds, runs unified smoke tests (verify.sh), pushes dev tags (including `:dev`, `:dev-<sha>`, `:dev-<version>`, and `:<image_version>-dev`)
 
 ### Cleanup
 
@@ -198,7 +198,7 @@ This is the standard automated flow after a new NordVPN version is detected:
 1. **Pull and Test the Dev Container**
    - Grab the tag from the draft PR:
      ```powershell
-     docker pull fredplex/nordvpn:dev-<version>
+     docker pull fredplex/nordvpn:<image_version>-dev
      ```
    - Verify that the container runs and connects successfully.
 

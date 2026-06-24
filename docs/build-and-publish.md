@@ -24,7 +24,7 @@ image appearing on Docker Hub. It is written for both humans and AI agents.
 ## 1. Architecture overview
 
 ```
-NordVPN package repo ──► Daily GitHub Action ──► Auto-builds Dev container (:dev-<version>)
+NordVPN package repo ──► Daily GitHub Action ──► Auto-builds Dev container (:dev-<version>, :<image_version>-dev)
                                                         │
                                                         ▼
                                                  Opens Draft PR
@@ -91,13 +91,13 @@ or similar errors.
 ┌─────────────────────────────────────────────────────────────────────┐
 │  DETECTION & DEV BUILD                                              │
 │  Daily Action check → new version found → Auto-builds Dev image    │
-│  → Smoke-tests dev image → Pushes :dev-<version> to Docker Hub      │
+│  → Smoke-tests dev image → Pushes dev tags to Docker Hub            │
 └─────────────────────────────┬───────────────────────────────────────┘
                               │ GHA opens draft PR
                               ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  PR REVIEW & TEST                                                   │
-│  Owner pulls & tests :dev-<version> on Unraid                      │
+│  Owner pulls & tests :<image_version>-dev on Unraid                 │
 │  Owner confirms versions in PR and merges                           │
 └─────────────────────────────┬───────────────────────────────────────┘
                               │ Human merges PR to main
@@ -114,10 +114,10 @@ or similar errors.
 
 **Detecting and building dev container**
 - GitHub Actions runs automatically every day at 08:00 UTC.
-- If a new version is found, it immediately builds and verifies a dev container, pushes it as `fredplex/nordvpn:dev-<version>`, and opens a **draft PR**.
+- If a new version is found, it immediately builds and verifies a dev container, pushes it under the dev tags (including `fredplex/nordvpn:dev-<version>` and `fredplex/nordvpn:<image_version>-dev`), and opens a **draft PR**.
 
 **Reviewing and testing (human)**
-- Pull and test the dev container on your local system or Unraid template: `docker pull fredplex/nordvpn:dev-<version>`.
+- Pull and test the dev container on your local system or Unraid template: `docker pull fredplex/nordvpn:<image_version>-dev`.
 - Confirm `IMAGE_VERSION` is correct in the PR (automation suggests a patch bump).
 - Skim the [NordVPN release notes](https://nordvpn.com/blog/nordvpn-linux-release-notes/) for anything breaking.
 - Merge the PR.
@@ -145,18 +145,18 @@ version) without going through the full release ceremony. Dev images are pushed 
 `:dev` tag, which is separate from `:latest` and semver tags. They never trigger the
 production publish workflow.
 
-#### Dual / Triple Tagging
+#### Dev Tagging Conventions
 
-Every dev build produces three tags pointing to the same image:
+Every dev build produces four tags pointing to the same image:
 
 | Tag | Purpose |
 |-----|---------|
 | `fredplex/nordvpn:dev` | Moving tag — always the latest dev build. Use in Unraid templates for testing. |
-| `fredplex/nordvpn:dev-<hash>` | Immutable tag — traceable to the exact commit. Useful for rollback or comparison. |
-| `fredplex/nordvpn:dev-<nordvpn_version>` | Version-traceable tag (e.g. `dev-4.6.0`) for validating specific releases. |
+| `fredplex/nordvpn:dev-<hash>` | Immutable tag — traceable to the exact git commit hash. Useful for rollback or comparison. |
+| `fredplex/nordvpn:dev-<nordvpn_version>` | Version-traceable tag (e.g. `dev-4.6.0`) for validating specific client releases. |
+| `fredplex/nordvpn:<image_version>-dev` | Image version-aligned dev tag (e.g. `5.5.1-dev`) that matches production image version metadata structures. |
 
-Both point to the same image. `IMAGE_VERSION` is set to `dev-<hash>` so you can confirm
-you're running a dev build via `docker inspect`.
+All four point to the same image. `IMAGE_VERSION` inside the container is set to `<image_version>-dev` (e.g. `5.5.1-dev`) so you can confirm you're running a dev build via `docker inspect`.
 
 > **Windows users**: Docker Desktop must run on the **WSL2 backend** with WSL integration
 > enabled, and Git Bash must be installed. The dev build scripts use `bash`, `curl`, `sed`,
@@ -186,7 +186,7 @@ and builds a dev image with that version. No manual version lookup needed.
 ```bash
 task dev-push
 ```
-Pushes both `:dev` and `:dev-<hash>`. Requires local Docker Hub login.
+Pushes all dev tags (`:dev`, `:dev-<hash>`, `:dev-<version>`, and `:<image_version>-dev`). Requires local Docker Hub login.
 
 **Clean up local dev images:**
 ```bash
@@ -269,20 +269,25 @@ Four workflows run automatically or on-demand. None of them push a production im
 
 ---
 
-### 4.3 Tag-triggered publish
+### 4.3 Tag-triggered / Main-branch triggered publish
 
 **File:** `.github/workflows/publish.yml`
-**Trigger:** Push of a git tag matching `[0-9]+.[0-9]+.[0-9]+` (e.g. `5.6.0`)
+**Trigger:**
+1. Push of a git tag matching `[0-9]+.[0-9]+.[0-9]+` (e.g. `5.6.0`)
+2. Merge or direct push to `main` branch that modifies `Dockerfile` (using `paths` filter)
+3. Manually triggered via GitHub Actions UI (`workflow_dispatch`)
+
 **What it does:**
-1. Logs in to Docker Hub using repo secrets
-2. Runs `docker build --platform linux/amd64` with `IMAGE_VERSION=<tag>` passed as a build arg
-   (so `/.version` inside the published image contains the semantic version, not a git hash)
-3. Pushes two tags to Docker Hub:
+1. Resolves release versions (either from the pushed tag, manual input, or pinned values in `Dockerfile`)
+2. Logs in to Docker Hub using repo secrets
+3. Builds the image locally as `temp-release`
+4. Runs unified smoke tests via `scripts/verify.sh` (validates `IMAGE_VERSION` environment variable / label, `nordvpn --version`, iptables kill-switch, and nordvpnd socket presence)
+5. Pushes two tags to Docker Hub on success:
    - `fredplex/nordvpn:latest`
    - `fredplex/nordvpn:<tag>` (e.g. `fredplex/nordvpn:5.6.0`)
-4. Creates a **GitHub Release** for the version tag — this is what sends the native success notification (see [§4.5 Release notifications](#45-release-notifications))
+6. Creates a **GitHub Release** for the version tag (only if not already existing) — this is what sends the native success notification (see [§4.5 Release notifications](#45-release-notifications))
 
-**Human action required:** Create and push the git tag (see Step 5 below).
+**Human action required:** Merge the draft PR (which modifies `Dockerfile`) or create/push a git tag.
 **Secrets needed:** `DOCKER_USERNAME` and `DOCKER_TOKEN` (see [Section 7](#7-one-time-setup-docker-hub-credentials-in-github)).
 
 > **Note on image version vs. git hash:**
@@ -298,15 +303,17 @@ Four workflows run automatically or on-demand. None of them push a production im
 ### 4.4 Manual dev publish
 
 **File:** `.github/workflows/publish-dev.yml`
-**Trigger:** Manual — GitHub Actions UI (`workflow_dispatch`)
+**Trigger:** Manual — GitHub Actions UI (`workflow_dispatch`) or reusable run
 **What it does:**
 1. Resolves the NordVPN version (pinned, explicit override, or auto-discover via `"latest"`)
 2. Logs in to Docker Hub
-3. Builds the image with `IMAGE_VERSION=dev-<sha>`
-4. Pushes two tags to Docker Hub:
+3. Builds the image with `IMAGE_VERSION=<image_version>-dev` (e.g. `5.5.1-dev`)
+4. Pushes four tags to Docker Hub:
    - `fredplex/nordvpn:dev` (moving — always the latest dev build)
-   - `fredplex/nordvpn:dev-<sha>` (immutable — traceable to the commit)
-5. Runs 3 stateless smoke tests: IMAGE_VERSION label, `nordvpn --version`, iptables kill-switch
+   - `fredplex/nordvpn:dev-<sha>` (immutable — traceable to the commit sha)
+   - `fredplex/nordvpn:dev-<nordvpn_version>` (version-traceable, e.g. `dev-4.6.0`)
+   - `fredplex/nordvpn:<image_version>-dev` (image version-aligned, e.g. `5.5.1-dev`)
+5. Runs unified smoke tests via `scripts/verify.sh` (validates `IMAGE_VERSION` label, `nordvpn --version`, iptables kill-switch, and nordvpnd socket presence)
 
 **Human action required:** Trigger manually from the Actions UI and choose the NordVPN version.
 **Secrets needed:** `DOCKER_USERNAME` and `DOCKER_TOKEN`.

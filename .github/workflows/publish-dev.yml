@@ -85,6 +85,7 @@ jobs:
           tags: |
             fredplex/nordvpn:dev
             fredplex/nordvpn:dev-${{ github.sha }}
+            fredplex/nordvpn:dev-${{ steps.version.outputs.version }}
             fredplex/nordvpn:${{ steps.version.outputs.image_version }}
 
       - name: Run unified smoke tests (verify.sh)
@@ -97,6 +98,7 @@ jobs:
           echo "  Dev image published successfully"
           echo "  Tag:    fredplex/nordvpn:dev"
           echo "  Tag:    fredplex/nordvpn:dev-${{ github.sha }}"
+          echo "  Tag:    fredplex/nordvpn:dev-${{ steps.version.outputs.version }}"
           echo "  Tag:    fredplex/nordvpn:${{ steps.version.outputs.image_version }}"
           echo "  NordVPN: ${{ steps.version.outputs.version }} (${{ steps.version.outputs.nord_source }})"
           echo "  IMAGE_VERSION: ${{ steps.version.outputs.image_version }}"
