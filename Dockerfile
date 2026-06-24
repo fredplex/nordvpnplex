@@ -1,8 +1,8 @@
 FROM ghcr.io/linuxserver/baseimage-ubuntu:noble
 LABEL maintainer="fredplexx@gmail.com"
 
-ARG NORDVPN_VERSION='4.5.0'
-ARG IMAGE_VERSION='5.5.0'
+ARG NORDVPN_VERSION='5.1.0'
+ARG IMAGE_VERSION='5.5.1'
 
 # OCI standard image labels — externally queryable without running the container:
 #   docker inspect <image> --format '{{json .Config.Labels}}'
