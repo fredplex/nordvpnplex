@@ -39,10 +39,11 @@ When the next bump lands: merge PR → GHA automatically runs release CD pipelin
 | 4 | `scripts/verify.sh` — added `--entrypoint /bin/bash` override for stateless checks to avoid s6 initialization and `$HOME` errors in restricted envs |
 | 5 | `.gitattributes` / file endings — normalised all text files to LF endings to prevent Windows CRLF shell script interpretation errors |
 | 6 | Documentation — updated flow charts, matrices, and checklists in `docs/build-and-publish.md`, `docs/user-guide.md`, and `docs/quick-build-checklist.md` |
+| 7 | Versioning design — added comprehensive versioning design summary in `docs/architecture.md` and updated `docs/feature-state.md` |
 
 ### Stopping point
 
-- Branch: `feature/unified-builds` — all commits pushed, ready to merge to `main`
+- Branch: `docs/versioning-summary` — ready to merge to `main`
 - Working tree: clean
 - Verification: `task docker-build` and `task verify` completed successfully using version 4.6.0 override (reverted back to 4.5.0 in code)
 
