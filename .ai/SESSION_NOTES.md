@@ -5,6 +5,40 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-06-24 (fix/publish-dev-smoke-test)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | `.github/workflows/publish-dev.yml` — "nordvpn version" smoke test now runs via `--entrypoint /bin/bash` to bypass s6 init | `fc8a147` |
+| 2 | `.github/workflows/publish.yml` — same fix on the production release CD (identical latent bug) | `fc8a147` |
+| 3 | `.ai/debug/publish-dev-smoke-test-failure.md` — root-cause investigation | `fc8a147` |
+| 4 | `.ai/plans/fix-publish-dev-smoke-test.md` — fix plan (2 phases) | `fc8a147` |
+| 5 | Merge to `main` | `3e80185` |
+| 6 | Handoff docs (current.md, SESSION_NOTES.md, tasks, memory gotcha) | `this commit` |
+
+### Root cause
+
+Today's daily checker detected NordVPN `5.1.0` and triggered `publish-dev`. The image built and pushed, but the "nordvpn version" smoke test failed: `expected '5.1.0', got ''`. The step ran `docker run --rm <image> nordvpn --version` through the image's default s6-overlay `/init` entrypoint **without `NET_ADMIN`**. `00-firewall`'s `iptables -P …` commands fail without that capability, s6 treats the failed `cont-init.d` script as fatal and halts before exec'ing the CMD, so `nordvpn --version` never ran → empty stdout → FAIL. Not a packaging problem; the image was fine.
+
+### Key decisions
+
+- **Fix in the test invocation, not the init script.** `00-firewall` must stay fail-closed at real runtime; softening it to satisfy a test would weaken the kill-switch invariant. The fix overrides the entrypoint instead, mirroring `scripts/verify.sh:49`.
+- **Fixed both workflows.** `publish.yml` (production release CD) had the identical untrapped pattern and would have failed the same way when the 5.1.0 PR is merged.
+
+### Validation
+
+- Local: `bash -n` syntax check of the edited command passed; diff reviewed (change is contained in the `run: |` block scalar, YAML structure intact). No `yaml`/`yq`/`actionlint` tooling in the local env.
+- **Pending (owner)**: end-to-end confirmation requires a real workflow run — **Publish Dev to Docker Hub** → `workflow_dispatch` with `nordvpn_version: latest`. This exercises the exact path that failed today.
+
+### Fragile areas
+
+- **s6 init + capabilities**: any `docker run` that must reach the CMD (e.g. `nordvpn --version`) without `--cap-add=NET_ADMIN` must override the entrypoint (`--entrypoint /bin/bash`) to bypass s6 init — otherwise `00-firewall` aborts init. Recorded in `.ai/memory/architecture-decisions.md` Gotchas.
+- **Debian repo package expiry** (unchanged): NordVPN purges old debs; default builds of deprecated versions can fail.
+
+---
+
 ## Session Close — 2026-06-23 (feature/unified-builds)
 
 ### Completed this session

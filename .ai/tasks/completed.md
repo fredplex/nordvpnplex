@@ -4,6 +4,18 @@ Archive of completed tasks with commit hashes.
 
 ---
 
+## 2026-06-24 — Fix CI nordvpn-version smoke test (fix/publish-dev-smoke-test)
+
+**Branch**: `fix/publish-dev-smoke-test` | **Fix commit**: `fc8a147` | **Merge**: `3e80185`
+
+- Root cause: the "nordvpn version" smoke test ran `nordvpn --version` through the image's default s6-overlay `/init` entrypoint without `NET_ADMIN`. `00-firewall`'s iptables commands fail without that capability, s6 halts init before the CMD runs, and the check failed with empty output (`expected '5.1.0', got ''`).
+- Fix: override the entrypoint (`--entrypoint /bin/bash … -c "nordvpn --version"`), mirroring `scripts/verify.sh:49`. Applied to both `publish-dev.yml` and `publish.yml` (production CD had the identical latent bug).
+- Added `.ai/debug/publish-dev-smoke-test-failure.md` (investigation) and `.ai/plans/fix-publish-dev-smoke-test.md` (plan).
+- Recorded the s6-init/capabilities gotcha in `.ai/memory/architecture-decisions.md`.
+- **Pending owner validation**: re-run **Publish Dev to Docker Hub** (`workflow_dispatch`, `nordvpn_version: latest`).
+
+---
+
 ## 2026-06-23 — Unified build & release pipeline (feature/unified-builds)
 
 **Branch**: `feature/unified-builds` | **Commits**: `3cbf9f5`…`ce02c0b`
