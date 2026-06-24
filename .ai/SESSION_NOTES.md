@@ -17,6 +17,7 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 | 4 | `scripts/verify.sh` — added `--entrypoint /bin/bash` override to bypass s6 init for stateless version check | `ce02c0b` |
 | 5 | `.gitattributes` — updated for script/file paths; normalized all files to LF endings | `64c5751` |
 | 6 | Documentation updates — `docs/build-and-publish.md`, `docs/user-guide.md`, `docs/quick-build-checklist.md` | `475ca72` |
+| 6b| Added Versioning Design guide to `docs/architecture.md` and updated `docs/feature-state.md` | `4e088e2` |
 | 7 | `.ai/tasks/` — updated task checklists and archives | `this commit` |
 | 8 | `.ai/current.md` & `SESSION_NOTES.md` — updated project state files | `this commit` |
 

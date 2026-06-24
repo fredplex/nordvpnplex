@@ -137,6 +137,39 @@ The kill switch fires **first** — traffic is blocked before the VPN establishe
 
 ---
 
+## Versioning Design
+
+The project separates NordVPN's client application version from the container project's release version. These versions manifest across different lifecycle stages (build, test, deploy, run).
+
+### 1. Version Identifiers
+
+| Variable | Scope | Description | Source of Truth |
+|---|---|---|---|
+| `NORDVPN_VERSION` | NordVPN Client | The version of the official NordVPN Linux package compiled into the image. | `Dockerfile`: `ARG NORDVPN_VERSION` |
+| `IMAGE_VERSION` | Project Release | The semantic version of this container release itself. | `Dockerfile`: `ARG IMAGE_VERSION` |
+
+### 2. Manifestations by Build Type
+
+| Build Type | Pushed Tags (Docker Hub) | `IMAGE_VERSION` inside container | Target `NORDVPN_VERSION` |
+|---|---|---|---|
+| **Production Release** | `:latest`, `:<IMAGE_VERSION>` | SemVer (e.g. `5.5.0`) | Pinned version from Dockerfile |
+| **Development Build** | `:dev`, `:dev-<git_hash>`, `:dev-<nordvpn_version>` | `dev-<git_hash>` | Pinned version (or manual input override) |
+| **Local Test Build** | (None / Local only) | `<git_hash>` (e.g. `ce02c0b`) | Pinned version |
+
+### 3. Runtime & Metadata Representation
+
+* **Container Logs Banner**: `cont-init.d/00-version` reads `ENV IMAGE_VERSION` at container boot and logs an ASCII banner showing the project version.
+* **OCI Annotations**: Standard OCI labels are written at compile-time, letting platforms inspect the project version without starting the container:
+  ```bash
+  docker inspect <image> --format '{{index .Config.Labels "org.opencontainers.image.version"}}'
+  ```
+* **Stateless Client Binary Check**: Running `nordvpn --version` with an overridden entrypoint directly returns the NordVPN package version:
+  ```bash
+  docker run --rm --entrypoint /bin/bash <image> -c "nordvpn --version"
+  ```
+
+---
+
 ## Operational Logging
 
 - `cont-init.d/00-version` prints the IMAGE_VERSION banner early in startup logs.
