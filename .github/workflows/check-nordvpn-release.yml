@@ -27,18 +27,8 @@ jobs:
       - name: Check for new NordVPN version
         id: check
         run: |
-          REPO_URL="https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/"
           CURRENT=$(grep "ARG NORDVPN_VERSION" Dockerfile | sed "s/ARG NORDVPN_VERSION='//;s/'$//")
-
-          LATEST=$(curl -sf "${REPO_URL}" \
-            | grep -oE 'nordvpn_[0-9]+\.[0-9]+\.[0-9]+_amd64\.deb' \
-            | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' \
-            | sort -V | uniq | tail -1)
-
-          if [[ -z "${LATEST}" ]]; then
-            echo "ERROR: Could not fetch version list from ${REPO_URL}" >&2
-            exit 1
-          fi
+          LATEST=$(bash scripts/get-latest-version.sh)
 
           echo "current=${CURRENT}" >> "$GITHUB_OUTPUT"
           echo "latest=${LATEST}" >> "$GITHUB_OUTPUT"
@@ -67,6 +57,7 @@ jobs:
     uses: ./.github/workflows/publish-dev.yml
     with:
       nordvpn_version: ${{ needs.check-version.outputs.latest_version }}
+      image_version: ${{ needs.check-version.outputs.suggested_image_version }}-dev
     secrets: inherit
 
   create-pr:

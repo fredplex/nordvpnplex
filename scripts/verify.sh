@@ -8,8 +8,11 @@ set -euo pipefail
 REGISTRY="fredplex"
 IMAGE="nordvpn"
 GIT_HASH="$(git log --format="%h" -n 1)"
-IMAGE_REF="${REGISTRY}/${IMAGE}:${GIT_HASH}"
-NORDVPN_VERSION="$(grep "ARG NORDVPN_VERSION" Dockerfile | sed "s/ARG NORDVPN_VERSION='//;s/'$//")"
+
+IMAGE_REF="${1:-${REGISTRY}/${IMAGE}:${GIT_HASH}}"
+NORDVPN_VERSION="${2:-$(grep "ARG NORDVPN_VERSION" Dockerfile | sed "s/ARG NORDVPN_VERSION='//;s/'$//")}"
+EXPECTED_IMAGE_VERSION="${3:-${GIT_HASH}}"
+
 CONTAINER="nordvpn_verify_$$"
 PASS=0
 FAIL=0
@@ -21,6 +24,7 @@ warn() { echo "  WARN  $1"; WARN=$((WARN + 1)); }
 
 echo "=== Verifying ${IMAGE_REF} ==="
 echo "    NordVPN target: ${NORDVPN_VERSION}"
+echo "    Image version target: ${EXPECTED_IMAGE_VERSION}"
 echo ""
 
 if ! docker image inspect "${IMAGE_REF}" > /dev/null 2>&1; then
@@ -33,16 +37,15 @@ fi
 # ---------------------------------------------------------------------------
 echo "--- Stateless checks ---"
 
-# 1. IMAGE_VERSION env must contain the git hash (local build behaviour — see AGENTS.md)
-#    Published images carry the semver tag; local builds carry the git hash.
+# 1. IMAGE_VERSION env must contain the expected version
 #    Uses docker inspect — no container startup required.
 ACTUAL_VERSION="$(docker inspect "${IMAGE_REF}" \
   --format '{{range .Config.Env}}{{println .}}{{end}}' \
   | grep '^IMAGE_VERSION=' | cut -d= -f2 || echo 'ERROR')"
-if [[ "${ACTUAL_VERSION}" == "${GIT_HASH}" ]]; then
-  pass "IMAGE_VERSION env = ${GIT_HASH}"
+if [[ "${ACTUAL_VERSION}" == "${EXPECTED_IMAGE_VERSION}" ]]; then
+  pass "IMAGE_VERSION env = ${EXPECTED_IMAGE_VERSION}"
 else
-  fail "IMAGE_VERSION env: expected '${GIT_HASH}', got '${ACTUAL_VERSION}'"
+  fail "IMAGE_VERSION env: expected '${EXPECTED_IMAGE_VERSION}', got '${ACTUAL_VERSION}'"
 fi
 
 # 2. nordvpn --version must report the pinned NORDVPN_VERSION

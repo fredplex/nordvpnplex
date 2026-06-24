@@ -12,11 +12,20 @@ on:
         description: 'NordVPN version (blank = use pinned, "latest" = auto-discover newest, or specify x.y.z)'
         required: false
         default: ''
+      image_version:
+        description: 'Image version override (blank = auto-calculate based on Dockerfile version + "-dev")'
+        required: false
+        default: ''
   workflow_call:
     inputs:
       nordvpn_version:
         type: string
         description: 'NordVPN version (blank = use pinned, "latest" = auto-discover newest, or specify x.y.z)'
+        required: false
+        default: ''
+      image_version:
+        type: string
+        description: 'Image version override (blank = auto-calculate based on Dockerfile version + "-dev")'
         required: false
         default: ''
 
@@ -28,29 +37,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Resolve NordVPN version
+      - name: Resolve NordVPN and Image versions
         id: version
         run: |
-          PINNED=$(grep "ARG NORDVPN_VERSION" Dockerfile | sed "s/ARG NORDVPN_VERSION='//;s/'$//")
+          PINNED_NORD=$(grep "ARG NORDVPN_VERSION" Dockerfile | sed "s/ARG NORDVPN_VERSION='//;s/'$//")
+          PINNED_IMG=$(grep "ARG IMAGE_VERSION" Dockerfile | sed "s/ARG IMAGE_VERSION='//;s/'$//")
 
+          # 1. Resolve NordVPN version
           if [[ "${{ inputs.nordvpn_version }}" == "latest" ]]; then
-            REPO_URL="https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/"
-            LATEST=$(curl -sf "${REPO_URL}" \
-              | grep -oE 'nordvpn_[0-9]+\.[0-9]+\.[0-9]+_amd64\.deb' \
-              | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' \
-              | sort -V | uniq | tail -1)
-            if [[ -z "${LATEST}" ]]; then
-              echo "ERROR: Could not fetch version list from ${REPO_URL}" >&2
-              exit 1
-            fi
+            LATEST=$(bash scripts/get-latest-version.sh)
             echo "version=${LATEST}" >> "$GITHUB_OUTPUT"
-            echo "source=latest available in repo" >> "$GITHUB_OUTPUT"
+            echo "nord_source=latest available in repo" >> "$GITHUB_OUTPUT"
           elif [[ -n "${{ inputs.nordvpn_version }}" ]]; then
             echo "version=${{ inputs.nordvpn_version }}" >> "$GITHUB_OUTPUT"
-            echo "source=manual override" >> "$GITHUB_OUTPUT"
+            echo "nord_source=manual override" >> "$GITHUB_OUTPUT"
           else
-            echo "version=${PINNED}" >> "$GITHUB_OUTPUT"
-            echo "source=pinned in Dockerfile" >> "$GITHUB_OUTPUT"
+            echo "version=${PINNED_NORD}" >> "$GITHUB_OUTPUT"
+            echo "nord_source=pinned in Dockerfile" >> "$GITHUB_OUTPUT"
+          fi
+
+          # 2. Resolve Image version (default: pinned + "-dev")
+          if [[ -n "${{ inputs.image_version }}" ]]; then
+            echo "image_version=${{ inputs.image_version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "image_version=${PINNED_IMG}-dev" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Log in to Docker Hub
@@ -71,54 +81,15 @@ jobs:
           push: true
           build-args: |
             NORDVPN_VERSION=${{ steps.version.outputs.version }}
-            IMAGE_VERSION=dev-${{ github.sha }}
+            IMAGE_VERSION=${{ steps.version.outputs.image_version }}
           tags: |
             fredplex/nordvpn:dev
             fredplex/nordvpn:dev-${{ github.sha }}
-            fredplex/nordvpn:dev-${{ steps.version.outputs.version }}
+            fredplex/nordvpn:${{ steps.version.outputs.image_version }}
 
-      - name: Smoke test — IMAGE_VERSION label
+      - name: Run unified smoke tests (verify.sh)
         run: |
-          docker pull fredplex/nordvpn:dev
-          ACTUAL=$(docker inspect fredplex/nordvpn:dev \
-            --format '{{index .Config.Labels "org.opencontainers.image.version"}}')
-          EXPECTED="dev-${{ github.sha }}"
-          if [[ "${ACTUAL}" == "${EXPECTED}" ]]; then
-            echo "PASS: IMAGE_VERSION label = ${ACTUAL}"
-          else
-            echo "FAIL: expected '${EXPECTED}', got '${ACTUAL}'" >&2
-            exit 1
-          fi
-
-      - name: Smoke test — nordvpn version
-        run: |
-          ACTUAL=$(docker run --rm --entrypoint /bin/bash fredplex/nordvpn:dev \
-            -c "nordvpn --version" 2>/dev/null \
-            | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-          EXPECTED="${{ steps.version.outputs.version }}"
-          if [[ "${ACTUAL}" == "${EXPECTED}" ]]; then
-            echo "PASS: nordvpn --version = ${ACTUAL}"
-          else
-            echo "FAIL: expected '${EXPECTED}', got '${ACTUAL}'" >&2
-            exit 1
-          fi
-
-      - name: Smoke test — iptables kill switch
-        run: |
-          POLICY=$(docker run --rm \
-            --cap-add=NET_ADMIN --cap-add=NET_RAW \
-            fredplex/nordvpn:dev \
-            /bin/bash -c \
-            'update-alternatives --set iptables /usr/sbin/iptables-legacy >/dev/null 2>&1 || true;
-             iptables -P OUTPUT DROP 2>/dev/null;
-             iptables -L OUTPUT 2>/dev/null | head -1' \
-            | grep -oE 'policy [A-Z]+' | awk '{print $2}')
-          if [[ "${POLICY}" == "DROP" ]]; then
-            echo "PASS: iptables OUTPUT policy = DROP (kill-switch functional)"
-          else
-            echo "FAIL: expected DROP, got '${POLICY}'" >&2
-            exit 1
-          fi
+          bash scripts/verify.sh "fredplex/nordvpn:dev" "${{ steps.version.outputs.version }}" "${{ steps.version.outputs.image_version }}"
 
       - name: Summary
         run: |
@@ -126,7 +97,7 @@ jobs:
           echo "  Dev image published successfully"
           echo "  Tag:    fredplex/nordvpn:dev"
           echo "  Tag:    fredplex/nordvpn:dev-${{ github.sha }}"
-          echo "  Tag:    fredplex/nordvpn:dev-${{ steps.version.outputs.version }}"
-          echo "  NordVPN: ${{ steps.version.outputs.version }} (${{ steps.version.outputs.source }})"
-          echo "  IMAGE_VERSION: dev-${{ github.sha }}"
+          echo "  Tag:    fredplex/nordvpn:${{ steps.version.outputs.image_version }}"
+          echo "  NordVPN: ${{ steps.version.outputs.version }} (${{ steps.version.outputs.nord_source }})"
+          echo "  IMAGE_VERSION: ${{ steps.version.outputs.image_version }}"
           echo "============================================"

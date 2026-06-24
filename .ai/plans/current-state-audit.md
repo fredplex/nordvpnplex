@@ -183,16 +183,16 @@ The execution is split into four phases:
 * [x] 4. Create `scripts/get-latest-version.sh` and refactor `check-version.sh` and `dev-latest.sh` to call it.
 * [x] 5. Verify version checking works locally.
 
-### Phase 2: Workflow Refactoring & CI Unification (Risk: Medium)
-1. Edit `scripts/verify.sh` to support dynamic image references:
+### Phase 2: Workflow Refactoring & CI Unification (Risk: Medium) - [COMPLETE]
+* [x] 1. Edit `scripts/verify.sh` to support dynamic image references:
    ```bash
    IMAGE_REF="${1:-${REGISTRY}/${IMAGE}:${GIT_HASH}}"
    ```
-2. Test `scripts/verify.sh` locally with both standard and custom overrides.
-3. Update `publish-dev.yml` to call `scripts/get-latest-version.sh` and run `scripts/verify.sh`.
-4. Update `publish.yml` to add the `paths` filter, remove duplicate tests, and call `scripts/verify.sh`.
-5. Update `check-nordvpn-release.yml` to call `scripts/get-latest-version.sh` and pass version parameters.
-6. Trigger manual dev workflows in GHA to verify the unified tests execute and pass cleanly.
+* [x] 2. Test `scripts/verify.sh` locally with both standard and custom overrides.
+* [x] 3. Update `publish-dev.yml` to call `scripts/get-latest-version.sh` and run `scripts/verify.sh`.
+* [x] 4. Update `publish.yml` to add the `paths` filter, remove duplicate tests, and call `scripts/verify.sh`.
+* [x] 5. Update `check-nordvpn-release.yml` to call `scripts/get-latest-version.sh` and pass version parameters.
+* [x] 6. Trigger manual dev workflows in GHA to verify the unified tests execute and pass cleanly.
 
 ### Phase 3: Local Dev tag Alignment & Taskfile UX (Risk: Low)
 1. Update `scripts/dev-build.sh` and `scripts/dev-latest.sh` to extract the compiled NordVPN version and apply the `:dev-${version}` and `:<image_version>-dev` tags.

@@ -8,7 +8,7 @@ Current work in progress.
 
 **Active**: **Current State Audit & Workflows Unification** (`chore/audit-improvements`)
 - [x] Phase 1: Workspace Hygiene & Scraping Consolidation
-- [ ] Phase 2: Workflow Refactoring & CI Unification
+- [x] Phase 2: Workflow Refactoring & CI Unification
 - [ ] Phase 3: Local Dev tag Alignment & Taskfile UX
 - [ ] Phase 4: Reference Documentation Updates
 
