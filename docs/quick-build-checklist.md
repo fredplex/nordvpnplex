@@ -11,6 +11,20 @@ One-page operator reference for common build and release tasks.
 
 ---
 
+## Notifications (one-time setup)
+
+Release notifications are GitHub-native — no SMTP, no third-party action, no secrets.
+Enable once:
+
+1. **Success emails** — on the repo, click **Watch → Custom → check "Releases"**. The
+   publish workflow ends by creating a **GitHub Release**, which emails Release watchers.
+2. **Failure emails** — **Settings → Notifications → Actions** → confirm failed-workflow
+   emails are enabled (default).
+
+Full reference: [user-guide.md §7 Step 4](user-guide.md#7-one-time-setup--docker-hub-credentials-in-github).
+
+---
+
 ## Test Build (Local)
 
 Use this for validating changes before publishing.
@@ -194,6 +208,7 @@ This is the standard automated flow after a new NordVPN version is detected:
 
 3. **Monitor the Pipeline**
    - Watch the build/smoke-tests/publish process under **GitHub → Actions → Publish to Docker Hub**.
+   - On success you receive a **GitHub Release** email; on failure, a GitHub Actions email. (One-time: **Watch → Custom → Releases** to enable the success email — no SMTP or secrets needed.)
 
 4. **Pull Git Tag**
    - Run a pull locally to sync the automatically created Git Release Tag:

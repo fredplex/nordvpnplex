@@ -42,7 +42,7 @@ flowchart TD
     E -->|Owner pulls dev image\ntests on Unraid| F[Owner Reviews Draft PR]
     F -->|PR Merged by Owner| G[GHA Release Pipeline:\nBuild Production & Verify]
     G --> H[GHA: Push :latest & :x.y.z to Docker Hub]
-    H --> I[GHA: Auto-create & push Git Release Tag]
+    H --> I[GHA: Publish GitHub Release\ntag + notification email]
     I --> J([Production Release Complete])
 ```
 
@@ -57,8 +57,17 @@ flowchart TD
 | **Release Approval** | Owner (Human Gate) | Merges the draft PR into the `main` branch to trigger production deployment. |
 | **Production Build & Test** | GitHub Actions Workflow | Rebuilds the production release image and runs 3 automated smoke tests. |
 | **Docker Hub Release** | GitHub Actions Workflow | Publishes `:latest` and `:<IMAGE_VERSION>` production tags. |
-| **Git Release Tagging** | GitHub Actions Workflow | Automatically creates the annotated Git Tag on `main` and pushes it back to the repo. |
+| **Git Release & Notification** | GitHub Actions Workflow | `gh release create` creates the version tag + a **GitHub Release**; publishing the Release emails repo watchers (the success notification). |
+| **Failure Notification** | GitHub | Native GitHub Actions emails notify the owner if any release step fails. |
 | **Fallback Release** | Owner (Human CLI) | Pushing a tag locally (`task release`) still works to trigger production publish directly. |
+
+> **Notifications — agent / human / GitHub**: The **AI agent** only implements
+> release/workflow changes on a branch and never merges or pushes to remote without
+> approval — it does not receive notifications. **GitHub** publishes the Release and
+> sends the native emails. The **owner** receives the success (GitHub Release) and
+> failure (Actions) emails and decides the next action. One-time setup: **Watch →
+> Custom → Releases** (see [§7](#7-one-time-setup--docker-hub-credentials-in-github)).
+> No SMTP or extra secrets — `gh release create` uses the built-in `GITHUB_TOKEN`.
 
 ### Human gates — never automated away
 
@@ -297,9 +306,9 @@ What it does:
 5. If tests pass, pushes production tags:
    - `fredplex/nordvpn:latest`
    - `fredplex/nordvpn:<version>` (e.g. `fredplex/nordvpn:5.6.0`)
-6. Automatically creates the corresponding Git tag and pushes it back to the repo (if triggered by branch push or manual run).
+6. Creates a **GitHub Release** (version tag + release notes) via `gh release create` (auth: built-in `GITHUB_TOKEN`), which sends a native notification email to repo watchers. Workflow failures are emailed natively via GitHub Actions notifications. See [§7 Step 4](#7-one-time-setup--docker-hub-credentials-in-github).
 
-**Secrets needed:** `DOCKER_USERNAME` and `DOCKER_TOKEN`.
+**Secrets needed:** `DOCKER_USERNAME` and `DOCKER_TOKEN` (the Release step needs no extra secrets — it uses `GITHUB_TOKEN`).
 
 ---
 
@@ -470,6 +479,16 @@ Delete the test tag afterwards:
 git push --delete origin 0.0.1-test
 git tag -d 0.0.1-test
 ```
+
+### Step 4 — Enable release notifications (no secrets)
+
+Release notifications are GitHub-native — no SMTP server, no third-party action, no extra
+secrets. Enable them once:
+
+1. **Success emails** — on the repo, click **Watch → Custom → check "Releases"**. The
+   publish workflow ends by creating a **GitHub Release**, which emails Release watchers.
+2. **Failure emails** — **Settings → Notifications → Actions** → confirm failed-workflow
+   emails are enabled (default). These notify you if any release step fails.
 
 ---
 

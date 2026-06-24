@@ -35,8 +35,8 @@ NordVPN Debian repo ──► Daily GitHub Action (checks versions)
                                                         ├──────────────────────┐
                                                         │                      │
                                                         ▼                      ▼
-                                                    Docker Hub             Git Tag push
-                                              :latest, :<version>        (back to repo)
+                                                    Docker Hub          GitHub Release
+                                              :latest, :<version>     (tag + notify email)
 ```
 
 **Alternative release paths**:
@@ -127,6 +127,26 @@ The kill switch fires **first** — traffic is blocked before the VPN establishe
 **Decision**: Human review of the auto-created draft PR is the final release gate. GitHub Actions automates the build, test, tag, and publish steps *after* approval.
 **Rationale**: GHA checks versions daily, auto-builds & tests a dev image, and opens a draft PR only if those tests pass. This provides verification data *before* the owner merges. Merging the PR then triggers GHA to run CD, performing a final smoke test check before pushing to Docker Hub.
 **Consequences**: Pushes are fully automated, but still completely gated by the owner merging the PR. Manually tagging or running local `task release` is no longer the primary path (though retained as a fallback).
+
+### Release notifications — GitHub-native
+
+**Context**: A successful production release used to be silent — `publish.yml` ended by pushing a bare git tag, which notifies no one. The owner only learned a release happened by checking the Actions tab or Docker Hub.
+**Decision**: Use **GitHub-native** signals only — no SMTP, no third-party action, no secrets:
+- **Success** → `publish.yml` finishes with `gh release create` (auth: built-in `GITHUB_TOKEN`), which creates the tag **and** a GitHub Release. Publishing the Release triggers GitHub's native notification email to repo watchers.
+- **Failure** → GitHub's built-in **Actions** notifications email the run's actor / scheduled-workflow editor (Settings → Notifications → Actions).
+**Rationale**: Zero secret management (no SMTP/app password), no third-party action to trust or pin, and a real Releases page as a side benefit (version history + notes). Failures were already covered natively; only success needed a signal.
+**Consequences**:
+- The owner must opt in once: **Watch → Custom → Releases** to receive the success emails.
+- `gh release create` makes a **lightweight** tag (the previous step made an annotated tag); the release notes carry the equivalent context.
+- The step runs on both the merge-to-`main` and manual `task release` paths (`gh release view` dedups so re-runs don't error).
+
+**Roles for this flow**:
+
+| Actor | Responsibility |
+|-------|----------------|
+| **AI agent** | Implements the workflow + docs on a branch; shows diffs; never merges/pushes without owner approval. Does not receive or act on notifications. |
+| **Human (owner)** | One-time: enable Watch → Releases + confirm Actions failure emails. Ongoing: receives success/failure emails and decides next action; remains the release gate. |
+| **GitHub** | Runs `publish.yml`; `gh release create` makes the tag + Release; GitHub emails watchers on release publish and the actor/owner on workflow failure. No third-party service, no secrets. |
 
 ---
 

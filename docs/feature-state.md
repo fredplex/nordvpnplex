@@ -2,7 +2,7 @@
 
 Authoritative inventory of all features in **fredplex/nordvpn**.
 
-**Last Updated**: 2026-06-23
+**Last Updated**: 2026-06-24
 
 **Working copy**: `.ai/memory/project-state.md`
 
@@ -55,13 +55,14 @@ Authoritative inventory of all features in **fredplex/nordvpn**.
 | `task bump` | ✅ Implemented | Single-command version bump; verifies package exists first |
 | `task release` | ✅ Implemented | Creates annotated git tag + pushes (retained as local release fallback) |
 | GitHub Actions: build-validate | ✅ Implemented | `docker build` on PR → main; no push |
-| GitHub Actions: publish | ✅ Implemented | PR merge (main push), tag push, or manual: builds, tests, publishes to Docker Hub, auto-tags git |
+| GitHub Actions: publish | ✅ Implemented | PR merge (main push), tag push, or manual: builds, tests, publishes to Docker Hub, then creates a GitHub Release (tag + native notification) |
 | GitHub Actions: check-nordvpn-release | ✅ Implemented | Daily cron: check repo, auto-run dev build & verify, open draft PR if successful |
 | `task dev-build` | ✅ Implemented | Builds `:dev` + `:dev-<hash>`; optional NORDVPN_VERSION override |
 | `task dev-push` | ✅ Implemented | Pushes `:dev` + `:dev-<hash>` to Docker Hub |
 | `task dev-latest` | ✅ Implemented | Auto-discovers newest NordVPN version + builds dev image |
 | `task dev-clean` | ✅ Implemented | Removes local `:dev` and `:dev-*` images |
 | GitHub Actions: publish-dev | ✅ Implemented | Manual/Auto trigger: builds, tests, pushes `:dev`, `:dev-<sha>`, `:dev-<version>` |
+| Release notifications (native) | ✅ Implemented | `publish.yml` creates a GitHub Release on success (emails repo watchers); GitHub Actions emails the owner on workflow failure. No SMTP, no secrets — uses `GITHUB_TOKEN`. One-time: Watch → Releases |
 
 ---
 
@@ -75,6 +76,8 @@ Authoritative inventory of all features in **fredplex/nordvpn**.
 
 ## Recently Shipped
 
+- Native release notifications — 2026-06-24 (`publish.yml` publishes a GitHub Release on success → emails repo watchers; native GitHub Actions emails on failure; no SMTP, no secrets)
+- NordVPN 5.1.0 release — 2026-06-24 (image 5.5.1; `:latest` + `:5.5.1` on Docker Hub)
 - Unified release pipeline — 2026-06-23 (GHA-centric release on PR merge, daily cron version checker + dev build, manual dispatch, verify script entrypoint override, LF normalisation)
 - Version mechanism refactor — 2026-06-22 (removed `/.version`, added `ENV IMAGE_VERSION` + OCI labels, moved banner to `cont-init.d/00-version`)
 - Build/publish workflow — 2026-06-22 (added scripts/bump.sh, check-version.sh, verify.sh; Taskfile tasks; 3 GitHub Actions)
