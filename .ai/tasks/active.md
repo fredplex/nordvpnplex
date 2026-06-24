@@ -6,16 +6,11 @@ Current work in progress.
 
 ## Current Status
 
-**Active**: Fix CI `nordvpn version` smoke test (branch `fix/publish-dev-smoke-test`).
+**Active**: None.
 
-- Plan: `.ai/plans/fix-publish-dev-smoke-test.md`
-- Investigation: `.ai/debug/publish-dev-smoke-test-failure.md`
-- [x] Phase 1 — `publish-dev.yml` version smoke test bypasses s6 init via `--entrypoint /bin/bash`
-- [x] Phase 2 — same fix applied to `publish.yml` (production release CD had the identical latent bug)
-- [ ] Validate via CI re-run (manual `publish-dev` dispatch); local bash/diff checks pass
-- [ ] Commit + push (awaiting owner approval)
+Last completed: Fix CI `nordvpn version` smoke test (2026-06-24, branch `fix/publish-dev-smoke-test`, merge `3e80185`, fix `fc8a147`). See `.ai/tasks/completed.md`.
 
-Last completed: Unified build & release pipeline (2026-06-23, branch `feature/unified-builds`, commits `3cbf9f5`…`ce02c0b`).
+**Owner follow-up**: re-run **Publish Dev to Docker Hub** (`workflow_dispatch`, `nordvpn_version: latest`) to confirm the fix end-to-end, then proceed with the NordVPN 5.1.0 draft PR.
 
 ---
 
