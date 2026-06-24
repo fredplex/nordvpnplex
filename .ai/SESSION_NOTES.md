@@ -5,6 +5,42 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-06-24 (bump.sh fix + NordVPN 5.1.0 release)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | `scripts/bump.sh` — stop overwriting `.ai/current.md`; bumps now edit only Dockerfile/README/CLAUDE | `64208df` → merge `8cc1082` |
+| 2 | Closed stale auto PR #3 + branch (carried the clobbered current.md); re-ran checker → clean PR #4 | — |
+| 3 | Merged PR #4 (NordVPN 4.5.0 → 5.1.0, image 5.5.1) | `aa54713` → merge `c52bd52` |
+| 4 | `publish.yml` release CD — smoke tests pass, pushed `:latest` + `:5.5.1`, git tag `5.5.1` | run `28110330929` |
+| 5 | Handoff docs (current.md, SESSION_NOTES.md, tasks, project-state) | `this commit` |
+
+### What happened (sequence)
+
+1. The daily checker had failed earlier because `publish-dev`'s nordvpn-version smoke test ran through s6 init without `NET_ADMIN` (fixed earlier this session, `fc8a147`). Re-running the checker produced draft PR #3 — but `bump.sh` had **clobbered `.ai/current.md`** with a templated stub.
+2. Rather than patch the PR, we fixed the root cause: removed the `current.md` generation from `bump.sh` entirely (it's narrative handoff state, not a generated artifact). Merged to `main` first so the checker would use the fixed script.
+3. Closed PR #3, deleted `auto/nordvpn-5.1.0`, re-ran the checker → clean PR #4 (only Dockerfile/README/CLAUDE, +5/−5).
+4. Owner tested `dev-5.1.0`: container started clean, connected to Spain #189 (NordLynx/UDP), real egress confirmed via a Madrid exit IP (no leak).
+5. Merged PR #4 → `publish.yml` released: 3/3 smoke tests passed, `:latest` + `:5.5.1` pushed, git tag `5.5.1` created.
+
+### Key decisions
+
+- **`bump.sh` should not generate `.ai/current.md`.** It is human/agent-maintained handoff narrative; auto-templating it destroyed history and injected stale release instructions. The pinned version still lives in CLAUDE.md (which bump.sh maintains).
+- **Fix-then-regenerate over patch-the-PR.** Merging the bump.sh fix to `main` before re-running the checker gave a clean PR with no manual fixups.
+
+### Naming note
+
+- Git tag / Docker version tag = **IMAGE_VERSION = `5.5.1`**; bundled NordVPN client = **`5.1.0`**. Don't conflate them.
+
+### Fragile areas
+
+- **`.ai/current.md` is now hand-maintained on every bump** — bump.sh no longer touches it. After merging a release PR, update `current.md` + `CLAUDE.md` built date by hand (CLAUDE.md version line is still auto-bumped).
+- **s6 init + capabilities** (unchanged): stateless `docker run` checks must use `--entrypoint /bin/bash` to bypass `00-firewall` when `NET_ADMIN` isn't granted.
+
+---
+
 ## Session Close — 2026-06-24 (fix/publish-dev-smoke-test)
 
 ### Completed this session

@@ -2,7 +2,7 @@
 
 ## Active Initiative — None
 
-**Status**: Idle / Up to date at NordVPN 4.5.0
+**Status**: Idle / Up to date at NordVPN 5.1.0 (image 5.5.1)
 
 ### Proposed / awaiting approval
 
@@ -10,6 +10,8 @@
 
 ### Recently shipped
 
+- NordVPN 5.1.0 released (2026-06-24, PR #4 → merge `c52bd52`, bump `aa54713`) — published `fredplex/nordvpn:latest` + `:5.5.1` (NordVPN 5.1.0) to Docker Hub; git tag `5.5.1`. Validated end-to-end: CI smoke tests, dev runtime connect (Spain #189), real egress via Madrid exit IP, and the production release CD (`publish.yml` run `28110330929`).
+- bump.sh no longer clobbers `.ai/current.md` (2026-06-24, `fix/bump-preserve-current-md`, merge `8cc1082`) — removed the templated overwrite; version bumps now edit only Dockerfile, README.md, CLAUDE.md. This handoff doc is maintained by hand.
 - CI smoke-test fix (2026-06-24, `fix/publish-dev-smoke-test`, merge `3e80185`, fix `fc8a147`) — the "nordvpn version" smoke test in `publish-dev.yml` and `publish.yml` now runs `nordvpn --version` via `--entrypoint /bin/bash`, bypassing s6 init. Previously it ran through the default `/init` entrypoint without `NET_ADMIN`; `00-firewall` failed, s6 halted init, the CMD never ran, and the check failed with empty output (`expected '5.1.0', got ''`). Mirrors the existing `scripts/verify.sh:49` pattern.
 - Unified build & release pipeline (2026-06-23, `feature/unified-builds`) — GHA-centric release on PR merge, daily checker with auto-dev build, manual prod/dev run options, and updated docs (§3.5, §4.4, §5)
 - Dev build & publish workflow (2026-06-23, `feature/dev-workflow`) — `task dev-build`, `task dev-push`, `task dev-latest`, `task dev-clean`; new `publish-dev.yml` CI workflow with smoke tests; updated all product docs
@@ -22,12 +24,9 @@
 
 ### Next step
 
-**NordVPN 5.1.0 is available** (detected by the daily checker on 2026-06-24). The auto-dev build for it failed today on the smoke-test bug now fixed on `main`. To proceed:
+NordVPN 5.1.0 is shipped and live on Docker Hub. No active work.
 
-1. Re-run **Publish Dev to Docker Hub** (`workflow_dispatch`, `nordvpn_version: latest`) to confirm all three smoke tests pass on the corrected workflow.
-2. Once green, review/merge the NordVPN 5.1.0 draft PR → GHA runs the release CD (`publish.yml`, now also fixed) to tag, build, verify, and publish.
-
-Thereafter: watch for the next NordVPN release; the daily checker auto-builds & tests a dev image and opens a draft PR when an update is found.
+Watch for the next NordVPN release: the daily checker (`check-nordvpn-release.yml`) auto-builds & tests a dev image and opens a draft PR when an update is found. To ship: review/merge the draft PR → `publish.yml` builds, smoke-tests, pushes `:latest` + `:<image>`, and tags. After merging, hand-update this file + `CLAUDE.md` (bump.sh no longer writes `.ai/current.md`).
 
 ---
 
