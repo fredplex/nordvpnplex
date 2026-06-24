@@ -28,7 +28,7 @@ Full onboarding workflow: `.ai/workflows/onboarding.md`
 
 ## Constraints
 
-- **Never push to the remote** — owner pushes manually after verifying the local image
+- **Never push to the remote** — without explicit instruction
 - **Never bump the base image** (`ghcr.io/linuxserver/baseimage-ubuntu:noble`) without explicit instruction
 - **Never modify `Taskfile.yml`** without explicit instruction
 - Changelog entries go in `README.md` under `## Changelog`, newest first
