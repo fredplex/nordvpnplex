@@ -5,8 +5,9 @@ set -euo pipefail
 # Edits all version-pinned files in one shot. Run from repo root.
 # Does NOT commit, tag, build, or push — human reviews diff and proceeds manually.
 #
-# When run in CI (CI=true), .ai/current.md is set to "pending" state.
-# When run locally, .ai/current.md is set to "complete" state.
+# This script does NOT touch .ai/current.md. That handoff doc is maintained by
+# humans/agents during PR review and session close — it is narrative state, not a
+# generated artifact. The pinned version lives in CLAUDE.md (updated below).
 
 NORDVPN_VERSION="${1:?Usage: bash scripts/bump.sh <NORDVPN_VERSION> <IMAGE_VERSION>}"
 IMAGE_VERSION="${2:?Usage: bash scripts/bump.sh <NORDVPN_VERSION> <IMAGE_VERSION>}"
@@ -42,45 +43,8 @@ sed -i "s#> \*\*Current image:\*\*.*#> **Current image:** fredplex/nordvpn:${IMA
 # 3. CLAUDE.md — pinned version block
 sed -i "s#NordVPN: .*  |  Image tag: .*  |  Built: .*#NordVPN: ${NORDVPN_VERSION}  |  Image tag: fredplex/nordvpn:${IMAGE_VERSION}  |  Built: ${TODAY}#" CLAUDE.md
 
-# 4. .ai/current.md — content differs based on context
-if [[ "${CI:-false}" == "true" ]]; then
-  # Automated PR context: owner hasn't built yet
-  cat > .ai/current.md << HEREDOC
-# Current Session State
-
-## Status
-Pending build — NordVPN ${NORDVPN_VERSION} bump opened as draft PR
-
-## Last Action
-Automated PR opened on ${TODAY} for NordVPN ${NORDVPN_VERSION} / image ${IMAGE_VERSION}.
-
-## Next Action
-1. Review and merge PR auto/nordvpn-${NORDVPN_VERSION} (confirm IMAGE_VERSION first)
-2. Run: task docker-build && task verify
-3. git tag -a ${IMAGE_VERSION} -m "bump to NordVPN ${NORDVPN_VERSION}" && git push --tags
-
-## Open Issues
-- None
-HEREDOC
-else
-  # Local context: owner has built and verified
-  cat > .ai/current.md << HEREDOC
-# Current Session State
-
-## Status
-Idle / Up to date at NordVPN ${NORDVPN_VERSION}
-
-## Last Action
-Built and verified ${NORDVPN_VERSION} on ${TODAY}. Pushed as \`fredplex/nordvpn:${IMAGE_VERSION}\` + \`:latest\`.
-
-## Next Action
-Watch for NordVPN next release. Run version-bump workflow when available.
-
-## Open Issues
-- None
-HEREDOC
-fi
-
 echo "All files updated. Review the diff before committing:"
 echo ""
 git diff
+echo ""
+echo "Reminder: update .ai/current.md by hand to reflect this bump (handoff state)."
