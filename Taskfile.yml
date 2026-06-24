@@ -13,11 +13,8 @@ vars:
 tasks:
   default:
     cmds:
-      - echo 'Version {{.GIT_TAG}}'
-      - echo 'GIT Commit {{.GIT_HASH}}'
-    preconditions:
-      - sh: "[ '{{.GIT_TAG}}' != '<no value>' ]"
-        msg: "Variable .GIT_TAG is not set"
+      - 'echo "Version:    {{.GIT_TAG | default `(no tag on HEAD)`}}"'
+      - 'echo "GIT Commit: {{.GIT_HASH}}"'
     silent: true
   env:
     desc: |
@@ -68,12 +65,22 @@ tasks:
     deps:
       - dev-build
     desc: |
-            Push the :dev and :dev-<hash> tags to Docker Hub.
+            Push all dev tags (:dev, :dev-<hash>, :dev-<version>, :<image_version>-dev) to Docker Hub.
+    vars:
+      DF_NORDVPN:
+        sh: grep "ARG NORDVPN_VERSION" Dockerfile | sed "s/ARG NORDVPN_VERSION='//;s/'$//"
+      DF_IMAGE:
+        sh: grep "ARG IMAGE_VERSION" Dockerfile | sed "s/ARG IMAGE_VERSION='//;s/'$//"
+      NORD_VER: '{{.NORDVPN_VERSION | default .DF_NORDVPN}}'
     cmds:
       - docker push "{{.REGISTRY}}/{{.IMAGE}}:dev"
       - docker push "{{.REGISTRY}}/{{.IMAGE}}:dev-{{.GIT_HASH}}"
+      - docker push "{{.REGISTRY}}/{{.IMAGE}}:dev-{{.NORD_VER}}"
+      - docker push "{{.REGISTRY}}/{{.IMAGE}}:{{.DF_IMAGE}}-dev"
       - 'echo "Pushed: {{.REGISTRY}}/{{.IMAGE}}:dev"'
       - 'echo "Pushed: {{.REGISTRY}}/{{.IMAGE}}:dev-{{.GIT_HASH}}"'
+      - 'echo "Pushed: {{.REGISTRY}}/{{.IMAGE}}:dev-{{.NORD_VER}}"'
+      - 'echo "Pushed: {{.REGISTRY}}/{{.IMAGE}}:{{.DF_IMAGE}}-dev"'
 
   dev-latest:
     desc: |

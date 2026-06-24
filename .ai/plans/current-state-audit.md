@@ -194,11 +194,11 @@ The execution is split into four phases:
 * [x] 5. Update `check-nordvpn-release.yml` to call `scripts/get-latest-version.sh` and pass version parameters.
 * [x] 6. Trigger manual dev workflows in GHA to verify the unified tests execute and pass cleanly.
 
-### Phase 3: Local Dev tag Alignment & Taskfile UX (Risk: Low)
-1. Update `scripts/dev-build.sh` and `scripts/dev-latest.sh` to extract the compiled NordVPN version and apply the `:dev-${version}` and `:<image_version>-dev` tags.
-2. Update `Taskfile.yml`'s `dev-push` to push the new tags.
-3. Modify the `default` task precondition in `Taskfile.yml` to output commit info without requiring a git tag.
-4. Verify all tasks function locally.
+### Phase 3: Local Dev tag Alignment & Taskfile UX (Risk: Low) - [COMPLETE]
+* [x] 1. Update `scripts/dev-build.sh` and `scripts/dev-latest.sh` to extract the compiled NordVPN version and apply the `:dev-${version}` and `:<image_version>-dev` tags.
+* [x] 2. Update `Taskfile.yml`'s `dev-push` to push the new tags.
+* [x] 3. Modify the `default` task precondition in `Taskfile.yml` to output commit info without requiring a git tag.
+* [x] 4. Verify all tasks function locally.
 
 ### Phase 4: Reference Documentation Updates (Risk: Low)
 Update references to GHA triggers, unified testing, scraping helpers, and new dev tags:
