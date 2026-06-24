@@ -4,6 +4,19 @@ Archive of completed tasks with commit hashes.
 
 ---
 
+## 2026-06-24 — Native release notifications (chore/publish-native-notify)
+
+**Branch**: `chore/publish-native-notify` | **Commits**: `7c61b2a` (workflow), `add8fdc` (docs)
+
+- Replaced `publish.yml`'s `Tag git release` step with `Publish GitHub Release` (`gh release create`, built-in `GITHUB_TOKEN`, no secrets). Creates the tag **and** a GitHub Release; publishing the Release sends GitHub's native email to repo watchers. Failures covered by native GitHub Actions emails.
+- Reverted an earlier SMTP draft (third-party action + 4 secrets) in favour of the native approach.
+- Documented the design + agent/human/GitHub roles across all 5 product docs (architecture.md decision block, build-and-publish.md §4.5, feature-state.md, quick-build-checklist.md, user-guide.md §7 Step 4).
+- Decisions: lightweight tag accepted (notes carry context); dropped the `ref_type != 'tag'` guard so `task release` also notifies; skip backfilling existing tags.
+- Plan: `.ai/plans/archive/publish-notifications.md`.
+- **Owner one-time**: Watch → Custom → Releases (so success emails arrive).
+
+---
+
 ## 2026-06-24 — NordVPN 5.1.0 release (auto/nordvpn-5.1.0, PR #4)
 
 **Branch**: `auto/nordvpn-5.1.0` | **Bump**: `aa54713` | **Merge**: `c52bd52` | **Release run**: `28110330929`

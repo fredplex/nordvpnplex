@@ -86,6 +86,12 @@ Container is stateless between restarts. The only persistent state is:
 **Rationale**: Fits the s6 pattern — init-time work belongs in cont-init.d. CMD should only start long-running processes.
 **Gotcha**: Banner appears before any s6 service starts, so it appears early in logs. This is correct.
 
+### Decision: Release notifications are GitHub-native (no SMTP)
+
+**Choice**: `publish.yml` ends with `gh release create` (auth: built-in `GITHUB_TOKEN`), which creates the tag + a GitHub Release. Success = native release email to repo watchers; failure = GitHub's built-in Actions emails.
+**Rationale**: No SMTP/app-password, no third-party action to pin/trust, no extra secrets. Real Releases page as a bonus. An SMTP step was drafted and deliberately reverted.
+**Gotcha**: The owner must opt in once (Watch → Custom → Releases) or the success email isn't delivered. `gh release create` makes a *lightweight* tag (the old step made an annotated one); release notes carry the context. The step runs on both merge and `task release` paths; `gh release view` dedups. (2026-06-24, `7c61b2a`)
+
 ### Decision: Human-in-the-loop publish gate
 
 **Choice**: Human review of the auto-created draft PR is the final release gate. GitHub Actions automates the build, test, tag, and publish steps *after* approval.

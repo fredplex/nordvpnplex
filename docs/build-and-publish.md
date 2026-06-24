@@ -13,6 +13,7 @@ image appearing on Docker Hub. It is written for both humans and AI agents.
 3. [Complete workflow at a glance](#3-complete-workflow-at-a-glance)
    - [3.5 Dev workflow](#35-dev-workflow)
 4. [Automated triggers (GitHub Actions)](#4-automated-triggers-github-actions)
+   - [4.5 Release notifications](#45-release-notifications)
 5. [Step-by-step: version bump and publish](#5-step-by-step-version-bump-and-publish)
 6. [Manual triggers](#6-manual-triggers)
 7. [One-time setup: Docker Hub credentials in GitHub](#7-one-time-setup-docker-hub-credentials-in-github)
@@ -37,7 +38,7 @@ NordVPN package repo ──► Daily GitHub Action ──► Auto-builds Dev con
                                          - Builds Prod image
                                          - Executes 3 smoke tests
                                          - Pushes :latest + :<tag> to Docker Hub
-                                         - Auto-creates & pushes Git Tag back to repo
+                                         - Publishes GitHub Release (creates tag + sends notification email)
 ```
 
 ### Human gates (deliberate — never automated away)
@@ -105,7 +106,7 @@ or similar errors.
 │  PRODUCTION RELEASE (GitHub Actions)                                │
 │  Merge triggers release pipeline → Builds Prod image                │
 │  → Executes 3 smoke tests → Pushes :latest & :<tag> to Docker Hub   │
-│  → Auto-pushes Git Tag back to repo                                 │
+│  → Publishes GitHub Release + email                                 │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -124,7 +125,7 @@ or similar errors.
 **Publishing and tagging (automated)**
 - Merging the PR triggers the release workflow on GitHub.
 - GHA builds the release image, verifies it with 3 smoke tests, and pushes `fredplex/nordvpn:latest` + `fredplex/nordvpn:<tag>` to Docker Hub.
-- GHA automatically tags the commit and pushes the tag back to the repository.
+- GHA publishes a **GitHub Release** (creating the version tag + release notes), which sends a native notification email to repo watchers. Workflow failures are emailed natively via GitHub Actions notifications. See [§4.5 Release notifications](#45-release-notifications).
 
 **If an agent is doing a manual bump (no PR)**
 - Agent runs `task bump NORDVPN_VERSION=x.x.x IMAGE_VERSION=y.y.y`.
@@ -279,6 +280,7 @@ Four workflows run automatically or on-demand. None of them push a production im
 3. Pushes two tags to Docker Hub:
    - `fredplex/nordvpn:latest`
    - `fredplex/nordvpn:<tag>` (e.g. `fredplex/nordvpn:5.6.0`)
+4. Creates a **GitHub Release** for the version tag — this is what sends the native success notification (see [§4.5 Release notifications](#45-release-notifications))
 
 **Human action required:** Create and push the git tag (see Step 5 below).
 **Secrets needed:** `DOCKER_USERNAME` and `DOCKER_TOKEN` (see [Section 7](#7-one-time-setup-docker-hub-credentials-in-github)).
@@ -315,6 +317,39 @@ Four workflows run automatically or on-demand. None of them push a production im
 - **Explicit version** (e.g. `4.6.0`) — uses that exact version
 
 For full dev workflow documentation, see [§3.5 Dev workflow](#35-dev-workflow).
+
+---
+
+### 4.5 Release notifications
+
+Notifications are **GitHub-native** — there is no SMTP server, no third-party email
+action, and no extra secrets. Two cases are covered:
+
+| Case | Mechanism | Who is notified |
+|------|-----------|-----------------|
+| **Success** | `publish.yml` ends with `gh release create`, publishing a **GitHub Release** (tag + notes). | Everyone **watching the repo for Releases** receives GitHub's native release email. |
+| **Failure** | GitHub's built-in **Actions** failure notifications. | The run's actor / scheduled-workflow editor (the owner) is emailed. |
+
+**Secrets needed:** None — `gh release create` authenticates with the built-in
+`GITHUB_TOKEN`.
+
+#### One-time owner setup
+
+1. **Success emails** — on the repo, click **Watch → Custom → check "Releases"** (or
+   "All Activity"). Without this, the native release email is not delivered.
+2. **Failure emails** — **github.com → Settings → Notifications → Actions** → confirm
+   email for failed workflows is enabled (default).
+
+#### Roles — agent / human / GitHub
+
+| Actor | Responsibility |
+|-------|----------------|
+| **AI agent** | Implements the workflow + docs on a branch; shows diffs; never merges/pushes to remote without owner approval. Does not receive or act on notifications. |
+| **Human (owner)** | One-time: enable Watch → Releases and confirm Actions failure emails. Ongoing: receives the success (Release) and failure (Actions) emails and decides next action; remains the release/merge gate. |
+| **GitHub** | Runs `publish.yml`; `gh release create` makes the tag + Release; GitHub emails watchers on release publish and the actor/owner on workflow failure. No third-party service, no secrets. |
+
+> Existing tags created before this change (e.g. `5.5.0`, `5.5.1`) are **not** retroactively
+> turned into Releases — only future releases get a Release object and a notification.
 
 ---
 

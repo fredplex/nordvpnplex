@@ -157,23 +157,24 @@ jobs:
             fredplex/nordvpn:latest
             fredplex/nordvpn:${{ steps.release_version.outputs.image_version }}
 
-      - name: Tag git release
-        if: steps.release_version.outputs.release_needed == 'true' && github.ref_type != 'tag'
+      # Creates the git tag AND a GitHub Release in one call. Publishing the
+      # Release is what sends GitHub's native notification email to repo watchers
+      # (Watch -> Custom -> Releases). Auth is the built-in GITHUB_TOKEN — no secrets.
+      - name: Publish GitHub Release
+        if: steps.release_version.outputs.release_needed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          TAG_NAME="${{ steps.release_version.outputs.image_version }}"
+          TAG="${{ steps.release_version.outputs.image_version }}"
           NORD_VER="${{ steps.release_version.outputs.nordvpn_version }}"
-          
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
-          git fetch --tags
-          if git tag -l | grep -qx "${TAG_NAME}"; then
-            echo "Git tag ${TAG_NAME} already exists. Skipping."
-          else
-            echo "Creating and pushing git tag ${TAG_NAME}..."
-            git tag -a "${TAG_NAME}" -m "bump to NordVPN ${NORD_VER}"
-            git push origin "${TAG_NAME}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists. Skipping."
+            exit 0
           fi
+          gh release create "$TAG" \
+            --target "${{ github.sha }}" \
+            --title "nordvpn $TAG — NordVPN ${NORD_VER}" \
+            --notes "Published \`fredplex/nordvpn:latest\` and \`:$TAG\` to Docker Hub. NordVPN client ${NORD_VER}. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: Summary
         if: steps.release_version.outputs.release_needed == 'true'
