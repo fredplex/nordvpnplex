@@ -4,6 +4,27 @@ Archive of completed tasks with commit hashes.
 
 ---
 
+## 2026-06-24 — NordVPN 5.1.0 release (auto/nordvpn-5.1.0, PR #4)
+
+**Branch**: `auto/nordvpn-5.1.0` | **Bump**: `aa54713` | **Merge**: `c52bd52` | **Release run**: `28110330929`
+
+- Bumped NordVPN `4.5.0 → 5.1.0`, IMAGE_VERSION `5.5.0 → 5.5.1` (Dockerfile, README.md, CLAUDE.md).
+- Owner tested `dev-5.1.0`: clean container start, connected to Spain #189 (NordLynx/UDP), real egress confirmed via Madrid exit IP (no leak).
+- Merged PR #4 → `publish.yml` release CD: 3/3 smoke tests passed, pushed `fredplex/nordvpn:latest` + `:5.5.1`, created git tag `5.5.1`.
+- Naming: git/Docker version tag = IMAGE_VERSION `5.5.1`; bundled NordVPN client = `5.1.0`.
+
+---
+
+## 2026-06-24 — Fix bump.sh clobbering .ai/current.md (fix/bump-preserve-current-md)
+
+**Branch**: `fix/bump-preserve-current-md` | **Fix**: `64208df` | **Merge**: `8cc1082`
+
+- `bump.sh` did `cat > .ai/current.md` with a templated stub (CI + local variants), overwriting the human-maintained handoff doc on every bump and injecting stale `git tag && git push` instructions.
+- Removed the current.md generation entirely; bumps now edit only the version-pinned files. Verified end-to-end: the regenerated checker PR (#4) contained only Dockerfile/README/CLAUDE.
+- Plan: `.ai/plans/fix-bump-preserve-current-md.md`.
+
+---
+
 ## 2026-06-24 — Fix CI nordvpn-version smoke test (fix/publish-dev-smoke-test)
 
 **Branch**: `fix/publish-dev-smoke-test` | **Fix commit**: `fc8a147` | **Merge**: `3e80185`

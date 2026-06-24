@@ -8,9 +8,9 @@ Current work in progress.
 
 **Active**: None.
 
-Last completed: Fix CI `nordvpn version` smoke test (2026-06-24, branch `fix/publish-dev-smoke-test`, merge `3e80185`, fix `fc8a147`). See `.ai/tasks/completed.md`.
+Last completed: **NordVPN 5.1.0 released** (2026-06-24, PR #4 → merge `c52bd52`) + `bump.sh` clobber fix (merge `8cc1082`). Image `fredplex/nordvpn:latest` / `:5.5.1` live on Docker Hub; git tag `5.5.1`. See `.ai/tasks/completed.md`.
 
-**Owner follow-up**: re-run **Publish Dev to Docker Hub** (`workflow_dispatch`, `nordvpn_version: latest`) to confirm the fix end-to-end, then proceed with the NordVPN 5.1.0 draft PR.
+**Watching**: next NordVPN release — the daily checker auto-builds/tests a dev image and opens a draft PR.
 
 ---
 

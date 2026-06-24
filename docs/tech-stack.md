@@ -2,7 +2,7 @@
 
 Technology choices, rationale, and dependency versions for **fredplex/nordvpn**.
 
-**Last Updated**: 2026-06-23
+**Last Updated**: 2026-06-24
 
 ---
 
@@ -17,7 +17,7 @@ Technology choices, rationale, and dependency versions for **fredplex/nordvpn**.
 | Technology | Version | Role | Rationale |
 |------------|---------|------|-----------|
 | `ghcr.io/linuxserver/baseimage-ubuntu:noble` | noble (Ubuntu 24.04) | Base image | Brings s6-overlay, well-maintained, sensible defaults |
-| NordVPN Linux client | 4.5.0 (pinned) | VPN client | Official Debian package from NordVPN's own repo |
+| NordVPN Linux client | 5.1.0 (pinned) | VPN client | Official Debian package from NordVPN's own repo |
 | WireGuard / NordLynx | included with NordVPN | VPN protocol (default) | Lower latency than OpenVPN |
 | OpenVPN | included with NordVPN | VPN protocol (alt) | Fallback; set via `TECHNOLOGY=OpenVPN` |
 | iptables / iptables-legacy | system | Kill switch | Drop all OUTPUT traffic before VPN connects |
@@ -73,6 +73,7 @@ No unit test framework — the project is shell scripts + a Dockerfile. The smok
 
 | Date | Change | Reason |
 |------|--------|--------|
+| 2026-06-24 | NordVPN 5.1.0, Image 5.5.1 | NordVPN client update (auto checker → PR #4) |
 | 2026-03-16 | NordVPN 4.5.0, Image 5.5.0 | NordVPN client update |
 | 2026-06-22 | `/.version` → `ENV IMAGE_VERSION` + OCI labels | Fix append bug, add standard queryable version |
 | 2026-06-22 | Added Taskfile tasks: verify, check-version, bump, release | Reduce manual toil |

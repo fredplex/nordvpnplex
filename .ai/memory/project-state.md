@@ -2,7 +2,7 @@
 
 Current product posture and approved scope for **nordvpn**.
 
-**Last Updated**: 2026-06-23
+**Last Updated**: 2026-06-24
 
 ---
 
@@ -47,7 +47,7 @@ Key areas:
 
 ### Currently Approved Mutations
 
-- `version bump` — via `task bump NORDVPN_VERSION=x IMAGE_VERSION=y` (edits Dockerfile, README.md, CLAUDE.md, .ai/current.md)
+- `version bump` — via `task bump NORDVPN_VERSION=x IMAGE_VERSION=y` (edits Dockerfile, README.md, CLAUDE.md only; `.ai/current.md` is hand-maintained — bump.sh no longer writes it, 2026-06-24)
 - `rootfs/ script edits` — editing cont-init.d, services.d, or usr/bin scripts
 - `documentation updates` — AGENTS.md, CLAUDE.md, docs/, .ai/
 - `GitHub Actions workflow edits` — when explicitly requested by owner
