@@ -92,7 +92,8 @@ jobs:
 
       - name: Smoke test — nordvpn version
         run: |
-          ACTUAL=$(docker run --rm fredplex/nordvpn:dev nordvpn --version 2>/dev/null \
+          ACTUAL=$(docker run --rm --entrypoint /bin/bash fredplex/nordvpn:dev \
+            -c "nordvpn --version" 2>/dev/null \
             | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
           EXPECTED="${{ steps.version.outputs.version }}"
           if [[ "${ACTUAL}" == "${EXPECTED}" ]]; then

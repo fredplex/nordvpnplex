@@ -6,7 +6,14 @@ Current work in progress.
 
 ## Current Status
 
-**Active**: None.
+**Active**: Fix CI `nordvpn version` smoke test (branch `fix/publish-dev-smoke-test`).
+
+- Plan: `.ai/plans/fix-publish-dev-smoke-test.md`
+- Investigation: `.ai/debug/publish-dev-smoke-test-failure.md`
+- [x] Phase 1 — `publish-dev.yml` version smoke test bypasses s6 init via `--entrypoint /bin/bash`
+- [x] Phase 2 — same fix applied to `publish.yml` (production release CD had the identical latent bug)
+- [ ] Validate via CI re-run (manual `publish-dev` dispatch); local bash/diff checks pass
+- [ ] Commit + push (awaiting owner approval)
 
 Last completed: Unified build & release pipeline (2026-06-23, branch `feature/unified-builds`, commits `3cbf9f5`…`ce02c0b`).
 
