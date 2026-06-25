@@ -5,6 +5,47 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-06-25 (Dockerfile optimization — planning session)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Onboarding pass — read AGENTS.md, all 4 core product docs, .ai/ workspace, current.md, active.md, SESSION_NOTES (last entry) | (read-only) |
+| 2 | Dockerfile review — initial analysis of the 52-line Dockerfile, produced summary of findings and recommendations | (read-only) |
+| 3 | Plan written — `.ai/plans/dockerfile-optimization.md` (initial version) | (untracked file) |
+| 4 | Deep analysis — re-read all 19 rootfs scripts, Taskfile.yml, verify.sh, bump.sh, dev-build.sh, get-latest-version.sh, all 3 GHA workflows, .gitattributes, .dockerignore, git ls-files --stage rootfs/ | (read-only) |
+| 5 | Plan revised — corrected 3 wrong recommendations, added 9 new findings, tiered into Tier 1 (clear wins) / Tier 2 (owner decisions) / Tier 3 (future) | (untracked file) |
+| 6 | Added "Complete Reasoning" section to the plan documenting the full two-pass analysis process and rationale for each finding | (untracked file) |
+
+### Key decisions
+
+- **`curl` is a runtime dependency, not build-only.** The initial plan recommended `apt-get purge -y curl` at the end of the install block. Deep analysis found `nord_watch:9` uses `curl -Is -m 30` to poll `CHECK_CONNECTION_URL` every 300s. Removing `curl` would silently break the watchdog. Recommendation retracted.
+- **The `chmod` block is necessary but suboptimal.** Initial plan called it "unnecessary overhead." Git index inspection revealed 18 of 19 rootfs files are `100644` (non-executable) — the `chmod` block is the only thing making them executable. Revised recommendation: set executable bits in git via `git update-index --chmod=+x`, then remove the `chmod` block. Rationale is "eliminate a fragile build step," not "remove gratuitous overhead."
+- **`apt-get upgrade` is a decision point, not a clear win.** AGENTS.md Key Boundaries explicitly prohibits bumping the base image without instruction. Given that constraint, `apt-get upgrade` may be the only security-patching mechanism. Moved to Tier 2 (owner decision) with full tradeoff documented.
+- **Tiering logic**: Tier 1 = no behavior change, no risk, no owner decision. Tier 2 = tradeoff or requires testing. Tier 3 = future/out of scope.
+- **No code changes made.** This was a planning session only. The plan awaits owner approval before any implementation begins.
+
+### Validation
+
+- Not run — no code changes were made (planning session only). The plan defines its own validation criteria (`task docker-build` + `task verify` + script executability check) for when implementation begins.
+
+### Fragile areas
+
+- **No branch was created.** The onboarding report was not explicitly confirmed before the user redirected to the Dockerfile review task. The plan file (`.ai/plans/dockerfile-optimization.md`) is an untracked file on `main`. The session-close commit will include it.
+- **Tier 2 `wireguard` removal is risky.** If approved, must test NordLynx connectivity (not just socket existence) — the NordVPN .deb may or may not auto-install `wireguard` as a dependency. Unknown without inspecting the package.
+- **`nord_watch` shebang uses `/usr/bin/bash`** (not `/bin/bash`) and does not use `with-contenv`. Works on Noble (merged-usr) and the env vars it reads are Docker ENV vars (not s6 container env vars). The plan recommends fixing the path to `/bin/bash` but NOT adding `with-contenv` — if it ain't broke, don't fix it.
+
+### Next steps (for the next session)
+
+1. Owner reviews `.ai/plans/dockerfile-optimization.md` and decides on Tier 2 items
+2. First write action: `git checkout -b chore/dockerfile-optimization` from `main`
+3. Implement Tier 1 phases (executable bits → shebangs → .dockerignore → Dockerfile refactor)
+4. Run `task docker-build` + `task verify`
+5. If Tier 2 approved, implement and re-validate
+
+---
+
 ## Session Close — 2026-06-24 (current state audit & workflows unification)
 
 ### Completed this session
