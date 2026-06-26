@@ -10,6 +10,9 @@ vars:
   GIT_TAG:
     sh: git tag --points-at HEAD
 
+env:
+  DOCKER_BUILDKIT: "1"
+
 tasks:
   default:
     cmds:
@@ -100,6 +103,19 @@ tasks:
       Checks /.version, nordvpn version, iptables kill-switch, and daemon socket.
     cmds:
       - bash scripts/verify.sh
+
+  verify-live:
+    desc: |
+      Real-token NordVPN connect + Spain egress test. Mandatory pre-release gate.
+      task verify uses a fake token and cannot validate tunnel connectivity; this can.
+      Usage: task verify-live TOKEN_FILE=~/.nordvpn-test-token
+    vars:
+      TOKEN_FILE: '{{.TOKEN_FILE | default ""}}'
+    preconditions:
+      - sh: '[ -n "{{.TOKEN_FILE}}" ]'
+        msg: "TOKEN_FILE is required. Usage: task verify-live TOKEN_FILE=/path/to/token"
+    cmds:
+      - TOKEN_FILE="{{.TOKEN_FILE}}" bash scripts/connect-test.sh "{{.REGISTRY}}/{{.IMAGE}}:{{.GIT_HASH}}" nordvpn_verify_live Spain
 
   check-version:
     desc: Check if a newer NordVPN version is available in the official package repo

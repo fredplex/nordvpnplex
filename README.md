@@ -29,7 +29,11 @@ This container was designed to be started first to provide a connection to other
 **NOTE**: More than the basic privileges are needed for NordVPN. With Docker 1.2 or newer, Podman, Kubernetes, etc. you can use the `--cap-add=NET_ADMIN,NET_RAW` option. Earlier versions, or with fig, and you'll have to run it in privileged mode.
 
 ## Starting an NordVPN instance
+
+> **Restart policy required**: The container startup chain (`nord_login → nord_config → nord_connect → nord_watch`) is fail-closed — if the connection becomes unrecoverable the container exits. Always run with `--restart=unless-stopped` so Docker automatically recovers it.
+
     docker run -ti --cap-add=NET_ADMIN --cap-add=NET_RAW --name vpn \
+               --restart=unless-stopped \
                -e TOKEN=f6f2bb45... \
                -e TECHNOLOGY=NordLynx -d ghcr.io/bubuntux/nordvpn
 
@@ -224,3 +228,7 @@ If you have any problems with or questions about this image, please contact me t
 # Disclaimer
 This project is independently developed for personal use, there is no affiliation with NordVpn or Nord Security companies,
 Nord Security companies are not responsible for and have no control over the nature, content and availability of this project.
+
+## Changelog
+
+- **2026-06-26** — Dockerfile hygiene (Phase 1): fix maintainer label, harden curl bootstrap fetch, add `ARG NORDVPN_RELEASE`, remove redundant `libc6`, `autoclean`→`clean`, fix shebang paths in `nord_config`/`nord_watch`, expand `.dockerignore`. Tooling: `DOCKER_BUILDKIT=1` enforced via Taskfile, `verify.sh` now MSYS/Git Bash safe, `task verify-live` added as a real-token pre-release gate (`scripts/connect-test.sh`). Docs: `--restart=unless-stopped` requirement documented.

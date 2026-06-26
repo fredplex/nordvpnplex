@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Prevent MSYS/Git Bash on Windows from mangling Unix paths in docker arguments.
+# These are no-ops on Linux and macOS.
+export MSYS_NO_PATHCONV=1
+export MSYS2_ARG_CONV_EXCL='*'
+
 # Usage: bash scripts/verify.sh
 # Smoke-tests the locally built image. Run from repo root after task docker-build.
 # Requires Docker with NET_ADMIN/NET_RAW capability support.

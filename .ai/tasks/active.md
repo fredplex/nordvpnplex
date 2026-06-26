@@ -6,16 +6,21 @@ Current work in progress.
 
 ## Current Status
 
-**Active**: Dockerfile optimization plan written — awaiting owner approval to implement.
-- [x] Deep analysis of Dockerfile + all rootfs scripts, build tooling, CI workflows, .gitattributes, .dockerignore, git index permissions
-- [x] Plan written: `.ai/plans/dockerfile-optimization.md` (Tier 1: 5 clear wins; Tier 2: 4 owner decisions; 3 corrections to initial analysis)
-- [ ] Owner reviews plan and decides on Tier 2 items
-- [ ] Create branch `chore/dockerfile-optimization` from `main`
-- [ ] Implement Tier 1 phases (executable bits → shebangs → .dockerignore → Dockerfile refactor)
-- [ ] Run `task docker-build` + `task verify`
-- [ ] (Conditional) Implement approved Tier 2 changes
+**Active**: Dockerfile optimization — implementation in progress on `chore/dockerfile-optimization`.
+Master plan: `.ai/plans/dockerfile-optimization-master-plan.md` (on `docs/dockerfile-security-review`).
 
-Last completed: **Dockerfile optimization plan** (2026-06-25, planning session).
+- [x] Deep analysis of Dockerfile + all rootfs scripts, build tooling, CI workflows, .gitattributes, .dockerignore, git index permissions
+- [x] Master plan written + all 7 owner questions answered (2026-06-26)
+- [x] Branch `chore/dockerfile-optimization` created from `main`
+- [x] **Phase 0** — baseline captured: build OK, size 110.2 MB, verify 3/4 (MSYS on Windows)
+- [x] **Phase 1** — zero-risk hygiene complete (2026-06-26): maintainer fix, ARG NORDVPN_RELEASE, curl hardening, libc6 removal, autoclean→clean, .dockerignore expanded, shebang fixes, verify.sh MSYS fix, DOCKER_BUILDKIT=1, task verify-live + scripts/connect-test.sh, README --restart note. Verify: 3 passed / 0 failed.
+- [ ] **Phase 2** — COPY --chmod=0755 (replace chmod block); verify exec bits inside image
+- [ ] **Phase 3** — base image digest pin
+- [ ] **Phase 4** — wireguard→wireguard-tools + explicit iptables; run `task verify-live`
+- [ ] **Phase 5** — HEALTHCHECK; observe healthy↔unhealthy transitions
+- [ ] **Phase 6** — documentation sync
+
+Last completed: **Phase 1 hygiene** (2026-06-26, `chore/dockerfile-optimization`).
 
 **Watching**: next NordVPN release — the daily checker auto-builds/tests a dev image and opens a draft PR.
 
