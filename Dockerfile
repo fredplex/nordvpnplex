@@ -40,4 +40,7 @@ COPY --chmod=0755 rootfs /
 
 ENV S6_CMD_WAIT_FOR_SERVICES=1
 
+HEALTHCHECK --interval=60s --timeout=10s --start-period=45s --retries=3 \
+    CMD nordvpn status | grep -q "Status: Connected" || exit 1
+
 CMD nord_login && nord_config && nord_connect && nord_watch

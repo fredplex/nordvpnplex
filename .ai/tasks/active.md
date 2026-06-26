@@ -17,10 +17,10 @@ Master plan: `.ai/plans/dockerfile-optimization-master-plan.md` (on `docs/docker
 - [x] **Phase 2** — COPY --chmod=0755 complete (2026-06-26): single COPY replaces COPY+chmod block; all scripts -rwxr-xr-x inside image confirmed; verify 3/0/1.
 - [x] **Phase 3** — base image digest pin complete (2026-06-26): noble@sha256:53411508... pinned; verify 3/0/1.
 - [x] **Phase 4** — wireguard→wireguard-tools + explicit iptables complete (2026-06-26): verify 3/0/1; verify-live PASS (Spain #195 Madrid, NordLynx, 77.243.86.224); size 110.2 MB.
-- [ ] **Phase 5** — HEALTHCHECK; observe healthy↔unhealthy transitions
+- [x] **Phase 5** — HEALTHCHECK complete (2026-06-26): interval=60s start-period=45s; healthy at t=5s (NordLynx); verify 3/0/1; verify-live PASS (Spain #170 Madrid, NordLynx, 192.145.39.2, 110.2 MB).
 - [ ] **Phase 6** — documentation sync
 
-Last completed: **Phase 1 hygiene** (2026-06-26, `chore/dockerfile-optimization`).
+Last completed: **Phase 5 HEALTHCHECK** (2026-06-26, `chore/dockerfile-optimization`).
 
 **Watching**: next NordVPN release — the daily checker auto-builds/tests a dev image and opens a draft PR.
 
