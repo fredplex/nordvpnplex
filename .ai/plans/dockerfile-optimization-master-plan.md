@@ -356,6 +356,16 @@ CMD nord_login && nord_config && nord_connect && nord_watch
   - `rootfs/usr/bin/nord_watch`: `#!/usr/bin/bash` → `#!/bin/bash`
   - (Both verified live. Per Plan B, do **not** add `with-contenv` to `nord_watch` — its env
     vars are Docker `ENV`, not s6 container env; "if it ain't broke, don't fix it.")
+- **`scripts/connect-test.sh`** + **`task verify-live`** [new, 2026-06-26] — promote the
+  real-token connect + egress harness from `.ai/experiments/artifacts/connect-test.sh` to
+  `scripts/connect-test.sh`; add a `task verify-live` wrapper in `Taskfile.yml`. This
+  formalizes the two-tier testing model:
+  - `task verify` — fast, credentialless, CI-safe smoke test (4 checks; ~30s)
+  - `task verify-live TOKEN_FILE=~/.nordvpn-test-token` — real NordVPN login, NordLynx connect,
+    Spain egress IP via `ipinfo.io`; the **mandatory pre-release gate** (run before `task release`)
+  The task reads the token from the file path the caller supplies via `TOKEN_FILE` (token never
+  printed, never committed). Token file lives outside the repo.
+  This is the second approved `Taskfile.yml` edit (Q4 `DOCKER_BUILDKIT=1` was the first).
 
 ---
 
@@ -382,6 +392,8 @@ add `ARG NORDVPN_RELEASE`. **Docs (Q2)**: add a `--restart=unless-stopped` note 
 README/user-guide — the restart policy is the `CMD` chain's recovery safety net. **Tooling (Q7)**:
 add `export MSYS_NO_PATHCONV=1` + `export MSYS2_ARG_CONV_EXCL='*'` near the top of
 `scripts/verify.sh` (no-ops on Linux/Mac) so `task verify` stops false-failing under Git Bash (F1).
+**Tooling (verify-live)**: promote `scripts/connect-test.sh` + add `task verify-live` wrapper in
+`Taskfile.yml` (second approved `Taskfile.yml` edit — see STEP 2 companion files).
 - **Why these are safe**: `libc6` is already in the base (no-op removal); `.dockerignore`
   entries are never `COPY`'d; `clean` only empties a cache the `rm` already clears.
 - **Breaking risks to watch**:
@@ -441,9 +453,9 @@ Changes: apply `--no-install-recommends`; remove `net-tools` + `iputils-ping`; *
   - **`task verify` is BLIND to this phase's failure modes (verified — STEP 1.5b), not merely
     "insufficient."** It connects with a *fake token* and only WARNs (never FAILs) on a missing
     daemon socket, so a broken daemon or a non-connecting tunnel still yields a **green** verify.
-    The **manual real-token connect + egress-IP test is the ONLY gate that can catch a Phase 4
-    regression, and is mandatory**: start with a real `TOKEN`, confirm `nordvpn status` =
-    *Connected*, and verify a real exit IP (the 5.1.0 Madrid-egress style check).
+    **`task verify-live TOKEN_FILE=<path>` is the ONLY gate that can catch a Phase 4 regression,
+    and is mandatory** (see STEP 2 companion files): run it against the built image, confirm
+    `nordvpn status` = *Connected*, and verify a real exit IP (the 5.1.0 Madrid-egress style check).
   - **`--no-install-recommends` on the `nordvpn` line** is the riskiest token. Fallback: drop
     the flag from that one line, keep it on the utility install.
   - **`wireguard` removal**: NordLynx may need `wg`. If the connect test fails, add
@@ -451,7 +463,7 @@ Changes: apply `--no-install-recommends`; remove `net-tools` + `iputils-ping`; *
   - **`net-tools`/`iputils-ping` removal** (DECIDED Q5: keep removed): only affects interactive `docker exec` debugging.
     Verified no `rootfs/` script uses them. Low risk; document that `ip`/`curl` remain for
     in-container diagnostics.
-- **Validate**: build + verify + **manual NordLynx connect + egress-IP check**.
+- **Validate**: `task docker-build` + `task verify` + **`task verify-live TOKEN_FILE=<path>`** (mandatory — `task verify` is blind to tunnel connectivity).
 
 ### Phase 5 — Runtime signals & owner decisions
 Changes: add `HEALTHCHECK` — **approved 2026-06-26 (Q3)**; validation step: confirm the Docker
@@ -469,8 +481,7 @@ cadence deferred to a future task — see Owner Decisions Log.)
     note it in the changelog.
   - **Removing `apt-get upgrade`** is only safe paired with periodic base refresh (digest
     re-pin or `docker build --pull`); otherwise CVEs accrue silently.
-- **Validate**: build + verify + observe `docker ps` health transitions (healthy after
-  connect; unhealthy if the tunnel is forced down).
+- **Validate**: `task docker-build` + `task verify` + **`task verify-live`** + observe `docker ps` health transitions (healthy after connect; unhealthy if the tunnel is forced down).
 
 ### Phase 6 — Documentation sync (final, doc-only — no behavior change)
 Run **last**, after the build changes land and validate, so docs describe what actually
@@ -488,7 +499,8 @@ shipped. Lowest risk. Each item below is tied to a concrete change from Phases 1
   Bash** (verify.sh sets `MSYS_NO_PATHCONV`; WSL2 no longer required *for verify* — dev-build
   scripts still use bash tooling); note the Dockerfile **requires BuildKit** (CI buildx already
   satisfies it; local Taskfile now sets `DOCKER_BUILDKIT=1`); add a Troubleshooting row for
-  "`COPY --chmod` unknown flag → enable BuildKit".
+  "`COPY --chmod` unknown flag → enable BuildKit"; add **pre-release checklist step**:
+  `task verify-live TOKEN_FILE=<path>` before `task release`.
 - **`quick-build-checklist.md`** — update the Windows prerequisite note (verify works in Git
   Bash now); add the BuildKit troubleshooting row.
 - **`tech-stack.md`** — Container Layer: `iptables` now **explicitly installed**; keep
@@ -499,8 +511,9 @@ shipped. Lowest risk. Each item below is tied to a concrete change from Phases 1
 - **`user-guide.md`** — add **`--restart=unless-stopped`** to the run guidance (Q2); note the
   container now **reports health** to Docker/Unraid (HEALTHCHECK); note `task verify` works
   under Git Bash (Q7).
-- **`testing.md`** — note `verify.sh` is now MSYS/Git-Bash safe; mention HEALTHCHECK as a
-  runtime health signal (distinct from the 4 `verify` checks).
+- **`testing.md`** — note `verify.sh` is now MSYS/Git-Bash safe; document `task verify-live`
+  as the second-tier pre-release gate (real token, real NordLynx egress, Spain — distinct from
+  the 4 credentialless `verify` checks); mention HEALTHCHECK as a runtime health signal.
 - **`feature-state.md`** — add HEALTHCHECK as a feature; record the Dockerfile hardening.
 
 **`.ai/`**
@@ -542,14 +555,14 @@ shipped. Lowest risk. Each item below is tied to a concrete change from Phases 1
 and the repo-root docs).
 **Explicitly out** (consensus): multi-stage build; non-root `USER`; base image *bump* (digest
 *pin* of the current noble is in-scope and distinct); NordVPN version bump; `Taskfile.yml`
-edits **except the approved `DOCKER_BUILDKIT=1` env (Q4)**; `rootfs/` logic changes (only
-shebang lines touched).
+edits **except the two approved changes (Q4 `DOCKER_BUILDKIT=1` env + `task verify-live` wrapper)**;
+`rootfs/` logic changes (only shebang lines touched).
 
 ## Validation — gate before "done"
 - `task docker-build` clean; `task verify` all 4 (`IMAGE_VERSION` env, `nordvpn --version`=5.1.0,
   iptables OUTPUT DROP, nordvpnd socket).
 - Phase 2: scripts are `-rwxr-xr-x` inside the image; container starts.
-- Phase 4: **manual** NordLynx connect + real egress IP (socket check alone is insufficient).
+- Phase 4: **`task verify-live TOKEN_FILE=<path>`** — real NordLynx connect + egress IP (`task verify` is blind to tunnel connectivity).
 - Phase 5: `docker ps` shows healthy↔unhealthy transitions correctly.
 - Phase 6: docs match the shipped `Dockerfile`/`Taskfile.yml`/`verify.sh`; all internal links
   resolve; no stale references to the chmod block, `# syntax` directive, or `wireguard` metapackage.
