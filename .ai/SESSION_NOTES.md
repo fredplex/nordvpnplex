@@ -5,6 +5,51 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-06-26 (Dockerfile optimization — implementation)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Phase 6 (verify-live formalization) added to master plan | `a0324e8` |
+| 2 | Phase 0 — baseline captured | `chore/dockerfile-optimization` |
+| 3 | Phase 1 — hygiene: maintainer fix, ARG NORDVPN_RELEASE, curl hardening, libc6 removal, autoclean→clean, .dockerignore expanded, shebang fixes, verify.sh MSYS fix, DOCKER_BUILDKIT=1, task verify-live + connect-test.sh, README --restart note | `ff6dc1d` |
+| 4 | Phase 2 — COPY --chmod=0755 (replaces chmod block; all 19 scripts confirmed executable) | `f113840` |
+| 5 | Phase 3 — base image digest pin (noble@sha256:53411508…) | `ce029b9` |
+| 6 | Phase 4 — wireguard→wireguard-tools, iptables explicit, net-tools/iputils-ping removed; verify-live PASS (Spain #195 Madrid, NordLynx, 77.243.86.224) | `6031fe0` |
+| 7 | Phase 5 — HEALTHCHECK (interval=60s, start-period=45s; healthy at t=5s; verify-live PASS Spain #170 Madrid, 192.145.39.2) | `b92d971` |
+| 8 | Phase 6 — documentation sync (all docs/, .ai/, AGENTS.md, CLAUDE.md, README.md) | this commit |
+
+### Key decisions
+
+- **Two-tier testing model**: `task verify` (credentialless, CI-safe) + `task verify-live` (real NordLynx egress, Spain). `task verify` is structurally blind to tunnel connectivity — `task verify-live` is the only pre-release gate that validates it. Both are now required before `task release`.
+- **COPY --chmod on Windows**: NTFS has no exec bit; `COPY --chmod=0755` stamps modes at copy time via BuildKit — deterministic on both Windows and Linux CI.
+- **`# syntax` directive rejected** (experiment F2): triggers 401 from Docker Hub for the BuildKit frontend in this environment. BuildKit satisfied by `DOCKER_BUILDKIT=1` in Taskfile env block.
+- **wireguard-tools validated** (Phase 4 verify-live): NordLynx connects successfully with `wireguard-tools` + without the `wireguard` metapackage.
+- **Base digest pin** (Phase 3): `noble@sha256:53411508…` makes the "never bump base without instruction" CLAUDE.md constraint enforceable. Future: adopt a base-refresh cadence.
+- **HEALTHCHECK** (Phase 5): healthy at t=5s with NordLynx (first health check runs immediately; NordLynx connects before the 45s start-period).
+
+### Validation
+
+- `task verify`: 3/0/1 on all phases (3 pass, 0 fail, 1 warn — expected on Windows with fake token)
+- `task verify-live`: PASS on Phases 4 and 5 (Spain, NordLynx, real egress confirmed)
+- `docker ps` health: `(healthy)` confirmed at t=5s
+
+### Fragile areas
+
+- **Base digest**: manually maintained; `noble@sha256:53411508…`; do not remove the pin.
+- **`# syntax` directive**: must NOT be added to the Dockerfile in this environment.
+- **Token for verify-live**: scratchpad path; never commit.
+- **Taskfile.yml**: only two pre-approved changes (DOCKER_BUILDKIT env + verify-live task).
+
+### Next steps
+
+1. Merge `chore/dockerfile-optimization` to `main` (owner approval required)
+2. Watch for next NordVPN release (daily checker handles detection)
+3. Future: design base-refresh cadence (deferred)
+
+---
+
 ## Session Close — 2026-06-25 (Dockerfile optimization — planning session)
 
 ### Completed this session

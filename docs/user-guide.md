@@ -29,6 +29,12 @@ The image is built on `ghcr.io/linuxserver/baseimage-ubuntu:noble` (linuxserver.
 Noble base, which includes the s6 process supervisor). NordVPN is installed at build time from
 the official Debian package repo, pinned to a specific version.
 
+**Required run flags**:
+- `--restart=unless-stopped` — the CMD chain (`nord_login → nord_config → nord_connect → nord_watch`) exits if the VPN becomes unrecoverable. Docker restart policy is the recovery mechanism.
+- `--cap-add=NET_ADMIN --cap-add=NET_RAW` — required for iptables kill switch and WireGuard.
+
+**Health reporting**: The container exposes a HEALTHCHECK (`nordvpn status | grep -q "Status: Connected"`). Unraid's dashboard and `docker ps` show `(healthy)` once the tunnel connects, and `(unhealthy)` if it drops. With NordLynx the container is typically healthy within 5 seconds.
+
 ---
 
 ## 2. How it works
@@ -91,8 +97,9 @@ All local operations use [Taskfile](https://taskfile.dev). Run from the repo roo
 | `task check-version` | Check NordVPN repo for newer versions | Before bumping |
 | `task bump NORDVPN_VERSION=x IMAGE_VERSION=y` | Apply version bump to all 5 locations | After confirming new version |
 | `task docker-build` | Build local test image (tagged with git hash) | After merging bump |
-| `task verify` | Smoke-test the local image (4 checks) | After docker-build |
-| `task release` | Create annotated git tag + push → triggers publish | After verify passes |
+| `task verify` | Smoke-test the local image (4 credentialless checks) | After docker-build |
+| `task verify-live TOKEN_FILE=<path>` | Real-token Spain egress test — mandatory pre-release gate | After verify passes, before release |
+| `task release` | Create annotated git tag + push → triggers publish | After verify-live passes |
 | `task env` | Print all environment variables (alphabetical) | Debugging |
 | `task docker-push` | Push image with git-hash tag directly to Docker Hub | Advanced / bypass GA |
 | `task docker-publish` | Tag + push as `:latest` and `:<git-tag>` directly | Advanced / bypass GA |
@@ -172,7 +179,7 @@ This is intentional — `task verify` confirms the hash is present.
 
 ### `task verify`
 
-Smoke-tests the locally built image with 4 checks:
+Smoke-tests the locally built image with 4 credentialless checks (fake token, no tunnel connection):
 
 | # | Check | How |
 |---|-------|-----|
@@ -180,6 +187,8 @@ Smoke-tests the locally built image with 4 checks:
 | 2 | `nordvpn --version` = `NORDVPN_VERSION` | One-shot container |
 | 3 | iptables OUTPUT policy = DROP (kill switch) | One-shot container with `NET_ADMIN` |
 | 4 | nordvpnd socket at `/run/nordvpn/nordvpnd.sock` | 12s runtime check |
+
+> **Windows users**: `task verify` now works natively in Git Bash. WSL2 is no longer required for this command (`verify.sh` handles the MSYS path-mangling issue internally). The dev-build scripts (`task dev-build`, `task dev-latest`) still require WSL2.
 
 Expected output on pass:
 ```
@@ -196,6 +205,22 @@ Expected output on pass:
 
 === 4 passed | 0 failed | 0 warnings ===
 ```
+
+---
+
+### `task verify-live TOKEN_FILE=<path>`
+
+The mandatory pre-release gate — runs after `task verify` passes. `task verify` cannot validate tunnel connectivity (it uses a fake token). This command:
+1. Reads the NordVPN token from `TOKEN_FILE` (never printed, never in logs)
+2. Starts the image with real credentials and `CONNECT=Spain`
+3. Polls `nordvpn status` until connected (up to 120s)
+4. Reports the Spain exit IP via `ipinfo.io`
+
+```bash
+task verify-live TOKEN_FILE=/path/to/your/nordvpn-token
+```
+
+> **Security**: The token must be in a file outside the repo. Never pass it as a CLI argument or env var that gets logged.
 
 ---
 
@@ -400,6 +425,7 @@ Merging to `main` will automatically trigger the release pipeline (which runs bu
 ```bash
 task docker-build
 task verify
+task verify-live TOKEN_FILE=/path/to/token   # Mandatory: real NordLynx egress gate
 task release     # Tags git locally and pushes, triggering publish workflow
 ```
 

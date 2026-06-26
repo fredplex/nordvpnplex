@@ -2,7 +2,7 @@
 
 Authoritative inventory of all features in **fredplex/nordvpn**.
 
-**Last Updated**: 2026-06-24
+**Last Updated**: 2026-06-26
 
 **Working copy**: `.ai/memory/project-state.md`
 
@@ -42,6 +42,8 @@ Authoritative inventory of all features in **fredplex/nordvpn**.
 | Version banner at startup | ✅ Implemented | `cont-init.d/00-version` prints `IMAGE_VERSION` |
 | OCI image labels | ✅ Implemented | `org.opencontainers.image.*` labels queryable via `docker inspect` |
 | `ENV IMAGE_VERSION` | ✅ Implemented | Available inside container at runtime; set at build time |
+| Docker HEALTHCHECK | ✅ Implemented | `--interval=60s --start-period=45s`; surfaces tunnel state to Docker engine and Unraid dashboard; transitions `starting → healthy` in ~5s with NordLynx |
+| Base image digest pin | ✅ Implemented | `noble@sha256:53411508…` — prevents silent base image changes; enforces the no-base-bump constraint |
 
 ---
 
@@ -50,7 +52,8 @@ Authoritative inventory of all features in **fredplex/nordvpn**.
 | Feature | Status | Notes |
 |---------|--------|-------|
 | `task docker-build` | ✅ Implemented | Builds local test image tagged with git hash |
-| `task verify` (smoke tests) | ✅ Implemented | 3 stateless checks (uses entrypoint override) + 1 runtime daemon socket check |
+| `task verify` (smoke tests) | ✅ Implemented | 3 stateless checks (uses entrypoint override) + 1 runtime daemon socket check; MSYS/Git-Bash safe on Windows (no WSL2 required for verify) |
+| `task verify-live` (real-token gate) | ✅ Implemented | Real NordVPN token + Spain egress test; reads token from file; mandatory pre-release gate; `scripts/connect-test.sh` |
 | `task check-version` | ✅ Implemented | Scrapes NordVPN Debian repo; shows latest 5 versions vs pinned |
 | `task bump` | ✅ Implemented | Single-command version bump; verifies package exists first |
 | `task release` | ✅ Implemented | Creates annotated git tag + pushes (retained as local release fallback) |
@@ -76,6 +79,16 @@ Authoritative inventory of all features in **fredplex/nordvpn**.
 
 ## Recently Shipped
 
+- **Dockerfile optimization (Phases 0–5)** — 2026-06-26 (`chore/dockerfile-optimization`):
+  - Base image digest-pinned (`noble@sha256:53411508…`)
+  - `wireguard` → `wireguard-tools`; `iptables` + `curl` made explicit; `net-tools`, `iputils-ping`, `libc6` removed
+  - `COPY --chmod=0755` replaces 10-line chmod block; `DOCKER_BUILDKIT=1` enforced in Taskfile
+  - HEALTHCHECK added — surfaces tunnel state to Docker/Unraid
+  - `task verify-live` + `scripts/connect-test.sh` formalised as mandatory pre-release gate
+  - `scripts/verify.sh` now MSYS/Git-Bash safe (no WSL2 required for verify)
+  - curl bootstrap fetch hardened (`--proto '=https' --tlsv1.2`)
+  - Shebangs fixed: `nord_config` (`with-contenv /bin/bash`), `nord_watch` (`/bin/bash`)
+  - `.dockerignore` expanded to exclude `.ai`, `docs`, `scripts`, `Taskfile.yml`, etc.
 - Native release notifications — 2026-06-24 (`publish.yml` publishes a GitHub Release on success → emails repo watchers; native GitHub Actions emails on failure; no SMTP, no secrets)
 - NordVPN 5.1.0 release — 2026-06-24 (image 5.5.1; `:latest` + `:5.5.1` on Docker Hub)
 - Unified release pipeline — 2026-06-23 (GHA-centric release on PR merge, daily cron version checker + dev build, manual dispatch, verify script entrypoint override, LF normalisation)

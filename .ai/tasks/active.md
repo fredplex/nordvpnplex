@@ -6,8 +6,7 @@ Current work in progress.
 
 ## Current Status
 
-**Active**: Dockerfile optimization — implementation in progress on `chore/dockerfile-optimization`.
-Master plan: `.ai/plans/dockerfile-optimization-master-plan.md` (on `docs/dockerfile-security-review`).
+**Active**: Dockerfile optimization — Phase 6 (documentation sync) in progress on `chore/dockerfile-optimization`.
 
 - [x] Deep analysis of Dockerfile + all rootfs scripts, build tooling, CI workflows, .gitattributes, .dockerignore, git index permissions
 - [x] Master plan written + all 7 owner questions answered (2026-06-26)
@@ -18,9 +17,9 @@ Master plan: `.ai/plans/dockerfile-optimization-master-plan.md` (on `docs/docker
 - [x] **Phase 3** — base image digest pin complete (2026-06-26): noble@sha256:53411508... pinned; verify 3/0/1.
 - [x] **Phase 4** — wireguard→wireguard-tools + explicit iptables complete (2026-06-26): verify 3/0/1; verify-live PASS (Spain #195 Madrid, NordLynx, 77.243.86.224); size 110.2 MB.
 - [x] **Phase 5** — HEALTHCHECK complete (2026-06-26): interval=60s start-period=45s; healthy at t=5s (NordLynx); verify 3/0/1; verify-live PASS (Spain #170 Madrid, NordLynx, 192.145.39.2, 110.2 MB).
-- [ ] **Phase 6** — documentation sync
+- [x] **Phase 6** — documentation sync complete (2026-06-26): all docs/, .ai/, AGENTS.md, CLAUDE.md, README.md updated to reflect shipped changes.
 
-Last completed: **Phase 5 HEALTHCHECK** (2026-06-26, `chore/dockerfile-optimization`).
+**Dockerfile optimization COMPLETE** — all 6 phases done on `chore/dockerfile-optimization`. Ready to merge to `main`.
 
 **Watching**: next NordVPN release — the daily checker auto-builds/tests a dev image and opens a draft PR.
 
@@ -29,6 +28,14 @@ Last completed: **Phase 5 HEALTHCHECK** (2026-06-26, `chore/dockerfile-optimizat
 ## Blocked Candidates
 
 *None.*
+
+## Future Work (deferred, not scheduled)
+
+### Base-refresh cadence
+
+**Goal**: Periodically re-pin the base digest (`noble@sha256:…`) + rebuild so OS security patches land without a manual base bump. Once this cadence exists, reconsider removing `apt-get upgrade` (currently kept as the security-patching mechanism).
+**Why deferred**: No urgency right now; the digest pin + `apt-get upgrade` is the current posture.
+**When to revisit**: When the base image tag diverges significantly from the pinned digest (check linuxserver.io release notes), or when a security advisory targets Ubuntu Noble base packages.
 
 ---
 

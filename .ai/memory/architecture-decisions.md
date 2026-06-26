@@ -66,7 +66,53 @@ Container is stateless between restarts. The only persistent state is:
 
 ---
 
-## Key Decisions
+## Key Decisions (2026-06-26 Dockerfile optimization)
+
+### Decision: COPY --chmod=0755 (permission model)
+
+**Choice**: Set executable bits in git via `git update-index --chmod=+x`; use `COPY --chmod=0755 rootfs /` instead of a 10-line `chmod` block.
+**Rationale**: BuildKit stamps mode at copy time — deterministic on Windows (NTFS) and Linux CI. Eliminates a fragile build step. Requires `DOCKER_BUILDKIT=1`.
+**Gotcha**: The `# syntax` directive must NOT be added to the Dockerfile — in this environment it triggers a 401 from Docker Hub for the frontend image. BuildKit is satisfied by `DOCKER_BUILDKIT=1` in Taskfile env or `docker/setup-buildx-action` in CI.
+
+### Decision: Base image digest pin
+
+**Choice**: `FROM ghcr.io/linuxserver/baseimage-ubuntu:noble@sha256:53411508…`
+**Rationale**: Makes the "never bump base without instruction" constraint enforceable — a tag re-target can no longer bypass it silently.
+**Gotcha**: Upgrading the base requires an explicit `@sha256:…` change. Future work: a base-refresh cadence (periodic re-pin + rebuild) to pick up OS patches.
+
+### Decision: wireguard → wireguard-tools; iptables explicit
+
+**Choice**: Replace `wireguard` with `wireguard-tools`; add `iptables` explicitly; remove `net-tools`, `iputils-ping`, `libc6`.
+**Rationale**: `wireguard-tools` is sufficient for NordLynx (NordVPN `.deb` brings kernel support). `iptables` made explicit documents the kill-switch dependency. Other packages are unused dead weight.
+**Gotcha**: Validated by `task verify-live` (Spain, NordLynx). Do not remove `wireguard-tools` without re-validating NordLynx.
+
+### Decision: --restart=unless-stopped required at runtime
+
+**Choice**: Document `--restart=unless-stopped` as a required run flag.
+**Rationale**: The CMD chain is fail-closed. Container exits on unrecoverable VPN failure. Docker restart policy is the intended recovery mechanism.
+**Gotcha**: Running without this means a VPN drop leaves users without network access permanently until manual restart.
+
+### Decision: HEALTHCHECK for tunnel health reporting
+
+**Choice**: `HEALTHCHECK --interval=60s --timeout=10s --start-period=45s --retries=3 CMD nordvpn status | grep -q "Status: Connected" || exit 1`
+**Rationale**: Surfaces real tunnel state to Docker engine and Unraid dashboard. With NordLynx, container is healthy in ~5s.
+**Gotcha**: HEALTHCHECK is a runtime signal, not a release gate. Use `task verify-live` as the release gate.
+
+### Decision: DOCKER_BUILDKIT=1 in Taskfile env
+
+**Choice**: Added `env: DOCKER_BUILDKIT: "1"` to Taskfile.yml top-level env block.
+**Rationale**: Makes BuildKit unconditional for all local builds. Closes the local/CI gap (CI already uses buildx).
+**Gotcha**: This is one of two approved Taskfile.yml changes (the other is `task verify-live`). Do not modify Taskfile.yml beyond these without explicit instruction.
+
+### Decision: task verify-live as formal second-tier pre-release gate
+
+**Choice**: `task verify-live TOKEN_FILE=<path>` wraps `scripts/connect-test.sh`. Required before `task release`.
+**Rationale**: `task verify` uses a fake token and cannot validate tunnel connectivity. `task verify-live` is the only gate that catches protocol-level regressions (e.g. wireguard→wireguard-tools, NordLynx connectivity).
+**Gotcha**: Token must come from a file outside the repo. Never print, echo, or log the token.
+
+---
+
+## Key Decisions (prior)
 
 ### Decision: OCI Labels + ENV for version (not `/.version` file)
 
@@ -109,5 +155,7 @@ Container is stateless between restarts. The only persistent state is:
 - **nordvpnd socket check takes 12s**: The verify script waits for the daemon to start. Expected.
 - **Running a CMD without NET_ADMIN halts at s6 init**: A bare `docker run <image> nordvpn --version` goes through the default s6 `/init` entrypoint. Without `--cap-add=NET_ADMIN`, `00-firewall`'s `iptables` commands fail, s6 aborts init, and the CMD never runs (empty output). To run the binary directly for a stateless check, override the entrypoint: `docker run --rm --entrypoint /bin/bash <image> -c "nordvpn --version"`. This is what `scripts/verify.sh:49` does, and what the CI smoke tests in `publish-dev.yml` / `publish.yml` must do (fixed 2026-06-24, `fc8a147`). The alternative — granting `--cap-add=NET_ADMIN` — is used by the kill-switch smoke check instead.
 - **`curl` is a runtime dependency, not build-only**: The Dockerfile installs `curl` to fetch the NordVPN repo `.deb` during build, but `nord_watch` (`rootfs/usr/bin/nord_watch:9`) also uses `curl -Is -m 30` at runtime to poll `CHECK_CONNECTION_URL` every 300s. Removing `curl` from the final image would silently break the watchdog. (Found 2026-06-25 during Dockerfile optimization deep analysis.)
-- **18 of 19 rootfs files are non-executable in git (`100644`)**: Only `nord_watch` has the executable bit (`100755`). The Dockerfile's `chmod` block is the only thing making the other scripts executable inside the container. To eliminate the `chmod` block, set the executable bit in git via `git update-index --chmod=+x` on each file. Note: `notification-fd` and `type` in `services.d/nordvpn/` are data files, not scripts — do not set the executable bit on them. (Found 2026-06-25.)
-- **Runtime dependencies of installed packages**: `libc6` is redundant (already in Ubuntu Noble base). `net-tools` and `iputils-ping` are unused by any rootfs script. `wireguard` may be redundant (the NordVPN `.deb` may auto-install it as a dependency — unverified). These findings are documented in `.ai/plans/dockerfile-optimization.md`. (Found 2026-06-25.)
+- **18 of 19 rootfs files are non-executable in git (`100644`)**: Only `nord_watch` had the executable bit. Fixed via `git update-index --chmod=+x` on all 17 scripts; `COPY --chmod=0755` now stamps permissions at build time. (Fixed 2026-06-26, Phase 2.)
+- **`curl` is a runtime dependency, not build-only**: `nord_watch:9` uses `curl -Is -m 30` at runtime to poll `CHECK_CONNECTION_URL`. Do not remove `curl` from the image.
+- **wireguard-tools is sufficient; wireguard metapackage not needed**: NordVPN `.deb` brings WireGuard kernel support. `wireguard-tools` provides the userspace tools. `wireguard` metapackage is unnecessary. (Validated 2026-06-26 via `task verify-live`.)
+- **`# syntax` directive must NOT be added to the Dockerfile**: In this environment it triggers a 401 from Docker Hub for the BuildKit frontend image. BuildKit is satisfied by `DOCKER_BUILDKIT=1` in Taskfile env or CI buildx.

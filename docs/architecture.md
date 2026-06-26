@@ -67,6 +67,8 @@ CMD: nord_login → nord_config → nord_connect → nord_watch
 
 The kill switch fires **first** — traffic is blocked before the VPN establishes. If the VPN fails to connect, traffic stays blocked.
 
+**Health reporting**: `HEALTHCHECK --interval=60s --timeout=10s --start-period=45s --retries=3 CMD nordvpn status | grep -q "Status: Connected" || exit 1` surfaces real tunnel state to Docker engine and the Unraid dashboard. The container transitions `starting → healthy` once the first `nordvpn status` confirms connection.
+
 ---
 
 ## Layer Responsibilities
@@ -148,6 +150,48 @@ The kill switch fires **first** — traffic is blocked before the VPN establishe
 | **Human (owner)** | One-time: enable Watch → Releases + confirm Actions failure emails. Ongoing: receives success/failure emails and decides next action; remains the release gate. |
 | **GitHub** | Runs `publish.yml`; `gh release create` makes the tag + Release; GitHub emails watchers on release publish and the actor/owner on workflow failure. No third-party service, no secrets. |
 
+### COPY --chmod=0755 (permission model)
+
+**Context**: The Dockerfile previously ran a multi-line `chmod +x` block after `COPY rootfs /` because 18 of 19 rootfs scripts were non-executable in git (`100644`). The block was fragile and NTFS-opaque.
+**Decision**: Set executable bits in git via `git update-index --chmod=+x` on all 17 scripts, then replace the whole `chmod` block with `COPY --chmod=0755 rootfs /`.
+**Rationale**: BuildKit stamps the mode at copy time — deterministic on both Windows (NTFS, which has no exec bit) and Linux CI. One line replaces ten. The git index is now the authoritative source of execute permission.
+**Consequences**: Requires `DOCKER_BUILDKIT=1` (see below). `Taskfile.yml` now sets `env: DOCKER_BUILDKIT: "1"` globally so local builds never regress.
+
+### Base image digest pin
+
+**Context**: `FROM ghcr.io/linuxserver/baseimage-ubuntu:noble` always resolves to whatever the tag points to at build time — a future linuxserver.io push could silently change the base.
+**Decision**: Pin the digest: `FROM ghcr.io/linuxserver/baseimage-ubuntu:noble@sha256:53411508...`
+**Rationale**: The CLAUDE.md constraint "never bump the base image without explicit instruction" was aspirational without the pin — a tag re-target would bypass it. The digest makes the constraint enforceable.
+**Consequences**: Upgrading the base requires an explicit `@sha256:…` update. This is intentional. Future work: a base-refresh cadence (periodic re-pin + rebuild) to pick up OS security patches — tracked as a future task.
+
+### wireguard → wireguard-tools (package rationalisation)
+
+**Context**: The Dockerfile installed the `wireguard` metapackage. The NordVPN `.deb` itself brings in WireGuard kernel support. The `wireguard` metapackage is broader than needed.
+**Decision**: Replace `wireguard` with `wireguard-tools` (userspace tools only). Also make `iptables` an explicit install (it was previously implicit via `nordvpn-release`).
+**Rationale**: `wireguard-tools` is sufficient for NordLynx. The `wireguard` metapackage installs unnecessary extras. Explicit `iptables` install documents the kill-switch dependency.
+**Consequences**: Validated by `task verify-live` (Spain egress, NordLynx, ~5s connect). Smaller attack surface.
+
+### --restart=unless-stopped requirement
+
+**Context**: The CMD chain (`nord_login → nord_config → nord_connect → nord_watch`) is fail-closed. If the VPN becomes unrecoverable the container exits. Without a restart policy, it stays down permanently.
+**Decision**: Document `--restart=unless-stopped` as a required run flag in README.md and user-guide.md.
+**Rationale**: Docker's restart policy is the recovery mechanism for transient failures. The container is designed to be re-started by Docker, not to self-heal indefinitely internally.
+**Consequences**: Running without `--restart=unless-stopped` means a VPN drop that exceeds the watchdog's retry budget leaves users without network access until manual restart.
+
+### HEALTHCHECK for Docker/Unraid health reporting
+
+**Context**: Docker had no visibility into whether the VPN tunnel was actually connected. `docker ps` showed `Up` even when the tunnel had failed internally.
+**Decision**: `HEALTHCHECK --interval=60s --timeout=10s --start-period=45s --retries=3 CMD nordvpn status | grep -q "Status: Connected" || exit 1`
+**Rationale**: Surfaces real tunnel state to Docker engine and Unraid's dashboard. When NordLynx connects in ~5s the container transitions `starting → healthy` well before the 45s start-period expires. After three consecutive failures it transitions `healthy → unhealthy`, signalling that action is needed.
+**Consequences**: Unraid operators can see container health at a glance. Docker Compose `depends_on: condition: service_healthy` can use this to gate dependent containers.
+
+### BuildKit enforced for local builds
+
+**Context**: `COPY --chmod=0755` is a BuildKit feature. Without `DOCKER_BUILDKIT=1`, the build falls back to the legacy builder which rejects the flag.
+**Decision**: Set `DOCKER_BUILDKIT: "1"` in Taskfile.yml's top-level `env:` block.
+**Rationale**: Makes BuildKit explicit and unconditional for all local builds. CI already uses `docker/setup-buildx-action` which satisfies BuildKit. The Taskfile env closes the local/CI gap.
+**Consequences**: Any local `task docker-build` will always use BuildKit. Developers without BuildKit support (Docker < 18.09 — very unlikely) would need to upgrade.
+
 ---
 
 ## Real-Time / Events
@@ -167,6 +211,7 @@ The project separates NordVPN's client application version from the container pr
 |---|---|---|---|
 | `NORDVPN_VERSION` | NordVPN Client | The version of the official NordVPN Linux package compiled into the image. | `Dockerfile`: `ARG NORDVPN_VERSION` |
 | `IMAGE_VERSION` | Project Release | The semantic version of this container release itself. | `Dockerfile`: `ARG IMAGE_VERSION` |
+| `NORDVPN_RELEASE` | Repo bootstrap | The version of the `nordvpn-release` Debian package that installs the NordVPN apt repo. Decoupled from `NORDVPN_VERSION` so the bootstrap package and the client package can move independently. | `Dockerfile`: `ARG NORDVPN_RELEASE` |
 
 ### 2. Manifestations by Build Type
 
@@ -205,3 +250,6 @@ The project separates NordVPN's client application version from the container pr
 - **No `/.version` file**: Older references to `/.version` in the container root are stale. Version is now `ENV IMAGE_VERSION` only.
 - **nordvpnd socket check takes 12s**: The verify script waits for the daemon to start before checking. Expected.
 - **`task release` requires a clean working tree and non-duplicate tag**: Always commit before running.
+- **`task verify` runs under Git Bash on Windows**: `scripts/verify.sh` sets `MSYS_NO_PATHCONV=1` and `MSYS2_ARG_CONV_EXCL='*'` at the top to prevent MSYS/Git Bash from mangling `--entrypoint /bin/bash` into a Windows path. WSL2 is no longer required for `task verify` (the dev-build scripts still need it).
+- **BuildKit required for `COPY --chmod`**: The Dockerfile uses `COPY --chmod=0755 rootfs /`, which is a BuildKit feature. Without BuildKit the build fails with "unknown flag". Locally, `Taskfile.yml`'s `env: DOCKER_BUILDKIT: "1"` satisfies this. CI uses `docker/setup-buildx-action`. Do **not** add a `# syntax` directive to the Dockerfile — in this environment it triggers a 401 from Docker Hub for the frontend image.
+- **`--restart=unless-stopped` required at runtime**: The CMD chain exits when the VPN is unrecoverable. Always run the container with `--restart=unless-stopped`.

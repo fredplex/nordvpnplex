@@ -3,11 +3,15 @@
 One-page operator reference for common build and release tasks.
 
 > **Windows prerequisite**: Docker Desktop must use **WSL2 backend** with WSL integration
-> enabled, and Git Bash must be installed. Without WSL2, bash-based tasks (`verify`,
-> `dev-build`, `dev-latest`, `dev-clean`) will fail. Verify:
+> enabled, and Git Bash must be installed. `task verify` and `task verify-live` work in Git
+> Bash without WSL2. Dev build tasks (`dev-build`, `dev-latest`, `dev-clean`) require WSL2. Verify:
 > 1. Docker Desktop → Settings → General → "Use WSL 2 based engine" is checked
 > 2. Docker Desktop → Settings → Resources → WSL Integration → your distro is enabled
 > 3. `bash --version` works in your terminal
+>
+> **BuildKit**: The Dockerfile requires BuildKit (`COPY --chmod=0755`). Taskfile sets
+> `DOCKER_BUILDKIT=1` automatically. If you see `unknown flag: --chmod`, add `DOCKER_BUILDKIT=1`
+> to your env or use `task docker-build` instead of a bare `docker build`.
 
 ---
 
@@ -98,6 +102,7 @@ Use this path if you need to manually tag and push a release from your local com
 
 **Prerequisites:**
 - Local build passes: `task docker-build` and `task verify`
+- Live gate passes: `task verify-live TOKEN_FILE=/path/to/token` (real NordLynx egress confirmed)
 - All changes are committed (working tree is clean)
 - Docker Hub secrets are configured in GitHub (`DOCKER_USERNAME`, `DOCKER_TOKEN`)
 
@@ -230,6 +235,7 @@ Done. Image is on Docker Hub.
 | `task docker-build` fails | Ensure Docker Desktop is running |
 | `task verify` fails on iptables | Docker Desktop on Windows/Mac needs `NET_ADMIN` capability; this is normal if the container can't check it |
 | `task verify` fails on nordvpn version | Rebuild without cache: `docker build --no-cache --platform linux/amd64 . -f Dockerfile -t "fredplex/nordvpn:$(git log --format='%h' -n 1)"` |
+| `COPY --chmod` unknown flag | BuildKit not active. Use `task docker-build` (sets `DOCKER_BUILDKIT=1`) or run `DOCKER_BUILDKIT=1 docker build …` manually |
 | `task release` says "tag already exists" | The version has already been released; increment `IMAGE_VERSION` or `NORDVPN_VERSION` in Dockerfile first |
 | `task release` says "working tree not clean" | Commit all changes: `git status` to see what's pending |
 
