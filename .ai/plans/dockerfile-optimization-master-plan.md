@@ -472,6 +472,60 @@ cadence deferred to a future task — see Owner Decisions Log.)
 - **Validate**: build + verify + observe `docker ps` health transitions (healthy after
   connect; unhealthy if the tunnel is forced down).
 
+### Phase 6 — Documentation sync (final, doc-only — no behavior change)
+Run **last**, after the build changes land and validate, so docs describe what actually
+shipped. Lowest risk. Each item below is tied to a concrete change from Phases 1–5.
+
+**`docs/`**
+- **`architecture.md`** — add a "Health reporting" note (HEALTHCHECK surfaces tunnel state to
+  Docker/Unraid); add Key Architectural Decisions entries for `COPY --chmod` (permission
+  model, replaces the chmod block), base-image **digest pin** (reproducibility), **dropping the
+  wireguard package** (NordVPN's `.deb` bundles NordLynx — F5/F6), and the
+  `--restart=unless-stopped` requirement (Q2); add **BuildKit requirement** + **Git-Bash
+  `verify.sh`** notes to "Known Constraints and Gotchas"; mention `ARG NORDVPN_RELEASE` in
+  Versioning Design.
+- **`build-and-publish.md`** — §2 Windows prerequisites: **`task verify` now runs under Git
+  Bash** (verify.sh sets `MSYS_NO_PATHCONV`; WSL2 no longer required *for verify* — dev-build
+  scripts still use bash tooling); note the Dockerfile **requires BuildKit** (CI buildx already
+  satisfies it; local Taskfile now sets `DOCKER_BUILDKIT=1`); add a Troubleshooting row for
+  "`COPY --chmod` unknown flag → enable BuildKit".
+- **`quick-build-checklist.md`** — update the Windows prerequisite note (verify works in Git
+  Bash now); add the BuildKit troubleshooting row.
+- **`tech-stack.md`** — Container Layer: `iptables` now **explicitly installed**; keep
+  `wireguard-tools` (drop full `wireguard` / `net-tools` / `iputils-ping` / `libc6`); add
+  **BuildKit** to Build Tooling; note the base **digest pin** in Key Version Constraints; add an
+  Upgrade History row (2026-06-26 Dockerfile optimization); list the removed packages under
+  Deprecated/Removed.
+- **`user-guide.md`** — add **`--restart=unless-stopped`** to the run guidance (Q2); note the
+  container now **reports health** to Docker/Unraid (HEALTHCHECK); note `task verify` works
+  under Git Bash (Q7).
+- **`testing.md`** — note `verify.sh` is now MSYS/Git-Bash safe; mention HEALTHCHECK as a
+  runtime health signal (distinct from the 4 `verify` checks).
+- **`feature-state.md`** — add HEALTHCHECK as a feature; record the Dockerfile hardening.
+
+**`.ai/`**
+- **`current.md`** — update handoff: optimization shipped, build date, fragile areas.
+- **`tasks/active.md`** — move the Dockerfile optimization to completed; add the **base-refresh
+  cadence** future task (Q1).
+- **`SESSION_NOTES.md`** — add a session-close entry.
+- **`memory/architecture-decisions.md`** — mirror the new decisions (COPY --chmod, HEALTHCHECK,
+  digest pin, wireguard drop, restart policy, BuildKit).
+- **`rules/mutation-rules.md`** — add the approved `Taskfile.yml` `DOCKER_BUILDKIT` env (Q4) and
+  `scripts/verify.sh` MSYS fix (Q7) to the Currently Approved list.
+
+**Repo-root docs (relevant, though outside `.ai/`+`docs/`)**
+- **`README.md`** — add the `--restart=unless-stopped` note (primary user-facing home of the Q2
+  deliverable) + a Changelog entry.
+- **`AGENTS.md`** — Project File Map: chmod block → `COPY --chmod`; add HEALTHCHECK; the
+  `ARG NORDVPN_RELEASE` insertion shifts the Version-Bump line references.
+- **`CLAUDE.md`** — Constraints: note the one approved `Taskfile.yml` exception (`DOCKER_BUILDKIT`).
+
+**Validate**: every internal link resolves; no stale references to the removed chmod block,
+`# syntax` directive, or the `wireguard` metapackage; doc claims match the shipped
+`Dockerfile` / `Taskfile.yml` / `verify.sh`.
+
+---
+
 ### Optional / Future (low priority, not scheduled)
 - **Base-refresh cadence** (logged from Q1, 2026-06-26): periodically re-pin the base digest +
   rebuild (or `docker build --pull`) so OS security patches land without a manual base bump;
@@ -484,7 +538,8 @@ cadence deferred to a future task — see Owner Decisions Log.)
 
 ## Scope
 
-**In**: everything in Phases 0–5 above.
+**In**: everything in Phases 0–6 above (Phase 6 = documentation sync across `docs/`, `.ai/`,
+and the repo-root docs).
 **Explicitly out** (consensus): multi-stage build; non-root `USER`; base image *bump* (digest
 *pin* of the current noble is in-scope and distinct); NordVPN version bump; `Taskfile.yml`
 edits **except the approved `DOCKER_BUILDKIT=1` env (Q4)**; `rootfs/` logic changes (only
@@ -496,6 +551,8 @@ shebang lines touched).
 - Phase 2: scripts are `-rwxr-xr-x` inside the image; container starts.
 - Phase 4: **manual** NordLynx connect + real egress IP (socket check alone is insufficient).
 - Phase 5: `docker ps` shows healthy↔unhealthy transitions correctly.
+- Phase 6: docs match the shipped `Dockerfile`/`Taskfile.yml`/`verify.sh`; all internal links
+  resolve; no stale references to the chmod block, `# syntax` directive, or `wireguard` metapackage.
 
 ## Open Questions (for owner)
 1. **`apt-get upgrade`** — **ANSWERED (2026-06-26): keep as-is for now** (patching channel).
