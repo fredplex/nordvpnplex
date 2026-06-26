@@ -47,7 +47,7 @@ Last completed: **Dockerfile optimization plan** (2026-06-25, planning session).
 - [ ] Test removing `wireguard`? (may be auto-installed by NordVPN .deb)
 - [ ] Add `HEALTHCHECK` instruction? (new behavior — Docker/Unraid health reporting)
 
-### Watch for NordVPN 4.6.x release
+### Watch for NordVPN Next release
 
 **Status**: Waiting (no action needed — weekly GitHub Action handles detection)
 **Goal**: Bump to the next NordVPN version when available
