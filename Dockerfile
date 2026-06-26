@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-ubuntu:noble
+FROM ghcr.io/linuxserver/baseimage-ubuntu:noble@sha256:53411508a50bf477f04e4f1e26be432f81f0226f52a134bb1f491ecc61b793d2
 LABEL maintainer="fredplex@gmail.com"
 
 ARG NORDVPN_VERSION='5.1.0'

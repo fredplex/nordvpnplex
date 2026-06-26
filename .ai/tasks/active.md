@@ -15,7 +15,7 @@ Master plan: `.ai/plans/dockerfile-optimization-master-plan.md` (on `docs/docker
 - [x] **Phase 0** — baseline captured: build OK, size 110.2 MB, verify 3/4 (MSYS on Windows)
 - [x] **Phase 1** — zero-risk hygiene complete (2026-06-26): maintainer fix, ARG NORDVPN_RELEASE, curl hardening, libc6 removal, autoclean→clean, .dockerignore expanded, shebang fixes, verify.sh MSYS fix, DOCKER_BUILDKIT=1, task verify-live + scripts/connect-test.sh, README --restart note. Verify: 3 passed / 0 failed.
 - [x] **Phase 2** — COPY --chmod=0755 complete (2026-06-26): single COPY replaces COPY+chmod block; all scripts -rwxr-xr-x inside image confirmed; verify 3/0/1.
-- [ ] **Phase 3** — base image digest pin
+- [x] **Phase 3** — base image digest pin complete (2026-06-26): noble@sha256:53411508... pinned; verify 3/0/1.
 - [ ] **Phase 4** — wireguard→wireguard-tools + explicit iptables; run `task verify-live`
 - [ ] **Phase 5** — HEALTHCHECK; observe healthy↔unhealthy transitions
 - [ ] **Phase 6** — documentation sync
