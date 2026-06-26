@@ -1,6 +1,6 @@
 # Dockerfile Optimization — Master Plan (Synthesis of 3 Sources)
 
-Created: 2026-06-26 | Status: Pending review & approval
+Created: 2026-06-26 | Status: All 7 open questions resolved (2026-06-26) — ready for implementation pending go-ahead
 
 > **Provenance**: This is the *definitive synthesis* of three independent sources, reconciled
 > by a principal-level audit. It supersedes the three inputs for execution purposes; the
@@ -26,6 +26,22 @@ Created: 2026-06-26 | Status: Pending review & approval
 > works (F3); **`--no-install-recommends` broke the kill switch (F4)** for <1% size (F7);
 > `wireguard`/`wireguard-tools` are **not required** for NordLynx (F5/F6); the `# syntax`
 > directive must be removed (F2). The Dockerfile and verdicts below reflect these findings.
+
+---
+
+## Owner Decisions Log
+
+Resolutions to the Open Questions, recorded as the owner answers them.
+
+| # | Question | Decision (date) | Effect on plan |
+|---|----------|-----------------|----------------|
+| Q1 | `apt-get upgrade` — keep vs. remove + base-refresh cadence | **Keep as-is for now** (2026-06-26) | No Dockerfile change. Future task logged: adopt a base-refresh cadence (couples with the Phase 3 digest pin), then revisit removal. |
+| Q2 | `CMD` `&&` chain — leave as-is vs. harden | **Leave as-is** (2026-06-26) | No Dockerfile change. New scoped item: add a `--restart=unless-stopped` note to README/user-guide (the chain's recovery safety net). |
+| Q3 | `HEALTHCHECK` — add it / accept Unraid health reporting | **Approved** (2026-06-26) | Add the HEALTHCHECK as specified. Grep string `Status: Connected` validated (F10); connect observed ~5s ≪ 45s start-period. Phase 5 validation step: observe the healthy↔unhealthy transition in a longer run before shipping. |
+| Q4 | Local BuildKit — implicit default vs. explicit `DOCKER_BUILDKIT=1` | **Adopt explicit** (2026-06-26) | Set `DOCKER_BUILDKIT=1` via Task's `env:` key (recommend top-level `env:` so `docker-build`/`dev-build` and the scripts they invoke inherit it). Touches `Taskfile.yml` — owner sign-off given for that edit at implementation. Guarantees `COPY --chmod` never regresses on a legacy/misconfigured builder; portable across Win/Mac/Linux. |
+| Q5 | `net-tools` + `iputils-ping` — keep removed vs. re-add for debugging | **Keep removed** (2026-06-26) | Confirms current Dockerfile (already omits both). ~0.35 MB saved; `ip`/`curl` remain for in-container diagnostics. |
+| Q6 | Pristine modes — accept inert 0755 vs. split the COPY | **Accept** (2026-06-26) | Single `COPY --chmod=0755 rootfs /`. Inert 0755 on `type`/`notification-fd` is harmless (s6 reads by content; verified F3). No split. |
+| Q7 | `verify.sh` false failures on Windows/Git Bash (F1) | **Fix the script** (2026-06-26) | Add `export MSYS_NO_PATHCONV=1` + `export MSYS2_ARG_CONV_EXCL='*'` near the top of `scripts/verify.sh` (no-ops on Linux/Mac). Touches a tooling file — sign-off given. Makes `task verify` work in Git Bash without WSL2 or a manual prefix. |
 
 ---
 
@@ -189,8 +205,8 @@ image is actually built and validated*. Each finding confirms, sharpens, or corr
   `dev-build.sh:23` call **plain `docker build`** with no `DOCKER_BUILDKIT=1`. On Docker Desktop
   24+ BuildKit is the default, so `--chmod` works — but it is *implicit*. Under a legacy builder
   it is an "unknown flag" error (loud, safe failure — never silent). Forcing it would require
-  editing `Taskfile.yml`, which the project rules forbid without explicit instruction → **owner
-  decision** (Open Question 7), not a unilateral change.
+  editing `Taskfile.yml`, which the project rules forbid without explicit instruction. **DECIDED
+  2026-06-26 (Q4): adopt — set `DOCKER_BUILDKIT=1` via Task's `env:` key** (owner sign-off given).
 
 ### b) `task verify` is BLIND to the exact failure modes Phase 4 risks — *most important finding*
 `scripts/verify.sh` does **not** validate a real VPN connection:
@@ -261,16 +277,16 @@ ENV IMAGE_VERSION=${IMAGE_VERSION}
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -y && \
-    # [DECISION — Plan B + Review beat Plan A] 'upgrade' is the security-patching channel
-    # while the base is intentionally pinned. KEEP unless the base is digest-pinned AND
-    # rebuilt on a cadence (see roadmap Phase 5). This is a tradeoff, not a free removal.
+    # [DECISION 2026-06-26 — owner: KEEP as-is for now] 'upgrade' is the security-patching
+    # channel while the base is intentionally pinned. FUTURE TASK: adopt a base-refresh
+    # cadence (couples with the digest pin), then revisit removing this. See Decisions Log.
     apt-get upgrade -y && \
     # VALIDATED 2026-06-26. 'iptables' is EXPLICIT — the kill switch must never be implicit
     #   (F4: '--no-install-recommends' silently dropped iptables and broke the kill switch).
     # 'wireguard' -> 'wireguard-tools': metapackage unnecessary; NordLynx connected (F5). Nord's
     #   .deb runs NordLynx even with NO wireguard pkg (F6) — tools kept as cheap insurance.
     # '--no-install-recommends' DROPPED: it saved <1% (F7) for real risk (F4) — not worth it.
-    # Also dropped: libc6 (in base), net-tools + iputils-ping (unused — only 'ip route' is used).
+    # Also dropped: libc6 (in base), net-tools + iputils-ping (unused; keep-removed confirmed Q5).
     apt-get install -y curl iptables wireguard-tools && \
     # [Independent Review] Hardened fetch: -f fails on HTTP>=400 (no silent 404->junk .deb),
     #   -S surfaces errors, -L follows redirects, protocol + TLS floor pinned.
@@ -299,23 +315,25 @@ RUN apt-get update -y && \
 # separate 'RUN chmod' layer. Chosen over Plan B's git-exec-bits (clean on Linux but fragile
 # for local Windows builds) and over the Review's extra chmod RUN layer.
 # Path fixed to 'rootfs' (no leading slash). NOTE: the two data files (type, notification-fd)
-# receive an inert 0755 — s6 reads them by content, so the exec bit is harmless. If pristine
-# modes are required, split: `COPY --chmod=0755 rootfs/usr /usr` + a plain COPY for the rest.
+# receive an inert 0755 — s6 reads them by content, so the exec bit is harmless. DECIDED
+# 2026-06-26 (Q6): ACCEPT this — single COPY, no split.
 COPY --chmod=0755 rootfs /
 
 ENV S6_CMD_WAIT_FOR_SERVICES=1
 
 # [Plan B + Review] HEALTHCHECK surfaces REAL tunnel state to Docker/Unraid. nord_watch's
-# internal s6 restarts were invisible to the orchestrator. start-period absorbs connect time.
-# [TEST] Confirm the exact "Status: Connected" wording on the pinned 5.1.0 client and that
-# 45s covers a normal connect; tune if Unraid shows 'unhealthy' at boot.
+# internal s6 restarts were invisible to the orchestrator. APPROVED 2026-06-26 (Q3).
+# Validated: "Status: Connected" wording matches the 5.1.0 client (F10); connect observed ~5s,
+# well under the 45s start-period. Phase 5 still: watch the healthy<->unhealthy flip in a
+# longer run before shipping.
 HEALTHCHECK --interval=60s --timeout=10s --start-period=45s --retries=3 \
     CMD nordvpn status | grep -q "Status: Connected" || exit 1
 
-# s6 (/init) is PID 1 and forwards signals, so shell-form CMD is acceptable. Caveat: the '&&'
-# chain aborts if nord_connect fails transiently -> nord_watch never starts; resilience then
-# depends on s6 restarting this CMD. Left intact (changing it is a behavior change needing
-# owner sign-off — tracked in Open Questions).
+# DECISION 2026-06-26 (Q2): KEEP the shell-form '&&' chain as-is. s6 (/init) is PID 1 and
+# forwards signals, so shell-form is fine. The chain is fail-closed: nord_connect retries
+# ~2.3h and nord_watch self-heals transient drops in place, so it exits only on truly
+# unrecoverable states (kill switch stays up). Recovery relies on a Docker restart policy —
+# REQUIREMENT documented in README/user-guide: run with --restart=unless-stopped.
 CMD nord_login && nord_config && nord_connect && nord_watch
 ```
 
@@ -360,7 +378,10 @@ branch is `chore/dockerfile-optimization` (per Plan B's execution order).
 ### Phase 1 — Zero-risk hygiene (no behavior change)
 Changes: fix `maintainer` typo; `autoclean`→`clean`; normalize the `rm -rf` indentation
 [Plan A]; remove `libc6`; harden `curl`; expand `.dockerignore`; fix both shebangs; (optional)
-add `ARG NORDVPN_RELEASE`.
+add `ARG NORDVPN_RELEASE`. **Docs (Q2)**: add a `--restart=unless-stopped` note to
+README/user-guide — the restart policy is the `CMD` chain's recovery safety net. **Tooling (Q7)**:
+add `export MSYS_NO_PATHCONV=1` + `export MSYS2_ARG_CONV_EXCL='*'` near the top of
+`scripts/verify.sh` (no-ops on Linux/Mac) so `task verify` stops false-failing under Git Bash (F1).
 - **Why these are safe**: `libc6` is already in the base (no-op removal); `.dockerignore`
   entries are never `COPY`'d; `clean` only empties a cache the `rm` already clears.
 - **Breaking risks to watch**:
@@ -383,7 +404,9 @@ the `# syntax=docker/dockerfile:1` header.
     all three workflows). **Local `task docker-build`/`dev-build.sh` use plain `docker build`** and
     rely on Docker Desktop's BuildKit default — works today, but unenforced. Confirm locally with
     `docker buildx version`. Under a legacy builder, `--chmod` is an "unknown flag" parse error
-    (loud, safe failure). Forcing `DOCKER_BUILDKIT=1` means editing `Taskfile.yml` → owner approval.
+    (loud, safe failure). **DECIDED (Q4): set `DOCKER_BUILDKIT=1` via Task's `env:` key** (a
+    `Taskfile.yml` edit, sign-off given) so this never regresses — recommend a top-level `env:`
+    so `docker-build`/`dev-build` and their scripts inherit it.
   - **Must confirm executability *inside* the image**, not just that it builds:
     `docker run --rm --entrypoint /bin/bash <img> -c 'ls -l /usr/bin/nord_* /etc/cont-init.d /etc/services.d/nordvpn/run'`
     Every script must be `-rwxr-xr-x`. If any is `644`, the container won't start (s6 can't
@@ -425,14 +448,16 @@ Changes: apply `--no-install-recommends`; remove `net-tools` + `iputils-ping`; *
     the flag from that one line, keep it on the utility install.
   - **`wireguard` removal**: NordLynx may need `wg`. If the connect test fails, add
     `wireguard-tools` (never the full metapackage).
-  - **`net-tools`/`iputils-ping` removal**: only affects interactive `docker exec` debugging.
+  - **`net-tools`/`iputils-ping` removal** (DECIDED Q5: keep removed): only affects interactive `docker exec` debugging.
     Verified no `rootfs/` script uses them. Low risk; document that `ip`/`curl` remain for
     in-container diagnostics.
 - **Validate**: build + verify + **manual NordLynx connect + egress-IP check**.
 
 ### Phase 5 — Runtime signals & owner decisions
-Changes: add `HEALTHCHECK`; finalize the `apt-get upgrade` decision (keep, or remove + adopt a
-base-refresh cadence).
+Changes: add `HEALTHCHECK` — **approved 2026-06-26 (Q3)**; validation step: confirm the Docker
+healthy↔unhealthy transition in a run longer than the 45s start-period (grep string + ~5s connect
+already validated, F10). (`apt-get upgrade` resolved 2026-06-26: **keep as-is**; base-refresh
+cadence deferred to a future task — see Owner Decisions Log.)
 - **Why**: orchestrator-visible health; a deliberate patch strategy.
 - **Breaking risks to watch**:
   - **HEALTHCHECK string coupling**: must match the client's exact `nordvpn status` wording.
@@ -448,6 +473,9 @@ base-refresh cadence).
   connect; unhealthy if the tunnel is forced down).
 
 ### Optional / Future (low priority, not scheduled)
+- **Base-refresh cadence** (logged from Q1, 2026-06-26): periodically re-pin the base digest +
+  rebuild (or `docker build --pull`) so OS security patches land without a manual base bump;
+  then reconsider removing `apt-get upgrade`.
 - **BuildKit apt cache mount** [Plan B Tier 3]: `RUN --mount=type=cache,target=/var/cache/apt`
   speeds rebuilds without bloating the image (cache lives outside the layer; the `rm` still
   keeps the image small). Build-speed only; defer.
@@ -459,7 +487,8 @@ base-refresh cadence).
 **In**: everything in Phases 0–5 above.
 **Explicitly out** (consensus): multi-stage build; non-root `USER`; base image *bump* (digest
 *pin* of the current noble is in-scope and distinct); NordVPN version bump; `Taskfile.yml`
-edits; `rootfs/` logic changes (only shebang lines touched).
+edits **except the approved `DOCKER_BUILDKIT=1` env (Q4)**; `rootfs/` logic changes (only
+shebang lines touched).
 
 ## Validation — gate before "done"
 - `task docker-build` clean; `task verify` all 4 (`IMAGE_VERSION` env, `nordvpn --version`=5.1.0,
@@ -469,21 +498,25 @@ edits; `rootfs/` logic changes (only shebang lines touched).
 - Phase 5: `docker ps` shows healthy↔unhealthy transitions correctly.
 
 ## Open Questions (for owner)
-1. **`apt-get upgrade`** — keep (patching) or remove (reproducibility)? If remove, accept a
-   base-refresh cadence? (Couples with the Phase 3 digest pin.)
+1. **`apt-get upgrade`** — **ANSWERED (2026-06-26): keep as-is for now** (patching channel).
+   Future task logged: adopt a base-refresh cadence (couples with the Phase 3 digest pin). See
+   Owner Decisions Log.
 2. **`--no-install-recommends`** — **ANSWERED (F4/F7): no.** It broke the kill switch for <1%
    size; dropped from the plan. Re-open only with `iptables` pinned explicitly.
 3. **`wireguard`** — **ANSWERED (F5/F6): removable entirely; plan keeps `wireguard-tools` as
    insurance.** Full metapackage dropped.
-4. **`HEALTHCHECK`** — approve the new Unraid health-reporting behavior? Confirm tolerance for
-   `--start-period` tuning.
-5. **`CMD` `&&` chain** — leave as-is (rely on s6 restart) or harden so `nord_watch` always
-   runs? (Behavior change — out of this plan unless you want it added.)
-6. **Pristine modes** — accept the inert `0755` on `type`/`notification-fd`, or split the COPY?
-7. **BuildKit for local builds** — leave `task docker-build`/`dev-build.sh` on Docker Desktop's
-   implicit BuildKit default (works today), or approve a one-line `Taskfile.yml` edit to set
-   `DOCKER_BUILDKIT=1` explicitly so `COPY --chmod` can never regress on a legacy builder?
-   (Editing `Taskfile.yml` requires your sign-off.)
+4. **`HEALTHCHECK`** — **ANSWERED (2026-06-26): approved.** Add as specified; grep string + ~5s
+   connect already validated (F10). Remaining Phase 5 validation: observe the healthy↔unhealthy
+   flip in a longer run. See Owner Decisions Log.
+5. **`CMD` `&&` chain** — **ANSWERED (2026-06-26): leave as-is.** Fail-closed and self-healing
+   for transient drops; recovery for unrecoverable states relies on a Docker restart policy.
+   New scoped item: document `--restart=unless-stopped` (Phase 1). See Owner Decisions Log.
+6. **Pristine modes** — **ANSWERED (2026-06-26): accept** the inert `0755`; single `COPY --chmod`,
+   no split. See Owner Decisions Log.
+7. **BuildKit for local builds** — **ANSWERED (2026-06-26): adopt explicit.** Set
+   `DOCKER_BUILDKIT=1` via Task's `env:` key (top-level recommended); `Taskfile.yml` edit
+   approved. Guarantees `COPY --chmod` never regresses; portable across Win/Mac/Linux. See
+   Owner Decisions Log.
 
 ## Source cross-reference (what came from where)
 | Master item | Independent Review | Plan A | Plan B |
