@@ -20,7 +20,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -y && \
     apt-get upgrade -y && \
-    apt-get install -y curl iputils-ping wireguard net-tools && \
+    apt-get install -y curl iptables iputils-ping wireguard-tools net-tools && \
     curl -fsSL --proto '=https' --tlsv1.2 \
         "https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn-release/nordvpn-release_${NORDVPN_RELEASE}_all.deb" \
         --output /tmp/nordrepo.deb && \
