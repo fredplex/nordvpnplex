@@ -1,0 +1,53 @@
+# VALIDATED CANDIDATE (experiment 2026-06-26) — NOT for direct merge.
+# This is candidate "v2": the smallest config that BUILDS, keeps the kill switch, and
+# CONNECTS via NORDLYNX (Spain, verified). It encodes the experiment's corrections:
+#   - NO '# syntax' directive (F2: it forced a docker/dockerfile:1 pull that 401'd).
+#   - 'iptables' listed EXPLICITLY (F4: --no-install-recommends silently drops it,
+#     which broke the kill switch).
+#   - 'wireguard-tools' (F5: full 'wireguard' metapackage is unnecessary; Nord's .deb
+#     can even run NordLynx with no wireguard package at all (F6) — wireguard-tools kept
+#     here as cheap insurance vs. relying on the implicit bundle).
+# NOTE: dependency slimming saved <1% (F7) — evaluate whether NIR is worth keeping at all.
+FROM ghcr.io/linuxserver/baseimage-ubuntu:noble
+LABEL maintainer="fredplex@gmail.com"
+
+ARG NORDVPN_VERSION='5.1.0'
+ARG IMAGE_VERSION='5.5.1'
+ARG NORDVPN_RELEASE='1.0.0'
+
+LABEL org.opencontainers.image.title="nordvpn-unraid" \
+      org.opencontainers.image.description="NordVPN Linux client Docker image for Unraid" \
+      org.opencontainers.image.version="${IMAGE_VERSION}" \
+      org.opencontainers.image.vendor="fredplex" \
+      org.opencontainers.image.source="https://github.com/fredplex/nordvpnplex"
+
+ENV IMAGE_VERSION=${IMAGE_VERSION}
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
+    # iptables MUST be explicit under --no-install-recommends (F4) — it is the kill switch.
+    apt-get install -y --no-install-recommends curl iptables wireguard-tools && \
+    curl -fsSL --proto '=https' --tlsv1.2 \
+        "https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn-release/nordvpn-release_${NORDVPN_RELEASE}_all.deb" \
+        --output /tmp/nordrepo.deb && \
+    apt-get install -y /tmp/nordrepo.deb && \
+    apt-get update -y && \
+    apt-get install -y --no-install-recommends nordvpn${NORDVPN_VERSION:+=$NORDVPN_VERSION} && \
+    apt-get remove -y nordvpn-release && \
+    apt-get autoremove -y && \
+    apt-get clean -y && \
+    rm -rf \
+        /tmp/* \
+        /var/cache/apt/archives/* \
+        /var/lib/apt/lists/* \
+        /var/tmp/*
+
+COPY --chmod=0755 rootfs /
+
+ENV S6_CMD_WAIT_FOR_SERVICES=1
+
+HEALTHCHECK --interval=60s --timeout=10s --start-period=45s --retries=3 \
+    CMD nordvpn status | grep -q "Status: Connected" || exit 1
+
+CMD nord_login && nord_config && nord_connect && nord_watch
