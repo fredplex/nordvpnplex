@@ -6,16 +6,20 @@ Current work in progress.
 
 ## Current Status
 
-**Active**: Dockerfile optimization plan written — awaiting owner approval to implement.
-- [x] Deep analysis of Dockerfile + all rootfs scripts, build tooling, CI workflows, .gitattributes, .dockerignore, git index permissions
-- [x] Plan written: `.ai/plans/dockerfile-optimization.md` (Tier 1: 5 clear wins; Tier 2: 4 owner decisions; 3 corrections to initial analysis)
-- [ ] Owner reviews plan and decides on Tier 2 items
-- [ ] Create branch `chore/dockerfile-optimization` from `main`
-- [ ] Implement Tier 1 phases (executable bits → shebangs → .dockerignore → Dockerfile refactor)
-- [ ] Run `task docker-build` + `task verify`
-- [ ] (Conditional) Implement approved Tier 2 changes
+**Active**: Dockerfile optimization — Phase 6 (documentation sync) in progress on `chore/dockerfile-optimization`.
 
-Last completed: **Dockerfile optimization plan** (2026-06-25, planning session).
+- [x] Deep analysis of Dockerfile + all rootfs scripts, build tooling, CI workflows, .gitattributes, .dockerignore, git index permissions
+- [x] Master plan written + all 7 owner questions answered (2026-06-26)
+- [x] Branch `chore/dockerfile-optimization` created from `main`
+- [x] **Phase 0** — baseline captured: build OK, size 110.2 MB, verify 3/4 (MSYS on Windows)
+- [x] **Phase 1** — zero-risk hygiene complete (2026-06-26): maintainer fix, ARG NORDVPN_RELEASE, curl hardening, libc6 removal, autoclean→clean, .dockerignore expanded, shebang fixes, verify.sh MSYS fix, DOCKER_BUILDKIT=1, task verify-live + scripts/connect-test.sh, README --restart note. Verify: 3 passed / 0 failed.
+- [x] **Phase 2** — COPY --chmod=0755 complete (2026-06-26): single COPY replaces COPY+chmod block; all scripts -rwxr-xr-x inside image confirmed; verify 3/0/1.
+- [x] **Phase 3** — base image digest pin complete (2026-06-26): noble@sha256:53411508... pinned; verify 3/0/1.
+- [x] **Phase 4** — wireguard→wireguard-tools + explicit iptables complete (2026-06-26): verify 3/0/1; verify-live PASS (Spain #195 Madrid, NordLynx, 77.243.86.224); size 110.2 MB.
+- [x] **Phase 5** — HEALTHCHECK complete (2026-06-26): interval=60s start-period=45s; healthy at t=5s (NordLynx); verify 3/0/1; verify-live PASS (Spain #170 Madrid, NordLynx, 192.145.39.2, 110.2 MB).
+- [x] **Phase 6** — documentation sync complete (2026-06-26): all docs/, .ai/, AGENTS.md, CLAUDE.md, README.md updated to reflect shipped changes.
+
+**Dockerfile optimization COMPLETE** — all 6 phases done on `chore/dockerfile-optimization`. Ready to merge to `main`.
 
 **Watching**: next NordVPN release — the daily checker auto-builds/tests a dev image and opens a draft PR.
 
@@ -24,6 +28,14 @@ Last completed: **Dockerfile optimization plan** (2026-06-25, planning session).
 ## Blocked Candidates
 
 *None.*
+
+## Future Work (deferred, not scheduled)
+
+### Base-refresh cadence
+
+**Goal**: Periodically re-pin the base digest (`noble@sha256:…`) + rebuild so OS security patches land without a manual base bump. Once this cadence exists, reconsider removing `apt-get upgrade` (currently kept as the security-patching mechanism).
+**Why deferred**: No urgency right now; the digest pin + `apt-get upgrade` is the current posture.
+**When to revisit**: When the base image tag diverges significantly from the pinned digest (check linuxserver.io release notes), or when a security advisory targets Ubuntu Noble base packages.
 
 ---
 

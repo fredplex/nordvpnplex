@@ -26,7 +26,8 @@ Main entry point for coding agents working in this repository.
 
 ```bash
 task docker-build    # Build local test image (tagged with git hash)
-task verify          # Smoke-test the local image
+task verify          # Smoke-test the local image (4 credentialless checks)
+task verify-live TOKEN_FILE=<path>   # Real NordLynx egress test — mandatory pre-release gate
 task check-version   # Check NordVPN Debian repo for newer versions
 task bump NORDVPN_VERSION=x.x.x IMAGE_VERSION=y.y.y   # Apply version bump
 task release         # Tag + push to trigger GitHub publish workflow
@@ -218,15 +219,16 @@ Look for `nordvpn_<NORDVPN_VERSION>_amd64.deb`. If not listed, do not proceed.
 ## Project File Map
 
 ```
-Dockerfile                        — primary build; version ARGs live here
-Taskfile.yml                      — local build/publish tasks (do not modify without instruction)
+Dockerfile                        — primary build; version ARGs live here; COPY --chmod=0755 rootfs /; HEALTHCHECK
+Taskfile.yml                      — local build/publish tasks (do not modify without instruction; two approved exceptions: DOCKER_BUILDKIT=1 env + task verify-live)
 README.md                         — user docs + Changelog
 CLAUDE.md                         — AI context and workflow rules
 AGENTS.md                         — this file
 scripts/
   bump.sh                         — version-bump script; edits all 5 locations
   check-version.sh                — scrapes NordVPN Debian repo; prints task bump command
-  verify.sh                       — smoke-tests the locally built image
+  verify.sh                       — smoke-tests the locally built image (credentialless; MSYS-safe)
+  connect-test.sh                 — real-token NordVPN connect + Spain egress test (task verify-live)
 docs/
   build-and-publish.md            — full human + agent reference: workflow, triggers, manual steps, secrets setup
   architecture.md                 — architecture details
@@ -332,8 +334,9 @@ For narrower per-change-type validation chains, see `.ai/workflows/validation.md
 
 ### Before Declaring Done
 ```bash
-task docker-build    # Must succeed (image builds)
-task verify          # Must pass all 4 checks
+task docker-build                            # Must succeed (image builds)
+task verify                                  # Must pass all 4 checks
+task verify-live TOKEN_FILE=/path/to/token   # Real NordLynx egress must confirm Spain exit
 # Then owner runs: task release
 ```
 
@@ -379,7 +382,8 @@ Do not skip either step, even for small tasks. The branch protects `main`; the p
 | Command | Purpose |
 |---------|---------|
 | `task docker-build` | Build local test image (tagged with git hash) |
-| `task verify` | Smoke-test the local image (4 checks) |
+| `task verify` | Smoke-test the local image (4 credentialless checks) |
+| `task verify-live TOKEN_FILE=<path>` | Real NordLynx egress test — mandatory pre-release gate |
 | `task check-version` | Check NordVPN Debian repo for newer versions |
 | `task bump NORDVPN_VERSION=x IMAGE_VERSION=y` | Apply version bump to all 5 locations |
 | `task release` | Create annotated git tag + push (triggers publish workflow) |

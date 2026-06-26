@@ -35,6 +35,8 @@ State-changing operations must be explicitly scoped, approved, and guarded.
 - `rootfs/ script edits` — cont-init.d, services.d, usr/bin scripts. Show diff first, wait for approval.
 - `documentation updates` — AGENTS.md, CLAUDE.md, docs/, .ai/ files.
 - `GitHub Actions workflow edits` — when explicitly requested.
+- `Taskfile.yml: env: DOCKER_BUILDKIT: "1"` — top-level env block addition (approved 2026-06-26, Q4). Ensures BuildKit for `COPY --chmod`. No other Taskfile.yml edits are pre-approved.
+- `Taskfile.yml: task verify-live` — new task added after `verify` (approved 2026-06-26). Wraps `scripts/connect-test.sh`. No other Taskfile.yml edits are pre-approved.
 
 ---
 

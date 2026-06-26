@@ -65,7 +65,8 @@ NordVPN package repo ──► Daily GitHub Action ──► Auto-builds Dev con
 
 **Windows users**: Docker Desktop must use the **WSL2 backend** with **WSL integration**
 enabled. The `task dev-build`, `task dev-latest`, and `task dev-clean` commands run
-bash scripts that require a Linux-compatible shell. Verify:
+bash scripts that require a Linux-compatible shell. `task verify` now works in **Git Bash
+without WSL2** (`verify.sh` handles MSYS path-mangling internally). Verify:
 
 1. **Docker Desktop → Settings → General** — "Use WSL 2 based engine" is checked
 2. **Docker Desktop → Settings → Resources → WSL Integration** — your WSL distro
@@ -74,7 +75,12 @@ bash scripts that require a Linux-compatible shell. Verify:
 4. `bash` is available in your terminal (`bash --version`)
 
 Without WSL2 integration, the dev build tasks will fail with `sed: executable file not found`
-or similar errors.
+or similar errors. `task verify` and `task verify-live` work in Git Bash without WSL2.
+
+> **BuildKit**: The Dockerfile requires BuildKit (`COPY --chmod=0755`). `Taskfile.yml` sets
+> `DOCKER_BUILDKIT=1` globally for all local builds. CI uses `docker/setup-buildx-action`
+> which satisfies this automatically. If you see `unknown flag: --chmod`, BuildKit is not
+> active — check that Docker Desktop is running and `DOCKER_BUILDKIT=1` is in your env.
 
 ### GitHub repo secrets (one-time setup — see [Section 7](#7-one-time-setup-docker-hub-credentials-in-github))
 
@@ -420,8 +426,9 @@ Merging or pushing directly to `main` triggers the automated release pipeline (r
 *Alternatively, to release completely from CLI (bypassing automated git tagging):*
 ```bash
 task docker-build
-task verify      # Local 4-check verification (includes runtime daemon check)
-task release     # Tags git locally and pushes, triggering publish workflow
+task verify                                       # Local 4-check verification (includes runtime daemon check)
+task verify-live TOKEN_FILE=/path/to/token        # Mandatory: real NordLynx egress gate before release
+task release                                      # Tags git locally and pushes, triggering publish workflow
 ```
 
 ---
@@ -518,6 +525,13 @@ The image was built with cached layers. Run:
 docker build --no-cache --platform linux/amd64 . -f Dockerfile -t "fredplex/nordvpn:$(git log --format="%h" -n 1)"
 ```
 or simply `task docker-build` again — Taskfile does not cache.
+
+### `COPY --chmod` unknown flag / BuildKit not active
+The Dockerfile requires BuildKit. `Taskfile.yml` sets `DOCKER_BUILDKIT=1` automatically, but if you're building outside Taskfile (bare `docker build`), add it:
+```bash
+DOCKER_BUILDKIT=1 docker build --platform linux/amd64 . -f Dockerfile -t fredplex/nordvpn:test
+```
+CI uses `docker/setup-buildx-action` which satisfies BuildKit. Do **not** add a `# syntax` directive to the Dockerfile.
 
 ### `task verify` — iptables check fails on Docker Desktop (Windows/Mac)
 `NET_ADMIN` capability is required. Ensure Docker Desktop is running and that the container

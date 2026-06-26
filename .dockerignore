@@ -3,3 +3,10 @@
 .img
 *.md
 LICENSE
+.ai
+docs
+scripts
+Taskfile.yml
+.gitattributes
+.ai-prime-version
+.ai-prime-versions.json
