@@ -6,7 +6,22 @@ Current work in progress.
 
 ## Current Status
 
-**Active**: Stable maintenance — watching for next NordVPN release (daily checker handles detection automatically).
+**On Hold**: Base image refresh plan written — awaiting agent credits to implement.
+
+### Base Image Refresh Cadence (ON HOLD — plan approved, not yet implemented)
+
+**Plan**: `.ai/plans/base-image-refresh.md`  
+**Branch**: `chore/base-image-refresh-plan` (pushed)  
+**All owner decisions resolved** — see plan §Owner Decisions.
+
+- [ ] **Phase A** — `scripts/check-base-image.sh` (local digest checker script)
+- [ ] **Phase B** — `.github/workflows/check-base-image.yml` (monthly cron, dev build, draft PR)
+- [ ] **Phase C** — `task check-base` entry in `Taskfile.yml` *(Taskfile edit explicitly approved)*
+- [ ] **Phase D** — doc updates (`.ai/current.md`, `active.md`, `AGENTS.md`, `docs/build-and-publish.md`)
+
+Use **Supervised mode**: one phase per human gate. Do not batch.
+
+---
 
 - [x] Deep analysis of Dockerfile + all rootfs scripts, build tooling, CI workflows, .gitattributes, .dockerignore, git index permissions
 - [x] Master plan written + all 7 owner questions answered (2026-06-26)

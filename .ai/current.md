@@ -1,6 +1,28 @@
 # Current Project State
 
-## Stable — Dockerfile Optimization + Template Update Shipped (2026-06-26)
+## On Hold — Base Image Refresh Plan Written (2026-06-27)
+
+**Status**: Plan complete, all decisions resolved, implementation paused pending agent credits. Branch `chore/base-image-refresh-plan` pushed.
+
+### Active plan
+
+**Plan**: `.ai/plans/base-image-refresh.md` — fully designed, all owner decisions answered, ready to implement.  
+**Branch**: `chore/base-image-refresh-plan` (pushed, plan doc only — no scripts or workflows yet)
+
+**What needs to be built** (4 phases, all approved):
+- Phase A: `scripts/check-base-image.sh` — local digest checker
+- Phase B: `.github/workflows/check-base-image.yml` — monthly GHA cron, dev build + draft PR
+- Phase C: `task check-base` entry in `Taskfile.yml` (Taskfile modification explicitly approved)
+- Phase D: Doc updates (`.ai/current.md`, `.ai/tasks/active.md`, `AGENTS.md`, `docs/build-and-publish.md`)
+
+**Key versioning model decision made this session**:  
+`IMAGE_VERSION` tracks the container, not NordVPN. A base image refresh is a first-class release: digest change + `IMAGE_VERSION` patch increment + dev build + full production publish on merge.
+
+**Next agent**: Read `.ai/plans/base-image-refresh.md` fully before touching anything. Use Supervised mode (one phase per human gate). See `SESSION_NOTES.md` top entry for the full handoff.
+
+---
+
+## Previously Completed — Dockerfile Optimization + Template Update Shipped (2026-06-26)
 
 **Status**: All 6 phases complete, merged to `main`, pushed. prime-ai-docs v1.2.1 template update applied and pushed.
 

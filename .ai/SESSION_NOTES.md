@@ -5,6 +5,57 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-06-27 (base image refresh — plan only, on hold)
+
+### What was done this session
+
+| # | Item |
+|---|------|
+| 1 | Full onboarding pass — confirmed `main` at `1e44fd7`, clean working tree, stable maintenance posture |
+| 2 | Audited the base image update gap: digest pinned 2026-06-26, no detection or refresh mechanism exists |
+| 3 | Wrote `.ai/plans/base-image-refresh.md` — comprehensive plan covering problem statement, audit, all owner decisions, and full workflow/script designs |
+| 4 | All 5 owner decisions resolved (see plan §Owner Decisions) |
+| 5 | Branch `chore/base-image-refresh-plan` created; plan committed and pushed |
+
+### Key decisions made this session
+
+- **Versioning model clarified**: `IMAGE_VERSION` tracks the container, not NordVPN. Any rebuild for any reason — base refresh, security fix, config bug, NordVPN bump — produces a new `IMAGE_VERSION`. This is the authoritative statement going forward.
+- **Base refresh = first-class release**: A base image digest bump always pairs with a `IMAGE_VERSION` patch increment, triggers a dev build, and fires the full production release pipeline on merge. Same process as a NordVPN version bump.
+- **Monthly cadence**: GHA cron `0 9 1 * *` (1st of each month, 09:00 UTC).
+- **Dev build on detection**: Yes — mirrors `check-nordvpn-release.yml` pattern; a pre-tested dev image is available on Docker Hub before the owner reviews the draft PR.
+- **`task check-base` approved**: Taskfile.yml modification approved for Phase C.
+- **`apt-get upgrade` revisit**: Deferred — revisit after first successful monthly base refresh.
+
+### Stopping point
+
+- **Status**: Plan written, all decisions resolved. Implementation ON HOLD — owner pausing to accumulate agent credits.
+- **Branch**: `chore/base-image-refresh-plan` — plan doc only; no scripts or workflows written yet.
+- **Working tree**: Clean after commit.
+- **No validation needed**: This session produced no Dockerfile, rootfs, or script changes.
+
+### What the next agent must do
+
+Read `.ai/plans/base-image-refresh.md` in full before touching anything. The plan is fully designed and approved — the next agent executes it, it does not redesign it.
+
+Implementation order (Phases A → B → C → D):
+
+1. **Phase A** — Create `scripts/check-base-image.sh` (local diagnostic script; see plan §Phase A for the exact script).
+2. **Phase B** — Create `.github/workflows/check-base-image.yml` (monthly GHA cron; see plan §Phase B for the full workflow YAML). This workflow calls `publish-dev.yml` as a reusable workflow — confirm `publish-dev.yml` still exists and its `with:` inputs match (`nordvpn_version`, `image_version`) before wiring.
+3. **Phase C** — Add `task check-base` entry to `Taskfile.yml` (approved; see plan §Phase C for the exact YAML block). This is a Taskfile.yml modification — normally frozen, but explicitly approved for this task.
+4. **Phase D** — Update `.ai/current.md`, `.ai/tasks/active.md`, `AGENTS.md` Known Issues, `docs/build-and-publish.md`.
+
+Use **Supervised mode** (one phase per human gate) — each phase is independently testable and reviewable. Do not batch phases into one commit.
+
+### Fragile areas (unchanged from previous session)
+
+- Base digest `noble@sha256:53411508…` must not change without explicit instruction.
+- `# syntax` directive must NOT be added to Dockerfile.
+- Token for `task verify-live` stays outside the repo.
+- `.ai/current.md` is hand-maintained.
+- s6 + capabilities: stateless `docker run` checks must use `--entrypoint /bin/bash`.
+
+---
+
 ## Session Close — 2026-06-26 (prime-ai-docs v1.2.1 template update)
 
 ### Completed this session
