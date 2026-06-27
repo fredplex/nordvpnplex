@@ -38,6 +38,7 @@ Key areas:
 - Meshnet support (peer routing and LAN discovery)
 - Watchdog reconnection (`nord_watch` polling)
 - Automated version detection daily + auto dev build/test & draft PR
+- Base image refresh check monthly + auto dev build & draft PR
 - GHA release CD pipeline triggered by PR merges
 - Smoke-test suite (uses entrypoint override for stateless checks)
 

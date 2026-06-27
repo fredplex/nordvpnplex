@@ -78,7 +78,7 @@ Container is stateless between restarts. The only persistent state is:
 
 **Choice**: `FROM ghcr.io/linuxserver/baseimage-ubuntu:noble@sha256:53411508…`
 **Rationale**: Makes the "never bump base without instruction" constraint enforceable — a tag re-target can no longer bypass it silently.
-**Gotcha**: Upgrading the base requires an explicit `@sha256:…` change. Future work: a base-refresh cadence (periodic re-pin + rebuild) to pick up OS patches.
+**Gotcha**: Upgrading the base requires an explicit `@sha256:…` change. A monthly base-refresh cadence has been implemented to automate updates, dev builds, and draft PRs while keeping the digest pin protection.
 
 ### Decision: wireguard → wireguard-tools; iptables explicit
 

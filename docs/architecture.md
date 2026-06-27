@@ -153,7 +153,7 @@ The kill switch fires **first** — traffic is blocked before the VPN establishe
 **Context**: `FROM ghcr.io/linuxserver/baseimage-ubuntu:noble` always resolves to whatever the tag points to at build time — a future linuxserver.io push could silently change the base.
 **Decision**: Pin the digest: `FROM ghcr.io/linuxserver/baseimage-ubuntu:noble@sha256:53411508...`
 **Rationale**: The CLAUDE.md constraint "never bump the base image without explicit instruction" was aspirational without the pin — a tag re-target would bypass it. The digest makes the constraint enforceable.
-**Consequences**: Upgrading the base requires an explicit `@sha256:…` update. Future work: a base-refresh cadence.
+**Consequences**: Upgrading the base requires an explicit `@sha256:…` update. A monthly base-refresh cadence has been implemented (via check-base-image.yml cron) to automate digest updates, dev testing, and draft PRs while keeping the digest pin protection.
 
 ### wireguard → wireguard-tools (package rationalisation)
 
