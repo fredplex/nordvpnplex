@@ -1,6 +1,6 @@
 # Plan: Base Image Refresh Cadence
 
-**Status**: APPROVED — ready to implement (all owner decisions resolved).  
+**Status**: In progress (Phase A complete)  
 **Branch**: `chore/base-image-refresh-plan`  
 **Date**: 2026-06-27
 
