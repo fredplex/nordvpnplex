@@ -5,6 +5,36 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-06-26 (prime-ai-docs v1.2.1 template update)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | `docs/architecture.md` — merged backup into new template: all Phase 6 project content (10 ADRs, versioning design, layer discipline, 8 gotchas); added Caching Strategy + Auth Model sections | `8257459` |
+| 2 | `.ai/README.md` — restored "Stable maintenance" phase text and full prompts bullet list (including `execute-plan-prompt.md`) | `8257459` |
+| 3 | `.ai/prompts/execute-plan-prompt.md` — added (new from template) | `8257459` |
+| 4 | `.ai/prompts/intermediate-phase-prompt.md`, `session-close-prompt.md` — template updates | `8257459` |
+| 5 | `.ai/workflows/implementation.md` — template update | `8257459` |
+| 6 | `PRIME.md`, `prime-ai-docs.mjs`, `.ai-prime-manifest.json/.version/.versions.json` — prime infrastructure committed | `8257459` |
+
+### Key decisions
+
+- **PRIME.md merge protocol followed**: new template structure wins; project-specific content extracted from backup and placed into equivalent sections; new sections (Caching Strategy, Auth Model) filled with nordvpn-appropriate content; never copied old file wholesale.
+- **`.ai-prime-backup/` not committed**: ephemeral working artifact; left in working tree only.
+- **Committed directly to `main`**: no feature branch (acknowledged; not protocol-compliant; user approved).
+
+### Validation
+
+- No Dockerfile/rootfs/scripts changed — `task verify` not required.
+- `docs/` and `.ai/` files only.
+
+### Fragile areas
+
+- Same as previous session (base digest, syntax directive, token outside repo, s6+capabilities).
+
+---
+
 ## Session Close — 2026-06-26 (Dockerfile optimization — implementation)
 
 ### Completed this session

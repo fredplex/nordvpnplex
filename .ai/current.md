@@ -1,8 +1,8 @@
 # Current Project State
 
-## Stable — Dockerfile Optimization Shipped (2026-06-26)
+## Stable — Dockerfile Optimization + Template Update Shipped (2026-06-26)
 
-**Status**: All Phases 0–5 merged to `chore/dockerfile-optimization`, pushed. Phase 6 (documentation sync) in progress on same branch.
+**Status**: All 6 phases complete, merged to `main`, pushed. prime-ai-docs v1.2.1 template update applied and pushed.
 
 ### Just completed (Phases 0–5, `chore/dockerfile-optimization`)
 
@@ -13,11 +13,12 @@
 - **Phase 4**: `wireguard` → `wireguard-tools`; `iptables` explicit; `net-tools`/`iputils-ping` removed. Validated by `task verify-live` (Spain #195 Madrid, NordLynx, 77.243.86.224)
 - **Phase 5**: HEALTHCHECK — `--interval=60s --start-period=45s`; healthy at t=5s; verify-live PASS (Spain #170 Madrid, NordLynx, 192.145.39.2, 110.2 MB)
 
-**Current branch**: `chore/dockerfile-optimization` at `b92d971` (pushed)
+**Current branch**: `main` at `8257459` (pushed)
 
 ### Recently shipped
 
-- **Dockerfile optimization Phases 0–5** (2026-06-26, `chore/dockerfile-optimization`) — Security hardening, reproducibility, health reporting. See above.
+- **prime-ai-docs v1.2.1 template update** (2026-06-26, `main` `8257459`) — Template re-prime via `prime-ai-docs.mjs`. Merged backup into `docs/architecture.md` (new template structure; all Phase 6 project content, 10 architectural decisions, versioning design, new Caching Strategy + Auth Model sections) and `.ai/README.md` (restored "Stable maintenance" phase text and prompts bullet list). Added `execute-plan-prompt.md`. Updated `intermediate-phase-prompt.md`, `session-close-prompt.md`, `implementation.md`. PRIME.md added to repo.
+- **Dockerfile optimization Phases 0–5 + merge to main** (2026-06-26, `7886cc8`) — Security hardening, reproducibility, health reporting. See above.
 - **Dockerfile optimization plan written** (2026-06-25, planning session on `main`) — Two-pass review: initial Dockerfile-only review produced 3 recommendations (2 wrong), followed by deep analysis of all 19 rootfs scripts, Taskfile, verify.sh, bump.sh, all 3 GHA workflows, .gitattributes, .dockerignore, and git index permissions. Corrected the errors and uncovered 9 additional findings. Plan separates clear wins from owner decisions.
 - Current State Audit & Workflows Unification (2026-06-24, `chore/audit-improvements`) — Performed repository-wide audit, pruned unused Web/API boilerplate in engineering/security rules, archived stale files/plans, and consolidated scrapers into `scripts/get-latest-version.sh`. Parameterized and unified CI smoke tests under `verify.sh`, and configured `publish.yml` with `paths` trigger filters. Aligned local and GHA dev builds to tag `:dev`, `:dev-<hash>`, `:dev-<version>`, and `:<image_version>-dev` (with container `IMAGE_VERSION` set to `<image_version>-dev` to mirror production metadata conventions). Updated all reference docs (`docs/architecture.md`, `docs/build-and-publish.md`, `docs/quick-build-checklist.md`, and `docs/user-guide.md`) to align with the changes.
 - Native release notifications (2026-06-24, `chore/publish-native-notify`) — `publish.yml` now ends with `gh release create` (built-in `GITHUB_TOKEN`, no secrets): a GitHub Release on success emails repo watchers; native GitHub Actions emails cover failures. Documented across all five product docs with explicit agent/human/GitHub roles. Owner one-time setup: Watch → Custom → Releases.
@@ -35,7 +36,7 @@
 
 ### Next step
 
-Merge `chore/dockerfile-optimization` to `main`. Then watch for the next NordVPN release (daily checker handles detection automatically).
+Watch for the next NordVPN release — the daily checker auto-builds/tests a dev image and opens a draft PR. No active task.
 
 **Future work logged**: Base-refresh cadence — periodically re-pin the base digest + rebuild (then reconsider removing `apt-get upgrade`). Not scheduled; deferred.
 

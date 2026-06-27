@@ -6,7 +6,7 @@ Current work in progress.
 
 ## Current Status
 
-**Active**: Dockerfile optimization — Phase 6 (documentation sync) in progress on `chore/dockerfile-optimization`.
+**Active**: Stable maintenance — watching for next NordVPN release (daily checker handles detection automatically).
 
 - [x] Deep analysis of Dockerfile + all rootfs scripts, build tooling, CI workflows, .gitattributes, .dockerignore, git index permissions
 - [x] Master plan written + all 7 owner questions answered (2026-06-26)
@@ -19,7 +19,7 @@ Current work in progress.
 - [x] **Phase 5** — HEALTHCHECK complete (2026-06-26): interval=60s start-period=45s; healthy at t=5s (NordLynx); verify 3/0/1; verify-live PASS (Spain #170 Madrid, NordLynx, 192.145.39.2, 110.2 MB).
 - [x] **Phase 6** — documentation sync complete (2026-06-26): all docs/, .ai/, AGENTS.md, CLAUDE.md, README.md updated to reflect shipped changes.
 
-**Dockerfile optimization COMPLETE** — all 6 phases done on `chore/dockerfile-optimization`. Ready to merge to `main`.
+**Dockerfile optimization COMPLETE** — all 6 phases merged to `main` (`7886cc8`).
 
 **Watching**: next NordVPN release — the daily checker auto-builds/tests a dev image and opens a draft PR.
 
@@ -89,6 +89,7 @@ Current work in progress.
 
 ## Recently Completed
 
+- **prime-ai-docs v1.2.1 template update** (2026-06-26, `8257459`) — Re-primed via `prime-ai-docs.mjs`. Merged backup into `docs/architecture.md` and `.ai/README.md`. Added `execute-plan-prompt.md`. PRIME.md added to repo.
 - **Dockerfile optimization plan** (2026-06-25, planning session) — Two-pass review of the Dockerfile and all interacting files (19 rootfs scripts, Taskfile, verify.sh, bump.sh, 3 GHA workflows, .gitattributes, .dockerignore, git index). Produced `.ai/plans/dockerfile-optimization.md` with 12 findings tiered into clear wins (Tier 1), owner decisions (Tier 2), and future work (Tier 3). Corrected 3 wrong initial recommendations (`curl` is runtime, `chmod` block is necessary, `apt-get upgrade` is a decision point). No code changes — plan only.
 - **Current State Audit & Workflows Unification** (2026-06-24, `chore/audit-improvements`) — Hygiene cleanup (boilerplate removal, file archiving), package scraping consolidation (`get-latest-version.sh`), parameterized `verify.sh` for customizable runs, CI smoke test unification, local & CI dev tag alignment (`dev`, `dev-<hash>`, `dev-<version>`, and `<image_version>-dev`), and full reference documentation updates.
 - **Unified build & release pipeline** (2026-06-23, `feature/unified-builds`) — GHA-centric release on PR merge, daily checker with auto-dev build, manual prod/dev run options, and updated docs (§3.5, §4.4, §5)
