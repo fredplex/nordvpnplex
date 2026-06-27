@@ -15,6 +15,7 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 | 2 | Phase B: GitHub Actions workflow `.github/workflows/check-base-image.yml` created | `aba8a41` |
 | 3 | Phase C: Taskfile command `task check-base` added | `f412b4b` |
 | 4 | Phase D: Updated current status, active tasks, AGENTS.md, and build-and-publish.md | `6716c56` |
+| 5 | Post-plan docs: Documented rebuilding/refreshing base image options in README.md and user-guide.md | `801daa6` |
 
 ### Key decisions
 
