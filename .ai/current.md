@@ -1,24 +1,24 @@
 # Current Project State
 
-## On Hold — Base Image Refresh Plan Written (2026-06-27)
+## Base Image Refresh Cadence Implemented (2026-06-27)
 
-**Status**: Plan complete, all decisions resolved, implementation paused pending agent credits. Branch `chore/base-image-refresh-plan` pushed.
+**Status**: Base image refresh cadence fully implemented. Diagnostic script, GHA cron workflow, and Taskfile integration are active.
 
 ### Active plan
 
-**Plan**: `.ai/plans/base-image-refresh.md` — fully designed, all owner decisions answered, ready to implement.  
-**Branch**: `chore/base-image-refresh-plan` (pushed, plan doc only — no scripts or workflows yet)
+**Plan**: `.ai/plans/base-image-refresh.md` — complete.
+**Branch**: `chore/base-image-refresh-plan` (to be merged)
 
-**What needs to be built** (4 phases, all approved):
-- Phase A: `scripts/check-base-image.sh` — local digest checker
-- Phase B: `.github/workflows/check-base-image.yml` — monthly GHA cron, dev build + draft PR
-- Phase C: `task check-base` entry in `Taskfile.yml` (Taskfile modification explicitly approved)
-- Phase D: Doc updates (`.ai/current.md`, `.ai/tasks/active.md`, `AGENTS.md`, `docs/build-and-publish.md`)
+**Completed implementation** (all 4 phases):
+- Phase A: `scripts/check-base-image.sh` — local digest checker (completed 2026-06-27)
+- Phase B: `.github/workflows/check-base-image.yml` — monthly GHA cron, dev build + draft PR (completed 2026-06-27)
+- Phase C: `task check-base` entry in `Taskfile.yml` (completed 2026-06-27)
+- Phase D: Doc updates (`.ai/current.md`, `.ai/tasks/active.md`, `AGENTS.md`, `docs/build-and-publish.md`) (completed 2026-06-27)
 
-**Key versioning model decision made this session**:  
+**Key versioning model decision**:  
 `IMAGE_VERSION` tracks the container, not NordVPN. A base image refresh is a first-class release: digest change + `IMAGE_VERSION` patch increment + dev build + full production publish on merge.
 
-**Next agent**: Read `.ai/plans/base-image-refresh.md` fully before touching anything. Use Supervised mode (one phase per human gate). See `SESSION_NOTES.md` top entry for the full handoff.
+**Next step**: Merge `chore/base-image-refresh-plan` to `main` (owner approval required).
 
 ---
 
@@ -58,9 +58,9 @@
 
 ### Next step
 
-Watch for the next NordVPN release — the daily checker auto-builds/tests a dev image and opens a draft PR. No active task.
+Watch for both the next NordVPN release (daily cron) and the next base image digest refresh (monthly cron). Both automatically open draft PRs and publish tested dev builds.
 
-**Future work logged**: Base-refresh cadence — periodically re-pin the base digest + rebuild (then reconsider removing `apt-get upgrade`). Not scheduled; deferred.
+**Future work logged**: Reconsider `apt-get upgrade` — once the base-refresh cadence has run successfully a few times, evaluate whether to remove `apt-get upgrade` from the Dockerfile to improve local build reproducibility.
 
 ### Fragile areas (post-optimization)
 

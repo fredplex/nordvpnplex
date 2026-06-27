@@ -13,7 +13,8 @@ image appearing on Docker Hub. It is written for both humans and AI agents.
 3. [Complete workflow at a glance](#3-complete-workflow-at-a-glance)
    - [3.5 Dev workflow](#35-dev-workflow)
 4. [Automated triggers (GitHub Actions)](#4-automated-triggers-github-actions)
-   - [4.5 Release notifications](#45-release-notifications)
+   - [4.5 Monthly base image check](#45-monthly-base-image-check)
+   - [4.6 Release notifications](#46-release-notifications)
 5. [Step-by-step: version bump and publish](#5-step-by-step-version-bump-and-publish)
 6. [Manual triggers](#6-manual-triggers)
 7. [One-time setup: Docker Hub credentials in GitHub](#7-one-time-setup-docker-hub-credentials-in-github)
@@ -131,7 +132,7 @@ or similar errors. `task verify` and `task verify-live` work in Git Bash without
 **Publishing and tagging (automated)**
 - Merging the PR triggers the release workflow on GitHub.
 - GHA builds the release image, verifies it with 3 smoke tests, and pushes `fredplex/nordvpn:latest` + `fredplex/nordvpn:<tag>` to Docker Hub.
-- GHA publishes a **GitHub Release** (creating the version tag + release notes), which sends a native notification email to repo watchers. Workflow failures are emailed natively via GitHub Actions notifications. See [§4.5 Release notifications](#45-release-notifications).
+- GHA publishes a **GitHub Release** (creating the version tag + release notes), which sends a native notification email to repo watchers. Workflow failures are emailed natively via GitHub Actions notifications. See [§4.6 Release notifications](#46-release-notifications).
 
 **If an agent is doing a manual bump (no PR)**
 - Agent runs `task bump NORDVPN_VERSION=x.x.x IMAGE_VERSION=y.y.y`.
@@ -242,7 +243,7 @@ Switch back to `fredplex/nordvpn:latest` when done testing.
 
 ## 4. Automated triggers (GitHub Actions)
 
-Four workflows run automatically or on-demand. None of them push a production image without a human-created git tag.
+Five workflows run automatically or on-demand. None of them push a production image without a human-created git tag.
 
 ### 4.1 Weekly version check
 
@@ -291,7 +292,7 @@ Four workflows run automatically or on-demand. None of them push a production im
 5. Pushes two tags to Docker Hub on success:
    - `fredplex/nordvpn:latest`
    - `fredplex/nordvpn:<tag>` (e.g. `fredplex/nordvpn:5.6.0`)
-6. Creates a **GitHub Release** for the version tag (only if not already existing) — this is what sends the native success notification (see [§4.5 Release notifications](#45-release-notifications))
+6. Creates a **GitHub Release** for the version tag (only if not already existing) — this is what sends the native success notification (see [§4.6 Release notifications](#46-release-notifications))
 
 **Human action required:** Merge the draft PR (which modifies `Dockerfile`) or create/push a git tag.
 **Secrets needed:** `DOCKER_USERNAME` and `DOCKER_TOKEN` (see [Section 7](#7-one-time-setup-docker-hub-credentials-in-github)).
@@ -331,9 +332,26 @@ Four workflows run automatically or on-demand. None of them push a production im
 
 For full dev workflow documentation, see [§3.5 Dev workflow](#35-dev-workflow).
 
+### 4.5 Monthly base image check
+
+**File:** `.github/workflows/check-base-image.yml`
+**Trigger:** 1st of each month at 09:00 UTC (cron), or manually
+
+**What it does:**
+1. Resolves the latest digest for `ghcr.io/linuxserver/baseimage-ubuntu:noble` without pulling the image.
+2. Compares the latest digest against the pinned digest in the `FROM` line of the `Dockerfile`.
+3. If a mismatch is detected (newer base image is available):
+   - Bumps `IMAGE_VERSION` in the `Dockerfile`, `README.md`, and `CLAUDE.md` using `scripts/bump.sh` (patch increment).
+   - Bumps the digest pin in the `Dockerfile` to the new digest.
+   - Triggers the dev build workflow (`publish-dev.yml`) to build and verify a pre-tested dev image (e.g. `dev-<version>`, `<image_version>-dev`).
+   - Opens a **draft PR** on branch `auto/base-image-<suggested_image_version>`.
+
+**Human action required:** Review the draft PR, confirm/adjust the suggested patch version, test the dev build container on Unraid/local, and merge the PR.
+**Secrets needed:** None.
+
 ---
 
-### 4.5 Release notifications
+### 4.6 Release notifications
 
 Notifications are **GitHub-native** — there is no SMTP server, no third-party email
 action, and no extra secrets. Two cases are covered:

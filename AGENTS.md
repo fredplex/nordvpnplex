@@ -29,6 +29,7 @@ task docker-build    # Build local test image (tagged with git hash)
 task verify          # Smoke-test the local image (4 credentialless checks)
 task verify-live TOKEN_FILE=<path>   # Real NordLynx egress test — mandatory pre-release gate
 task check-version   # Check NordVPN Debian repo for newer versions
+task check-base      # Check if a newer base image digest is available
 task bump NORDVPN_VERSION=x.x.x IMAGE_VERSION=y.y.y   # Apply version bump
 task release         # Tag + push to trigger GitHub publish workflow
 task                 # (no args) print current git tag and hash
@@ -311,7 +312,8 @@ rootfs/
 |---|---|---|
 | `.github/workflows/build-validate.yml` | PR → main | `docker build` only — no push. Catches Dockerfile errors early. |
 | `.github/workflows/publish.yml` | Push of semver tag (e.g. `5.6.0`) | Builds and pushes `:latest` + `:<tag>` to Docker Hub. |
-| `.github/workflows/check-nordvpn-release.yml` | Weekly cron (Mon 08:00 UTC) + manual | Checks NordVPN package repo; opens draft PR if newer version available. |
+| `.github/workflows/check-nordvpn-release.yml` | Daily cron (08:00 UTC) + manual | Checks NordVPN package repo; opens draft PR if newer version available. |
+| `.github/workflows/check-base-image.yml` | Monthly cron (1st at 09:00 UTC) + manual | Checks base image for newer digest; opens draft PR + triggers dev build. |
 
 ### Required GitHub repo secrets
 
@@ -385,7 +387,8 @@ Do not skip either step, even for small tasks. The branch protects `main`; the p
 | `task verify` | Smoke-test the local image (4 credentialless checks) |
 | `task verify-live TOKEN_FILE=<path>` | Real NordLynx egress test — mandatory pre-release gate |
 | `task check-version` | Check NordVPN Debian repo for newer versions |
-| `task bump NORDVPN_VERSION=x IMAGE_VERSION=y` | Apply version bump to all 5 locations |
+| `task check-base` | Check if a newer base image digest is available |
+| `task bump NORDVPN_VERSION=x.x.x IMAGE_VERSION=y.y.y` | Apply version bump to all 5 locations |
 | `task release` | Create annotated git tag + push (triggers publish workflow) |
 | `task` (no args) | Print current git tag and hash |
 

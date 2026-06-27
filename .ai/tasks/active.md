@@ -6,20 +6,14 @@ Current work in progress.
 
 ## Current Status
 
-**On Hold**: Base image refresh plan written — awaiting agent credits to implement.
+**Active**: Watching for both NordVPN releases and base image updates. Draft PRs and dev builds are automated.
 
-### Base Image Refresh Cadence (ON HOLD — plan approved, not yet implemented)
+### Base Image Refresh Cadence (Complete)
 
-**Plan**: `.ai/plans/base-image-refresh.md`  
-**Branch**: `chore/base-image-refresh-plan` (pushed)  
-**All owner decisions resolved** — see plan §Owner Decisions.
-
-- [x] **Phase A** — `scripts/check-base-image.sh` (local digest checker script)
-- [x] **Phase B** — `.github/workflows/check-base-image.yml` (monthly cron, dev build, draft PR)
-- [x] **Phase C** — `task check-base` entry in `Taskfile.yml` *(Taskfile edit explicitly approved)*
-- [ ] **Phase D** — doc updates (`.ai/current.md`, `active.md`, `AGENTS.md`, `docs/build-and-publish.md`)
-
-Use **Supervised mode**: one phase per human gate. Do not batch.
+- [x] **Phase A** — `scripts/check-base-image.sh` (local digest checker script) (2026-06-27)
+- [x] **Phase B** — `.github/workflows/check-base-image.yml` (monthly cron, dev build, draft PR) (2026-06-27)
+- [x] **Phase C** — `task check-base` entry in `Taskfile.yml` *(Taskfile edit explicitly approved)* (2026-06-27)
+- [x] **Phase D** — doc updates (`.ai/current.md`, `active.md`, `AGENTS.md`, `docs/build-and-publish.md`) (2026-06-27)
 
 ---
 
@@ -46,11 +40,10 @@ Use **Supervised mode**: one phase per human gate. Do not batch.
 
 ## Future Work (deferred, not scheduled)
 
-### Base-refresh cadence
+### Reconsider `apt-get upgrade`
 
-**Goal**: Periodically re-pin the base digest (`noble@sha256:…`) + rebuild so OS security patches land without a manual base bump. Once this cadence exists, reconsider removing `apt-get upgrade` (currently kept as the security-patching mechanism).
-**Why deferred**: No urgency right now; the digest pin + `apt-get upgrade` is the current posture.
-**When to revisit**: When the base image tag diverges significantly from the pinned digest (check linuxserver.io release notes), or when a security advisory targets Ubuntu Noble base packages.
+**Goal**: Evaluate whether to remove `apt-get upgrade` from the Dockerfile.
+**Why deferred**: Revisit after the first few monthly base image refreshes have successfully completed and validated.
 
 ---
 
