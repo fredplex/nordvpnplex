@@ -122,6 +122,11 @@ tasks:
     cmds:
       - bash scripts/check-version.sh
 
+  check-base:
+    desc: Check if a newer base image digest is available for ghcr.io/linuxserver/baseimage-ubuntu:noble
+    cmds:
+      - bash scripts/check-base-image.sh
+
   bump:
     desc: |
       Bump NordVPN and image versions across all files, then show the diff.

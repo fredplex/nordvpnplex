@@ -16,7 +16,7 @@ Current work in progress.
 
 - [x] **Phase A** — `scripts/check-base-image.sh` (local digest checker script)
 - [x] **Phase B** — `.github/workflows/check-base-image.yml` (monthly cron, dev build, draft PR)
-- [ ] **Phase C** — `task check-base` entry in `Taskfile.yml` *(Taskfile edit explicitly approved)*
+- [x] **Phase C** — `task check-base` entry in `Taskfile.yml` *(Taskfile edit explicitly approved)*
 - [ ] **Phase D** — doc updates (`.ai/current.md`, `active.md`, `AGENTS.md`, `docs/build-and-publish.md`)
 
 Use **Supervised mode**: one phase per human gate. Do not batch.
