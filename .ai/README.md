@@ -1,14 +1,14 @@
 # Agent Workspace
 
-Welcome to the `.ai/` directory — the operational context for working on **nordvpn**.
+Welcome to the `.ai/` directory — the operational context for working on **nordvpnplex**.
 
 ---
 
 ## Quick Orientation
 
 **What is this app?**
-- NordVPN Container
-
+- NordVPN container
+- **Stack**: Docker
 
 **Current phase**: Stable maintenance — update NordVPN client version as new packages release, verify locally, publish via `task release`
 
@@ -47,7 +47,12 @@ Track work here. Update `active.md` as you work; move completed items to `comple
 Detailed work plans for approved initiatives. Create a plan before starting multi-step work.
 
 ### `/prompts/` — Reusable Agent Prompts
-Copy-paste prompts for onboarding, intermediate phases, and session close.
+Copy-paste prompts for starting a session, executing plan phases, and closing a session.
+
+- **`onboarding-prompt.md`** — paste as opening message to start a new agent session
+- **`intermediate-phase-prompt.md`** — Supervised mode: execute one phase with human approval before commit
+- **`execute-plan-prompt.md`** — Autonomous mode: execute all phases with commits per phase; human approves push
+- **`session-close-prompt.md`** — trigger the handoff and session-close protocol
 
 ### `/integrations/` — Integration Notes
 Quick-ref notes on external systems. Full specs in `docs/integrations/`.

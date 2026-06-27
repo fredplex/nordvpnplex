@@ -1,5 +1,5 @@
-vibe-coding-template v1.1.0
-Primed: 2026-06-23T02:42:16.105Z
+vibe-coding-template v1.2.1
+Primed: 2026-06-27T01:14:32.732Z
 
 To check if a newer version of the template is available:
   node prime-ai-docs.mjs --version

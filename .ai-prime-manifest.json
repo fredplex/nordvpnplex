@@ -1,17 +1,17 @@
 {
-  "templateVersion": "1.1.0",
-  "primedAt": "2026-06-23T02:42:16.106Z",
-  "targetDir": "C:\\Users\\fredp\\Documents\\GitHub\\nordvpn",
+  "templateVersion": "1.2.1",
+  "primedAt": "2026-06-27T01:14:32.736Z",
+  "targetDir": "C:\\Users\\fredp\\Documents\\GitHub\\nordvpnplex",
   "mode": "update",
   "context": {
-    "date": "2026-06-23",
-    "name": "nordvpn",
-    "description": "NordVPN Container",
-    "stack": "",
-    "install": "npm ci",
-    "dev": "npm run dev",
-    "validate": "npm run validate:local",
-    "test": "npm run test:e2e"
+    "date": "2026-06-27",
+    "name": "nordvpnplex",
+    "description": "NordVPN container",
+    "stack": "Docker",
+    "install": "Docker",
+    "dev": "Docker",
+    "validate": "Docker",
+    "test": "Docker"
   },
   "files": [
     {
@@ -20,15 +20,13 @@
     },
     {
       "path": "AGENTS.md",
-      "status": "updated",
-      "fromVersion": "1.0.0",
-      "toVersion": "1.1.0"
+      "status": "current"
     },
     {
       "path": ".ai/README.md",
       "status": "updated",
-      "fromVersion": "1.0.0",
-      "toVersion": "1.0.1"
+      "fromVersion": "1.0.1",
+      "toVersion": "1.2.0"
     },
     {
       "path": ".ai/current.md",
@@ -64,7 +62,9 @@
     },
     {
       "path": ".ai/workflows/implementation.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "1.2.0"
     },
     {
       "path": ".ai/workflows/validation.md",
@@ -88,11 +88,19 @@
     },
     {
       "path": ".ai/prompts/intermediate-phase-prompt.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "1.2.0"
     },
     {
       "path": ".ai/prompts/session-close-prompt.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "1.2.0"
+    },
+    {
+      "path": ".ai/prompts/execute-plan-prompt.md",
+      "status": "created"
     },
     {
       "path": "docs/README.md",
@@ -100,7 +108,9 @@
     },
     {
       "path": "docs/architecture.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "1.2.1"
     },
     {
       "path": "docs/project-rules.md",

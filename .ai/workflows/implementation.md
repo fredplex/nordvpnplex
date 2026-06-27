@@ -90,24 +90,73 @@ Plan → Code → Test → Validate cycle for effective development.
 ## 4. Validate Phase
 
 ```bash
-npm run validate:local    # Static gate — always run
-npm run test:e2e    # Runtime/test gate
+Docker    # Static gate — always run
+Docker    # Runtime/test gate
 ```
 
 See `.ai/workflows/validation.md` for the full gate specification.
 
 ---
 
-## Intermediate Phase Commit Protocol
+## Execution Modes
 
-When completing a phase of a multi-phase plan:
+When executing a multi-phase plan, choose one of two modes:
 
-1. Preflight: `git status` — identify only phase-relevant changes
-2. Run focused validation (narrowest meaningful test set for this phase)
-3. Mark phase complete in the plan file and `.ai/tasks/active.md`
-4. Stage only phase files + docs/tracking updates
-5. Formulate commit message — **stop and request human approval**
-6. Once approved, commit and push to the task branch
+| Mode | Use when | Human gates |
+|------|----------|-------------|
+| **Supervised** — Single Phase, Human-Gated | You want to review and approve each phase before it commits | After each phase (commit + push) |
+| **Autonomous** — Auto-Execute Full Plan | The plan is approved; you want the agent to run all phases and only stop before pushing | Before the final push only |
+
+Trigger **Supervised** mode with `intermediate-phase-prompt.md`.
+Trigger **Autonomous** mode with `execute-plan-prompt.md`.
+
+---
+
+## Phase Commit Protocol
+
+### Supervised — Single Phase, Human-Gated
+
+Use this mode when executing one phase at a time with human approval before each commit.
+
+1. **Preflight** — run `git status`; identify only phase-relevant changes; note any unrelated pre-existing changes but do not touch them.
+2. **Confirm scope** — name the active plan file and the requested phase; confirm the phase's scoped changes before editing anything; if scope is ambiguous, stop and report — do not guess.
+3. **Implement this phase only** — no opportunistic cleanup, no work from later phases.
+4. **Run focused validation** — use the narrowest chain from `validation.md` for this change type; if validation fails due to this phase, fix within scope; if unrelated, stop and report.
+5. **Clean build artifacts** — revert compile-time edits by build tools if present; do not revert unrelated files.
+6. **Update tracking** — mark phase complete in the plan + `.ai/tasks/active.md`; update `docs/` and `.ai/memory/` if behavior, APIs, or architecture changed.
+7. **Stage and formulate** — stage only phase files + docs/tracking updates; write a proposed commit message with a semantic prefix.
+8. **Stop — request explicit human approval** before commit and push.
+9. **Execute** — once approved, commit and push to the task branch.
+10. **Report** — commit hash, committed files, validation summary, remaining local changes — **wait for instructions**.
+
+---
+
+### Autonomous — Auto-Execute Full Plan
+
+Use this mode when the plan is approved and you want the agent to execute all phases in sequence, committing after each, only stopping before the final push.
+
+**Before starting:**
+- Confirm the plan is already approved by the human.
+- Read all phases to understand the full scope.
+- Record the pre-run commit hash: `git rev-parse HEAD` — this is the rollback point if needed.
+
+**For each phase, in order:**
+
+1. **Preflight** — run `git status`; identify phase-relevant changes; note unrelated changes but do not touch them.
+2. **Implement this phase only** — no work from other phases, no opportunistic cleanup.
+3. **Run focused validation** for this phase's change type (see `validation.md`).
+   - **If validation fails**: stop immediately; print a phase-failure summary; print the suggested rollback command — `git reset --hard <pre-run-hash>` — but **do not execute it**; wait for human instructions.
+4. **Clean build artifacts** if present — do not revert unrelated files.
+5. **Update tracking** — mark phase complete in plan + `active.md`; update `docs/` and `.ai/memory/` as needed.
+6. **Stage and commit** — stage phase files + tracking updates; commit with semantic prefix — **do not push**.
+7. **Print phase-complete line** — phase name, commit hash, validation result.
+
+**After all phases complete:**
+
+1. Print a full run summary: all phases, commit hashes, any warnings.
+2. Formulate the push command.
+3. **Stop — request explicit human approval before push.**
+4. Once approved: push task branch; report final pushed state.
 
 ---
 
@@ -115,8 +164,8 @@ When completing a phase of a multi-phase plan:
 
 At end of session:
 
-1. Run `npm run validate:local` — fix any failures before closing
-2. Run `npm run test:e2e` if runtime behavior changed
+1. Run `Docker` — fix any failures before closing
+2. Run `Docker` if runtime behavior changed
 3. Clean/revert dev-environment cache/artifacts if applicable
 4. Update `.ai/current.md` — completed work, stopping point, fragile areas
 5. Prepend session close entry to `.ai/SESSION_NOTES.md`
