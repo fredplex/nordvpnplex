@@ -1,0 +1,133 @@
+name: Check Base Image
+
+on:
+  schedule:
+    - cron: '0 9 1 * *'   # Monthly, 1st of each month at 09:00 UTC
+  workflow_dispatch:
+
+jobs:
+  check-base:
+    runs-on: ubuntu-latest
+    outputs:
+      update_available: ${{ steps.check.outputs.update_available }}
+      pinned_digest:    ${{ steps.check.outputs.pinned }}
+      latest_digest:    ${{ steps.check.outputs.latest }}
+      current_image_version:   ${{ steps.image_version.outputs.current }}
+      suggested_image_version: ${{ steps.image_version.outputs.suggested }}
+      current_nordvpn_version: ${{ steps.nordvpn_version.outputs.current }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Resolve digests
+        id: check
+        run: |
+          PINNED=$(grep "^FROM" Dockerfile | sed 's/.*@//')
+          LATEST=$(docker buildx imagetools inspect \
+            ghcr.io/linuxserver/baseimage-ubuntu:noble \
+            --format '{{.Manifest.Digest}}')
+          echo "pinned=${PINNED}" >> "$GITHUB_OUTPUT"
+          echo "latest=${LATEST}" >> "$GITHUB_OUTPUT"
+          if [[ "${PINNED}" == "${LATEST}" ]]; then
+            echo "update_available=false" >> "$GITHUB_OUTPUT"
+            echo "Base image up to date: ${PINNED}"
+          else
+            echo "update_available=true" >> "$GITHUB_OUTPUT"
+            echo "Update: ${LATEST} (pinned: ${PINNED})"
+          fi
+
+      - name: Read current NordVPN version
+        if: steps.check.outputs.update_available == 'true'
+        id: nordvpn_version
+        run: |
+          CURRENT=$(grep "ARG NORDVPN_VERSION" Dockerfile | sed "s/ARG NORDVPN_VERSION='//;s/'$//")
+          echo "current=${CURRENT}" >> "$GITHUB_OUTPUT"
+
+      - name: Calculate suggested IMAGE_VERSION (patch +1)
+        if: steps.check.outputs.update_available == 'true'
+        id: image_version
+        run: |
+          CURRENT=$(grep "ARG IMAGE_VERSION" Dockerfile | sed "s/ARG IMAGE_VERSION='//;s/'$//")
+          IFS='.' read -r major minor patch <<< "${CURRENT}"
+          SUGGESTED="${major}.${minor}.$((patch + 1))"
+          echo "current=${CURRENT}"     >> "$GITHUB_OUTPUT"
+          echo "suggested=${SUGGESTED}" >> "$GITHUB_OUTPUT"
+
+  publish-dev:
+    needs: check-base
+    if: needs.check-base.outputs.update_available == 'true'
+    uses: ./.github/workflows/publish-dev.yml
+    with:
+      nordvpn_version: ${{ needs.check-base.outputs.current_nordvpn_version }}
+      image_version: ${{ needs.check-base.outputs.suggested_image_version }}-dev
+    secrets: inherit
+
+  create-pr:
+    needs: [check-base, publish-dev]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply bump (version increment)
+        run: |
+          bash scripts/bump.sh \
+            "${{ needs.check-base.outputs.current_nordvpn_version }}" \
+            "${{ needs.check-base.outputs.suggested_image_version }}"
+
+      - name: Update base image digest in Dockerfile
+        run: |
+          LATEST="${{ needs.check-base.outputs.latest_digest }}"
+          sed -i "s|@sha256:[a-f0-9]*|@${LATEST}|" Dockerfile
+
+      - name: Open draft PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: auto/base-image-${{ needs.check-base.outputs.suggested_image_version }}
+          commit-message: >
+            chore: bump base image digest + IMAGE_VERSION
+            ${{ needs.check-base.outputs.current_image_version }}
+            → ${{ needs.check-base.outputs.suggested_image_version }}
+          title: >
+            chore: refresh base image
+            (noble digest → ${{ needs.check-base.outputs.suggested_image_version }})
+          body: |
+            A new digest is available for `ghcr.io/linuxserver/baseimage-ubuntu:noble`.
+
+            | | Value |
+            |---|---|
+            | **Pinned digest** | `${{ needs.check-base.outputs.pinned_digest }}` |
+            | **Latest digest** | `${{ needs.check-base.outputs.latest_digest }}` |
+            | **NordVPN version** | `${{ needs.check-base.outputs.current_nordvpn_version }}` (unchanged) |
+            | **IMAGE_VERSION** | `${{ needs.check-base.outputs.current_image_version }}` → `${{ needs.check-base.outputs.suggested_image_version }}` |
+
+            A development build has been successfully built and published to Docker Hub:
+            - **Dev image**: `fredplex/nordvpn:dev-${{ needs.check-base.outputs.current_nordvpn_version }}`
+            - **Moving dev tag**: `fredplex/nordvpn:dev`
+
+            ## Before merging
+            1. Review [linuxserver.io release notes](https://github.com/linuxserver/docker-baseimage-ubuntu/releases)
+               for breaking changes (s6-overlay API changes, dropped packages, etc.)
+            2. Pull the dev image and test on Unraid:
+               ```bash
+               docker pull fredplex/nordvpn:dev-${{ needs.check-base.outputs.current_nordvpn_version }}
+               ```
+            3. Locally: `git pull && task docker-build && task verify`
+            4. `task verify-live TOKEN_FILE=<path>` — mandatory pre-release egress check
+
+            ## After merging
+            Merging triggers the production release pipeline automatically:
+            - Production image built and verified
+            - Pushed as `fredplex/nordvpn:latest` and
+              `fredplex/nordvpn:${{ needs.check-base.outputs.suggested_image_version }}`
+            - GitHub Release created → notification email sent to repo watchers
+
+            > **Draft PR** — do not merge until you have tested the dev image and
+            > run `task verify-live`.
+          draft: true

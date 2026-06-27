@@ -15,7 +15,7 @@ Current work in progress.
 **All owner decisions resolved** — see plan §Owner Decisions.
 
 - [x] **Phase A** — `scripts/check-base-image.sh` (local digest checker script)
-- [ ] **Phase B** — `.github/workflows/check-base-image.yml` (monthly cron, dev build, draft PR)
+- [x] **Phase B** — `.github/workflows/check-base-image.yml` (monthly cron, dev build, draft PR)
 - [ ] **Phase C** — `task check-base` entry in `Taskfile.yml` *(Taskfile edit explicitly approved)*
 - [ ] **Phase D** — doc updates (`.ai/current.md`, `active.md`, `AGENTS.md`, `docs/build-and-publish.md`)
 

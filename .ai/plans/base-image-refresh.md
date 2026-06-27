@@ -1,6 +1,6 @@
 # Plan: Base Image Refresh Cadence
 
-**Status**: In progress (Phase A complete)  
+**Status**: In progress (Phases A & B complete)  
 **Branch**: `chore/base-image-refresh-plan`  
 **Date**: 2026-06-27
 
