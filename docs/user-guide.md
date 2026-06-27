@@ -431,6 +431,27 @@ task release     # Tags git locally and pushes, triggering publish workflow
 
 ---
 
+### Rebuilding / Refreshing the Base Image
+
+Because the base image is pinned to a specific digest (e.g. `noble@sha256:...`) in the `Dockerfile`, standard rebuilds will not pull any newer base image layers unless the digest pin is modified.
+
+#### Scenario A: You want to update the base image to the latest security patch
+If a newer base image is available and you want to upgrade:
+1. **Via GitHub Actions (One-click)**: Go to **Actions → Check Base Image** and run the workflow manually (or wait for the monthly cron on the 1st of the month).
+   * If a new base image is available, GHA automatically bumps the digest pin in the `Dockerfile`, increments the container patch version (`IMAGE_VERSION`), runs a dev build, and opens a draft PR. You test and merge to release.
+2. **Locally**:
+   * Run `task check-base`. If an update is available, the script prints the latest digest.
+   * Update the pinned digest on line 1 of the `Dockerfile`.
+   * Run `task bump NORDVPN_VERSION=<current> IMAGE_VERSION=<new_patch_version>` to update version pins.
+   * Run `task docker-build` and `task verify-live TOKEN_FILE=<path>` to test, then commit and push to `main` (or run `task release`).
+
+#### Scenario B: You want to rebuild the container with the *existing* base image
+If you made changes to scripts inside `rootfs/` or want to force a clean build without updating the base image digest:
+1. **Via GitHub Actions**: Go to **Actions → Publish to Docker Hub**, click **Run workflow**, and run it (optionally overriding the version inputs).
+2. **Locally**: Commit your changes and run `task release` to tag the repository and trigger the release CD workflow.
+
+---
+
 ## 6. Runtime environment variables
 
 These are set when running the container, not at build time.

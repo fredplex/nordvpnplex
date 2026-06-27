@@ -4,8 +4,9 @@
 
 **WSL2 required on Windows**: Docker Desktop must use the WSL2 backend with WSL integration
 enabled, and Git Bash must be installed. The build scripts use `bash`, `curl`, `sed`, and
-`grep` — these are not available in PowerShell or CMD. See the
-[build and publish docs](docs/build-and-publish.md#2-prerequisites) for setup details.
+`grep` — these are not available in PowerShell or CMD. See the [build and publish docs](docs/build-and-publish.md#2-prerequisites) for setup details.
+
+**Base image pinning**: The base image is pinned to a specific digest for security and stability. To rebuild the container with the latest base image updates or force a manual rebuild, see [Rebuilding / Refreshing the Base Image](docs/user-guide.md#rebuilding--refreshing-the-base-image) in the User Guide.
 
 ---
 
@@ -231,4 +232,5 @@ Nord Security companies are not responsible for and have no control over the nat
 
 ## Changelog
 
+- **2026-06-27** — Base image refresh cadence implemented: added monthly digest check workflow (`.github/workflows/check-base-image.yml`) and local diagnostics script (`scripts/check-base-image.sh` / `task check-base`) to detect base image updates, automate dev builds, and open draft PRs.
 - **2026-06-26** — Dockerfile optimization complete (Phases 0–5): base image digest-pinned (`noble@sha256:53411508…`), `wireguard` → `wireguard-tools` + `iptables` explicit + `net-tools`/`iputils-ping`/`libc6` removed, `COPY --chmod=0755` replaces 10-line chmod block, `DOCKER_BUILDKIT=1` enforced, HEALTHCHECK added (surfaces tunnel state to Docker/Unraid, healthy in ~5s on NordLynx). Pre-release gate: `task verify-live` real-token Spain egress test. `verify.sh` now MSYS/Git Bash safe — no WSL2 needed for `task verify`. Fix shebang paths in `nord_config`/`nord_watch`, expand `.dockerignore`, harden curl bootstrap fetch (`--proto '=https' --tlsv1.2`), add `ARG NORDVPN_RELEASE`.
