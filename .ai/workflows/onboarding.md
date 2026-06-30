@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.0 template=.ai/workflows/onboarding.md date=2026-06-30 -->
+<!-- prime: version=3.0.1 template=.ai/workflows/onboarding.md date=2026-06-30 -->
 # Onboarding Workflow
 
 How to start working effectively in this codebase.
@@ -45,6 +45,10 @@ SESSION_NOTES entries beyond the most recent unless the active task explicitly r
 
 - **Source/doc mismatch**: if the source code contradicts any doc, report it under Fragile
   Areas. Treat source + `.ai/current.md` as authoritative until the human confirms otherwise.
+- **AGENTS.md staleness**: if the Architecture, Key Boundaries, or Validation sections of
+  `AGENTS.md` appear inconsistent with the source code or other docs (different data flows,
+  changed constraints, wrong commands), flag it under Fragile Areas. Do not fix during this
+  read-only pass.
 - **Documentation drift**: if `docs/` or `.ai/` appears out of sync with the source, flag it
   under Fragile Areas. Do not fix it during this read-only pass.
 - **State conflicts**: if `current.md`, `git`, `tasks/active.md`, and `SESSION_NOTES.md`

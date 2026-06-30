@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.1 template=AGENTS.md date=2026-06-30 -->
+<!-- prime: version=3.0.2 template=AGENTS.md date=2026-06-30 -->
 # AGENTS.md
 
 Main entry point for coding agents working in this repository.
@@ -131,6 +131,8 @@ mandatory vs. conditional each session — do not treat this list as a per-sessi
 - `.ai/workflows/implementation.md` — plan → code → test → validate
 - `.ai/workflows/definition-of-done.md` — validation gates, Done + review checklists
 - `.ai/workflows/session-close.md` — handoff & session close protocol
+- `.ai/prompts/` — human-sent trigger prompts for Supervised and Autonomous modes.
+  Read to understand what a human is invoking; do not treat as primary reading material.
 
 ### Tasks
 - `.ai/current.md` — live handoff state
@@ -138,6 +140,7 @@ mandatory vs. conditional each session — do not treat this list as a per-sessi
 
 ### Version
 - `.ai-prime-versions.json` — version cache; authoritative source is the `<!-- prime: ... -->` control section on line 1 of each generated file
+- `manifest.json` — file registry with per-file template versions and `skipIfExists` flags (lives in the package, not your repo)
 
 ---
 
@@ -339,6 +342,8 @@ task verify-live TOKEN_FILE=/path/to/token   # Real NordLynx egress must confirm
 # Then owner runs: task release
 ```
 
+For the full validation gates, Done checklist, and review checklist, see `.ai/workflows/definition-of-done.md`.
+
 ### Verify checks
 1. `IMAGE_VERSION` ENV = git hash (via `docker inspect`)
 2. `nordvpn --version` = NORDVPN_VERSION (one-shot container)
@@ -371,6 +376,7 @@ Do not skip either step, even for small tasks. The branch protects `main`; the p
 
 ### Keep the Onboarding Path Current
 - When work lands or priorities change, update `.ai/current.md` and `.ai/tasks/active.md`
+- When architecture, key boundaries, tech stack, or validation commands change, update the corresponding sections of `AGENTS.md` in the same commit — it is the primary entry point and must not drift
 - A new agent must learn current state from the standard path without hunting
 
 ### Before Ending a Session

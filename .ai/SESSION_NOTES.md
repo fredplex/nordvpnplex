@@ -6,6 +6,31 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-06-30 (prime-ai-docs v3.4.1 re-prime)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Re-prime: AGENTS.md backup merge (3.0.1 → 3.0.2) + 3 workflow file updates | `23f4059` |
+| 2 | Session close — current.md, active.md, SESSION_NOTES.md, completed.md | this commit |
+
+### Key decisions
+
+- Dry-run scenario: Re-prime (4 would-update, 0 would-create). GUIDE.md and prime-prompt.md both up-to-date — no stale-guide stop needed.
+- AGENTS.md was regenerated from generic template (⚠️ CONTENT REVIEW REQUIRED). Full backup merge from `.ai-prime-backup/2026-06-30-12-19-02/` — all project content restored.
+- New template additions kept: `prompts/` Required Reading entry, `manifest.json` version note, AGENTS.md self-update Working Rule in "Keep the Onboarding Path Current".
+- Web/API env setup paragraph removed from Quick Start — not applicable to this Docker/Taskfile project.
+- Three workflow files (onboarding, implementation, session-close) accepted as-is — all template-pure improvements, no project customisations.
+- Runtime artifacts (`.ai-prime-manifest.json`, `.ai-prime-versions.json`) left unstaged per GUIDE.md Step 6.
+
+### Stopping point
+
+- Working tree: clean after close commit (runtime artifacts intentionally unstaged)
+- Validation: N/A — workspace-only change; no source, Dockerfile, or rootfs changes
+
+---
+
 ## Session Close — 2026-06-30 (agents-md-improvements)
 
 ### Completed this session
