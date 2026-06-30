@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.2 template=.ai/workflows/implementation.md date=2026-06-30 -->
+<!-- prime: version=3.0.3 template=.ai/workflows/implementation.md date=2026-06-30 -->
 # Implementation Workflow
 
 Plan → Code → Test → Validate cycle for effective development.
@@ -145,9 +145,9 @@ as the change. Do not defer.**
 
 | Topic | `docs/` file | `.ai/` working copy |
 |-------|--------------|---------------------|
-| Architecture | `docs/architecture.md` | `.ai/memory/architecture-decisions.md` |
+| Architecture | `docs/architecture.md` | `.ai/memory/architecture-decisions.md` + `AGENTS.md` Architecture section |
 | Features / state | `docs/feature-state.md` | `.ai/memory/project-state.md` |
-| Rules / boundaries | `docs/project-rules.md` | `.ai/rules/` |
+| Rules / boundaries | `docs/project-rules.md` | `.ai/rules/` + `AGENTS.md` Key Boundaries section |
 | Testing | `docs/testing.md` | `.ai/workflows/definition-of-done.md` |
 | Tech stack | `docs/tech-stack.md` | `AGENTS.md` + `.ai/memory/` |
 | Scaffold file count or structure | `docs/feature-state.md` | `AGENTS.md` Key rules prose + file-structure table |
@@ -155,11 +155,11 @@ as the change. Do not defer.**
 
 If a topic has no 1:1 working copy, ensure `AGENTS.md` and `.ai/memory/` still reflect it.
 
-> **AGENTS.md numeric claims**: if a change adds, removes, or renames a template file, or alters
-> any numeric claim in AGENTS.md (test counts, file counts, version numbers in prose) — update
-> `AGENTS.md` Key rules prose **and** the file-structure table in the same commit, even if the
-> change is classified as "feature" rather than "tech stack." Numeric prose in AGENTS.md is
-> **not** auto-updated by Track B — it must be hand-verified every time a count changes.
+> **AGENTS.md upkeep** — `AGENTS.md` is the primary agent entry point; keep all sections current in the same commit as the relevant change:
+> - **Architecture section**: update when architecture, data-flow, or key rules change.
+> - **Key Boundaries section**: update when approved/forbidden boundaries change.
+> - **Numeric claims** (test counts, file counts, version numbers in prose): hand-verify on every change that affects those numbers; prose is not updated by the prime script automatically.
+> - **File-structure table / Key rules prose**: update when scaffold file count or directory structure changes.
 
 ---
 
@@ -199,8 +199,8 @@ Use this mode when executing one phase at a time with human approval before each
 6. **Update tracking and documentation** — update the plan's `Status` to `In progress` (if not already); mark phase complete in the plan + `.ai/tasks/active.md`. If this phase altered behavior, architecture, features, rules, tech stack, or user-facing workflows: **update both the affected `docs/` file and its `.ai/` working copy — required, not optional, in this same commit** (see *Documentation Sync* above for the pairs table).
 7. **Stage and formulate** — first run the doc-sync gate, then stage:
    - [ ] Behavior / features changed → `docs/feature-state.md` + `.ai/memory/project-state.md`
-   - [ ] Architecture changed        → `docs/architecture.md` + `.ai/memory/architecture-decisions.md`
-   - [ ] Rules / boundaries changed  → `docs/project-rules.md` + `.ai/rules/`
+   - [ ] Architecture changed        → `docs/architecture.md` + `.ai/memory/architecture-decisions.md` + `AGENTS.md` Architecture section
+   - [ ] Rules / boundaries changed  → `docs/project-rules.md` + `.ai/rules/` + `AGENTS.md` Key Boundaries section
    - [ ] Tech stack changed          → `docs/tech-stack.md` + `AGENTS.md` + `.ai/memory/`
    - [ ] Scaffold file count or structure changed → `AGENTS.md` Key rules prose + file-structure table + `docs/feature-state.md`
    - [ ] User-facing guide changed   → `README.md`
@@ -238,8 +238,8 @@ Use this mode when the plan is approved and you want the agent to execute all ph
 5. **Update tracking and documentation** — update the plan's `Status` to `In progress` (if not already); mark phase complete in plan + `active.md`. If this phase altered behavior, architecture, features, rules, tech stack, or user-facing workflows: **update both the affected `docs/` file and its `.ai/` working copy in this same commit — required, not optional** (see *Documentation Sync* above).
 6. **Stage and commit** — first run the doc-sync gate, then stage:
    - [ ] Behavior / features changed → `docs/feature-state.md` + `.ai/memory/project-state.md`
-   - [ ] Architecture changed        → `docs/architecture.md` + `.ai/memory/architecture-decisions.md`
-   - [ ] Rules / boundaries changed  → `docs/project-rules.md` + `.ai/rules/`
+   - [ ] Architecture changed        → `docs/architecture.md` + `.ai/memory/architecture-decisions.md` + `AGENTS.md` Architecture section
+   - [ ] Rules / boundaries changed  → `docs/project-rules.md` + `.ai/rules/` + `AGENTS.md` Key Boundaries section
    - [ ] Tech stack changed          → `docs/tech-stack.md` + `AGENTS.md` + `.ai/memory/`
    - [ ] Scaffold file count or structure changed → `AGENTS.md` Key rules prose + file-structure table + `docs/feature-state.md`
    - [ ] User-facing guide changed   → `README.md`
