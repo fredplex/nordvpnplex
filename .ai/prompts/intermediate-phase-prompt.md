@@ -1,3 +1,4 @@
+<!-- prime: version=3.0.0 template=.ai/prompts/intermediate-phase-prompt.md date=2026-06-30 -->
 # Phase Prompt — Supervised (Single Phase, Human-Gated)
 
 I approve the plan. Please execute **Phase [N]: [Phase Name]** using the

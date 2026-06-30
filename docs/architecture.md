@@ -1,3 +1,4 @@
+<!-- prime: version=3.0.0 template=docs/architecture.md date=2026-06-30 -->
 # Architecture
 
 Core architecture philosophy, layer discipline, and design decisions for **fredplex/nordvpn**.
@@ -214,6 +215,14 @@ docker build --no-cache --platform linux/amd64 . -f Dockerfile -t "fredplex/nord
 
 ---
 
+## Operational Logging
+
+- `cont-init.d/00-version` prints the IMAGE_VERSION banner early in startup logs.
+- nordvpnd daemon logs to stdout/stderr (captured by s6 and Docker).
+- No structured JSON logging — plain text to Docker's log driver.
+
+---
+
 ## Versioning Design
 
 The project separates NordVPN's client application version from the container project's release version. These versions manifest across different lifecycle stages (build, test, deploy, run).
@@ -248,14 +257,6 @@ The project separates NordVPN's client application version from the container pr
 
 ---
 
-## Operational Logging
-
-- `cont-init.d/00-version` prints the IMAGE_VERSION banner early in startup logs.
-- nordvpnd daemon logs to stdout/stderr (captured by s6 and Docker).
-- No structured JSON logging — plain text to Docker's log driver.
-
----
-
 ## Known Constraints and Gotchas
 
 - **CRLF line endings in rootfs/**: Shell scripts with CRLF fail with `bad interpreter`. `.gitattributes` enforces LF on checkout; verify when creating new scripts on Windows.
@@ -263,6 +264,6 @@ The project separates NordVPN's client application version from the container pr
 - **No `/.version` file**: Older references to `/.version` in the container root are stale. Version is now `ENV IMAGE_VERSION` only.
 - **nordvpnd socket check takes 12s**: The verify script waits for the daemon to start before checking. Expected.
 - **`task release` requires a clean working tree and non-duplicate tag**: Always commit before running.
-- **`task verify` runs under Git Bash on Windows**: `scripts/verify.sh` sets `MSYS_NO_PATHCONV=1` and `MSYS2_ARG_CONV_EXCL='*'` at the top to prevent MSYS/Git Bash from mangling `--entrypoint /bin/bash` into a Windows path. WSL2 is no longer required for `task verify` (the dev-build scripts still need it).
+- **`task verify` runs under Git Bash on Windows**: `scripts/verify.sh` sets `MSYS_NO_PATHCONV=1` and `MSYS2_ARG_CONV_EXCL='*'` at the top to prevent MSYS/Git Bash from mangling `--entrypoint /bin/bash` into a Windows path. WSL2 is no longer required for `task verify`.
 - **BuildKit required for `COPY --chmod`**: The Dockerfile uses `COPY --chmod=0755 rootfs /`, which is a BuildKit feature. Without BuildKit the build fails with "unknown flag". Locally, `Taskfile.yml`'s `env: DOCKER_BUILDKIT: "1"` satisfies this. CI uses `docker/setup-buildx-action`. Do **not** add a `# syntax` directive to the Dockerfile — in this environment it triggers a 401 from Docker Hub for the frontend image.
 - **`--restart=unless-stopped` required at runtime**: The CMD chain exits when the VPN is unrecoverable. Always run the container with `--restart=unless-stopped`.

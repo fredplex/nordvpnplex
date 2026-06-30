@@ -1,3 +1,10 @@
+<!-- prime: version=3.0.0 template=.ai/rules/security-rules.md date=2026-06-30 -->
+---
+paths:
+  - "**"
+applies_to: "Container / CLI archetype"
+---
+
 # Security Rules
 
 Trust boundaries and security controls for **nordvpn**.
@@ -17,7 +24,7 @@ Trust boundaries and security controls for **nordvpn**.
 
 ---
 
-## 2. Shared Security Principles (All Projects)
+## Shared Security Principles (All Projects)
 
 ### Input Validation
 - Validate and sanitize all inputs at the entrypoint boundary.
@@ -26,4 +33,3 @@ Trust boundaries and security controls for **nordvpn**.
 ### Redaction in Logs
 - Never log passwords, tokens, API keys, or raw request payloads containing sensitive personal details.
 - Avoid printing full stack traces to the user output.
-

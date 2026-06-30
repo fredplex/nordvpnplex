@@ -1,3 +1,4 @@
+<!-- prime: version=3.0.0 template=.ai/prompts/execute-plan-prompt.md date=2026-06-30 -->
 # Execute Plan Prompt — Autonomous (Auto-Execute Full Plan)
 
 I approve this plan. Please execute **all phases** using the

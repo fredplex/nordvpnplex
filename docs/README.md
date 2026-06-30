@@ -1,3 +1,4 @@
+<!-- prime: version=3.0.0 template=docs/README.md date=2026-06-30 -->
 # Product Documentation
 
 This folder contains the comprehensive product, architecture, and operational documentation for **nordvpn**.
@@ -64,4 +65,7 @@ This folder contains the comprehensive product, architecture, and operational do
 | Architecture | `architecture.md` | `.ai/memory/architecture-decisions.md` |
 | Features | `feature-state.md` | `.ai/memory/project-state.md` |
 | Rules | `project-rules.md` | `.ai/rules/` |
-| Testing | `testing.md` | `.ai/workflows/validation.md` |
+| Testing | `testing.md` | `.ai/workflows/definition-of-done.md` |
+
+> The canonical doc-sync protocol and pairs table live in
+> `.ai/workflows/implementation.md` — *Documentation Sync*.

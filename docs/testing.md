@@ -1,8 +1,9 @@
+<!-- prime: version=3.0.4 template=docs/testing.md date=2026-06-30 -->
 # Testing
 
 Testing strategy, validation gates, and coverage expectations for **fredplex/nordvpn**.
 
-**Working copy**: `.ai/workflows/validation.md`
+**Working copy**: `.ai/workflows/definition-of-done.md`
 
 ---
 
@@ -40,11 +41,11 @@ The script runs 4 checks against the locally built image (`fredplex/nordvpn:<git
 Expected output on a passing run:
 ```
 === Verifying fredplex/nordvpn:<hash> ===
-    NordVPN target: 4.5.0
+    NordVPN target: 5.1.0
 
 --- Stateless checks ---
   PASS  IMAGE_VERSION env = <hash>
-  PASS  nordvpn --version = 4.5.0
+  PASS  nordvpn --version = 5.1.0
   PASS  iptables OUTPUT policy DROP (kill-switch functional)
 
 --- Runtime check (daemon socket) ---
@@ -79,22 +80,11 @@ Current technology: NORDLYNX
 
 **Token security rule**: Token must be read from a file outside the repo. Never pass it as a CLI argument, env var that gets logged, or commit it.
 
----
-
 ### Build Validation (CI)
 
 **Workflow**: `.github/workflows/build-validate.yml`
 **Trigger**: PR → main
 **What it checks**: `docker build --platform linux/amd64` succeeds — catches Dockerfile errors and `apt-get install` failures. No push.
-
----
-
-## CI/CD
-
-- **Pipeline**: GitHub Actions
-- **PR gate**: `build-validate.yml` — `docker build` only, no credentials, no push
-- **Publish gate**: `publish.yml` — triggered by tag push (only after human runs `task release`)
-- **No static lint gate** — this is a shell/Docker project; no ESLint, TypeScript, or npm involved
 
 ---
 
@@ -110,30 +100,20 @@ Current technology: NORDLYNX
 
 ---
 
-## Troubleshooting Common Test Failures
+## Test Conventions
 
-### Check 1 fails (IMAGE_VERSION wrong)
-The image was not built with `task docker-build`. Rebuild with `task docker-build`.
+### What to Test
 
-### Check 2 fails (`nordvpn --version` reports wrong version)
-Stale Docker layer cache. Run:
-```bash
-docker build --no-cache --platform linux/amd64 . -f Dockerfile -t "fredplex/nordvpn:$(git log --format='%h' -n 1)"
-```
-
-### Check 3 fails (iptables policy not DROP)
-`NET_ADMIN` capability is required. Ensure Docker Desktop is running and not blocked by a security policy. Test manually:
-```bash
-docker run --rm --cap-add=NET_ADMIN --cap-add=NET_RAW fredplex/nordvpn:<hash> \
-  /bin/bash -c "update-alternatives --set iptables /usr/sbin/iptables-legacy; iptables -L"
-```
-
-### Check 4 fails (nordvpnd socket not found)
-The daemon failed to start. Check for a broken `cont-init.d` script that halted init before services started, or `/dev/net/tun` not available (check `10-tun` script).
+- ✅ Behavior (what the feature does)
+- ✅ Critical paths (kill switch, version correctness, daemon startup)
+- ✅ Error states (daemon failures, missing capabilities)
+- ❌ Implementation details (private variable state, intermediate shell vars)
 
 ---
 
 ## Validation Gate
+
+See `.ai/workflows/definition-of-done.md` for the full validation gates and Done checklist.
 
 ### Before `task release` (required):
 ```bash
@@ -157,4 +137,25 @@ This surfaces real tunnel state to the Docker engine and Unraid dashboard:
 
 With NordLynx, the container typically transitions `starting → healthy` in ~5s. The HEALTHCHECK does not replace `task verify-live` — it's a runtime signal, not a release gate.
 
-See `.ai/workflows/validation.md` for the full validation spec.
+---
+
+## Troubleshooting Common Test Failures
+
+### Check 1 fails (IMAGE_VERSION wrong)
+The image was not built with `task docker-build`. Rebuild with `task docker-build`.
+
+### Check 2 fails (`nordvpn --version` reports wrong version)
+Stale Docker layer cache. Run:
+```bash
+docker build --no-cache --platform linux/amd64 . -f Dockerfile -t "fredplex/nordvpn:$(git log --format='%h' -n 1)"
+```
+
+### Check 3 fails (iptables policy not DROP)
+`NET_ADMIN` capability is required. Ensure Docker Desktop is running and not blocked by a security policy. Test manually:
+```bash
+docker run --rm --cap-add=NET_ADMIN --cap-add=NET_RAW fredplex/nordvpn:<hash> \
+  /bin/bash -c "update-alternatives --set iptables /usr/sbin/iptables-legacy; iptables -L"
+```
+
+### Check 4 fails (nordvpnd socket not found)
+The daemon failed to start. Check for a broken `cont-init.d` script that halted init before services started, or `/dev/net/tun` not available (check `10-tun` script).
