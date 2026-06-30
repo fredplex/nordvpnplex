@@ -173,6 +173,7 @@ mandatory vs. conditional each session — do not treat this list as a per-sessi
 - Add sleep loops or background processes to `cont-init.d/` scripts
 - Push Docker images without the human-in-the-loop gate
 - Add mutations without approval gate
+- Add a `# syntax` directive to the Dockerfile — triggers a 401 from Docker Hub for the BuildKit frontend in this environment
 
 ---
 

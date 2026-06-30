@@ -35,6 +35,15 @@ Current work in progress.
 - [x] Template applied via `npx github:fredplex/vibe-coding-template .`
 - [x] Backup merge: all project-specific content restored from `.ai-prime-backup/2026-06-30-10-56-56/`
 
+### AGENTS.md improvements — gaps and doc-drift fixes (In Progress)
+
+- [x] Phase 1 — `# syntax` directive constraint added to "Must not" list
+- [ ] Phase 2 — Session close working rule added to Working Rules
+- [ ] Phase 3 — `.gitignore` added to Project File Map
+- [ ] Phase 4 — `current.md` fragile area note corrected
+
+Plan: `.ai/plans/agents-md-improvements.md`
+
 **Watching**: next NordVPN release — the daily checker auto-builds/tests a dev image and opens a draft PR.
 
 ---
