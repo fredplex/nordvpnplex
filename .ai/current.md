@@ -1,17 +1,17 @@
 <!-- prime: version=3.0.2 template=.ai/current.md date=2026-06-30 -->
 # Current Project State
 
-## Base Image Refresh Cadence Implemented (2026-06-27)
+## prime-ai-docs v3.x Template Update Complete (2026-06-30)
 
-**Status**: Base image refresh cadence fully implemented. Diagnostic script, GHA cron workflow, and Taskfile integration are active. Branch `chore/base-image-refresh-plan` merged to `main`.
+**Status**: Template updated to v3.x. Backup merge complete — all project-specific content restored. New workflow files (`definition-of-done.md`, `session-close.md`) and on-demand stubs (`integrations/`, `assessments/`, `debug/`, `knowledge/`) added.
 
 ### Recently Completed
 
 > Keep the last 3 entries. Prune older items at session close — the full history lives in `SESSION_NOTES.md`.
 
-- Base image refresh cadence (Phases A–D) — 2026-06-27 (`chore/base-image-refresh-plan`, merged)
-- Dockerfile optimization (Phases 0–5 + merge) — 2026-06-26 (`chore/dockerfile-optimization`)
-- prime-ai-docs v3.x template update — 2026-06-30 (`chore/prime-template-update`, in progress)
+- prime-ai-docs v3.x template update — 2026-06-30 (f4604c3)
+- Base image refresh cadence (Phases A–D) — 2026-06-27
+- Dockerfile optimization (Phases 0–5) — 2026-06-26
 
 ### Next step
 
@@ -27,35 +27,35 @@ Watch for both the next NordVPN release (daily cron) and the next base image dig
 
 | Commit | Change |
 |--------|--------|
-| — | prime-ai-docs v3.x template update applied via `npx github:fredplex/vibe-coding-template .` |
-| — | Backup merge: all project-specific content restored from `.ai-prime-backup/2026-06-30-10-56-56/` |
+| `f4604c3` | prime-ai-docs v3.x template update applied; backup merge complete |
+| this commit | Session close — current.md, active.md, SESSION_NOTES.md updated |
 
 ### Stopping point
 
-- Branch: `chore/prime-template-update`
-- Working tree: template files merged; commit pending owner review
-- Validation: not applicable (docs-only change)
+- Working tree: clean after close commit
+- Validation: N/A — docs/workspace change only; no source, Dockerfile, or rootfs changes
 
 ### Decisions / reasoning
 
-- Template v3 adds new workflow files (`definition-of-done.md`, `session-close.md`), new prompt files (`prime-prompt.md`), and new on-demand folders (`integrations/`, `assessments/`, `debug/`, `knowledge/`).
-- All project-specific content restored from backup: AGENTS.md, CLAUDE.md, mutation-rules.md, project-state.md, architecture-decisions.md, all docs/, engineering-rules.md, security-rules.md, current.md, active.md, completed.md, SESSION_NOTES.md.
-- Template-pure files (new workflows, prompts) accepted as-is — they are improvements.
-- `.ai/README.md` updated: new phase text restored, new workflow file list used (definition-of-done.md, session-close.md replace validation.md, review.md per template v3 structure).
+- Template v3 adds: `definition-of-done.md`, `session-close.md`, `GUIDE.md`, `prime-prompt.md`, four `_TEMPLATE.md` on-demand stubs, `.gitignore`.
+- Backup merge: all project-specific content restored from `.ai-prime-backup/2026-06-30-10-56-56/` — AGENTS.md, CLAUDE.md, mutation-rules.md, project-state.md, architecture-decisions.md, all docs/, engineering-rules.md, security-rules.md, current.md, active.md, completed.md, SESSION_NOTES.md.
+- Template-pure files (new workflows, prompts) accepted as-is — structural improvements.
+- `definition-of-done.md` archetype prune: Web UI/BFF and API/Backend sections removed; CLI/Container kept.
+- Stale merge-state in backup `current.md` (`"awaiting merge"` for base-image-refresh) confirmed resolved — git log shows those commits are already on main.
 
 ### Fragile areas
 
 - **Base digest must be updated manually**: Dockerfile is pinned to `noble@sha256:53411508…`. A future base-refresh requires an explicit digest change — do not remove the pin.
-- **`# syntax` directive must NOT be added to Dockerfile**: Triggers a 401 from Docker Hub for the BuildKit frontend in this environment. BuildKit is satisfied by `DOCKER_BUILDKIT=1` in Taskfile or CI buildx.
-- **Token for `task verify-live` stays outside the repo**: Lives in a scratchpad path. Never commit, print, or pass as CLI arg.
-- **`.ai/current.md` is hand-maintained**: `bump.sh` no longer touches it. After merging a release PR, update this file and `CLAUDE.md` built date by hand.
+- **`# syntax` directive must NOT be added to Dockerfile**: Triggers a 401 from Docker Hub for the BuildKit frontend in this environment.
+- **Token for `task verify-live` stays outside the repo**: Never commit, print, or pass as CLI arg.
+- **`.ai/current.md` is hand-maintained**: `bump.sh` no longer touches it. After any release PR, update this file and `CLAUDE.md` built date by hand.
 - **s6 init + capabilities**: Stateless `docker run` checks must use `--entrypoint /bin/bash` to bypass `00-firewall` when `NET_ADMIN` isn't granted.
 
 ---
 
-## Previously Completed — Dockerfile Optimization + Base Image Refresh (2026-06-26/27)
+## Previously Completed — Base Image Refresh Cadence + Dockerfile Optimization (2026-06-26/27)
 
-**Status**: All phases complete, merged to `main`.
+**Status**: All phases complete.
 
 ### Key versioning model decision
 

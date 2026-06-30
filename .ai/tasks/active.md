@@ -20,7 +20,6 @@ Current work in progress.
 
 - [x] Deep analysis of Dockerfile + all rootfs scripts, build tooling, CI workflows, .gitattributes, .dockerignore, git index permissions
 - [x] Master plan written + all 7 owner questions answered (2026-06-26)
-- [x] Branch `chore/dockerfile-optimization` created from `main`
 - [x] **Phase 0** — baseline captured: build OK, size 110.2 MB, verify 3/4 (MSYS on Windows)
 - [x] **Phase 1** — zero-risk hygiene complete (2026-06-26)
 - [x] **Phase 2** — COPY --chmod=0755 complete (2026-06-26)
@@ -29,14 +28,12 @@ Current work in progress.
 - [x] **Phase 5** — HEALTHCHECK complete (2026-06-26)
 - [x] **Phase 6** — documentation sync complete (2026-06-26)
 
-**Dockerfile optimization COMPLETE** — all 6 phases merged to `main`.
+**Dockerfile optimization COMPLETE** — all 6 phases complete.
 
-### prime-ai-docs v3.x template update (In Progress)
+### prime-ai-docs v3.x template update (Complete)
 
-- [x] Template applied via `npx github:fredplex/vibe-coding-template .` on branch `chore/prime-template-update`
+- [x] Template applied via `npx github:fredplex/vibe-coding-template .`
 - [x] Backup merge: all project-specific content restored from `.ai-prime-backup/2026-06-30-10-56-56/`
-- [ ] Commit and push `chore/prime-template-update`
-- [ ] Owner reviews and merges to `main`
 
 **Watching**: next NordVPN release — the daily checker auto-builds/tests a dev image and opens a draft PR.
 
@@ -87,6 +84,6 @@ Current work in progress.
 
 ## Recently Completed
 
-- **prime-ai-docs v3.x template update** (2026-06-30, `chore/prime-template-update`) — In progress; backup merge complete.
-- **Base image refresh cadence (Phases A–D)** (2026-06-27, `chore/base-image-refresh-plan`, merged) — All 4 phases implemented.
-- **Dockerfile optimization plan** (2026-06-25/26, `chore/dockerfile-optimization`, merged) — All 6 phases complete.
+- **prime-ai-docs v3.x template update** (2026-06-30) — workspace updated to v3 template; all project content restored from backup.
+- **Base image refresh cadence (Phases A–D)** (2026-06-27) — All 4 phases implemented.
+- **Dockerfile optimization** (2026-06-25/26) — All 6 phases complete.

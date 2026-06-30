@@ -6,6 +6,32 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-06-30 (prime-ai-docs v3.x template update)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Applied prime-ai-docs v3.x template via `npx github:fredplex/vibe-coding-template .` | `f4604c3` |
+| 2 | Backup merge: all project-specific content restored from `.ai-prime-backup/2026-06-30-10-56-56/` | `f4604c3` |
+| 3 | Session close — current.md, active.md, definition-of-done.md archetype prune, SESSION_NOTES.md | this commit |
+
+### Key decisions
+
+- "New file's structure wins" — all project-specific content carried over into new v3 template structure; old files never copied wholesale.
+- Template-pure files (new workflows, prompts, on-demand stubs) accepted as-is.
+- `definition-of-done.md` archetype prune: Web UI/BFF and API/Backend sections deleted; CLI/Container section kept.
+- `engineering-rules.md` and `security-rules.md`: Web/API sections deleted as N/A; CLI/Container sections kept.
+- Stale merge-state in backup `current.md` (base-image-refresh listed as "awaiting merge") confirmed already resolved in git history — updated to reflect actual completed state.
+- `.gitignore` created to exclude `.ai-prime-backup/` from version control.
+
+### Stopping point
+
+- Working tree: clean after close commit
+- Validation: N/A — workspace-only change; no source, Dockerfile, or rootfs files changed
+
+---
+
 ## Session Close — 2026-06-27 (base image refresh cadence implementation)
 
 ### Completed this session

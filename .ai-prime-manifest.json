@@ -1,132 +1,218 @@
 {
-  "templateVersion": "1.2.1",
-  "primedAt": "2026-06-27T01:14:32.736Z",
+  "templateVersion": "3.4.0",
+  "primedAt": "2026-06-30T10:56:57.137Z",
   "targetDir": "C:\\Users\\fredp\\Documents\\GitHub\\nordvpnplex",
   "mode": "update",
   "context": {
-    "date": "2026-06-27",
+    "date": "2026-06-30",
     "name": "nordvpnplex",
-    "description": "NordVPN container",
+    "description": "NordVPN Container",
     "stack": "Docker",
-    "install": "Docker",
-    "dev": "Docker",
-    "validate": "Docker",
-    "test": "Docker"
+    "install": "docker",
+    "dev": "docker",
+    "validate": "docker",
+    "test": "docker"
   },
   "files": [
     {
       "path": "CLAUDE.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
     },
     {
       "path": "AGENTS.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.1.0",
+      "toVersion": "3.0.1",
+      "needsReview": true
     },
     {
       "path": ".ai/README.md",
       "status": "updated",
-      "fromVersion": "1.0.1",
-      "toVersion": "1.2.0"
+      "fromVersion": "1.2.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
     },
     {
       "path": ".ai/current.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.2",
+      "needsReview": false
     },
     {
       "path": ".ai/SESSION_NOTES.md",
-      "status": "current"
-    },
-    {
-      "path": ".ai/memory/project-state.md",
-      "status": "current"
-    },
-    {
-      "path": ".ai/memory/architecture-decisions.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
     },
     {
       "path": ".ai/rules/engineering-rules.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
     },
     {
       "path": ".ai/rules/security-rules.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
     },
     {
       "path": ".ai/rules/mutation-rules.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
     },
     {
       "path": ".ai/workflows/onboarding.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
     },
     {
       "path": ".ai/workflows/implementation.md",
       "status": "updated",
-      "fromVersion": "1.0.0",
-      "toVersion": "1.2.0"
+      "fromVersion": "1.2.0",
+      "toVersion": "3.0.2",
+      "needsReview": false
     },
     {
-      "path": ".ai/workflows/validation.md",
-      "status": "current"
+      "path": ".ai/workflows/definition-of-done.md",
+      "status": "created"
     },
     {
-      "path": ".ai/workflows/review.md",
-      "status": "current"
+      "path": ".ai/workflows/session-close.md",
+      "status": "created"
     },
     {
       "path": ".ai/tasks/active.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
     },
     {
       "path": ".ai/tasks/completed.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
     },
     {
       "path": ".ai/prompts/onboarding-prompt.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
     },
     {
       "path": ".ai/prompts/intermediate-phase-prompt.md",
       "status": "updated",
-      "fromVersion": "1.0.0",
-      "toVersion": "1.2.0"
+      "fromVersion": "1.2.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
     },
     {
       "path": ".ai/prompts/session-close-prompt.md",
       "status": "updated",
-      "fromVersion": "1.0.0",
-      "toVersion": "1.2.0"
+      "fromVersion": "1.2.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
     },
     {
       "path": ".ai/prompts/execute-plan-prompt.md",
+      "status": "updated",
+      "fromVersion": "1.2.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
+    },
+    {
+      "path": ".ai/memory/project-state.md",
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
+    },
+    {
+      "path": ".ai/memory/architecture-decisions.md",
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
+    },
+    {
+      "path": ".ai/GUIDE.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/prompts/prime-prompt.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/integrations/_TEMPLATE.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/assessments/_TEMPLATE.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/debug/_TEMPLATE.md",
+      "status": "created"
+    },
+    {
+      "path": ".ai/knowledge/_TEMPLATE.md",
       "status": "created"
     },
     {
       "path": "docs/README.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
     },
     {
       "path": "docs/architecture.md",
       "status": "updated",
-      "fromVersion": "1.0.0",
-      "toVersion": "1.2.1"
+      "fromVersion": "1.2.1",
+      "toVersion": "3.0.0",
+      "needsReview": true
     },
     {
       "path": "docs/project-rules.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
     },
     {
       "path": "docs/feature-state.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.0",
+      "needsReview": false
     },
     {
       "path": "docs/tech-stack.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.0",
+      "needsReview": true
     },
     {
       "path": "docs/testing.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "1.0.0",
+      "toVersion": "3.0.4",
+      "needsReview": false
     }
   ]
 }
