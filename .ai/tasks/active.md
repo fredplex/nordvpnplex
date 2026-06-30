@@ -38,7 +38,7 @@ Current work in progress.
 ### AGENTS.md improvements — gaps and doc-drift fixes (In Progress)
 
 - [x] Phase 1 — `# syntax` directive constraint added to "Must not" list
-- [ ] Phase 2 — Session close working rule added to Working Rules
+- [x] Phase 2 — Session close working rule added to Working Rules
 - [ ] Phase 3 — `.gitignore` added to Project File Map
 - [ ] Phase 4 — `current.md` fragile area note corrected
 
