@@ -7,7 +7,7 @@ Current work in progress.
 
 ## Current Status
 
-**Active**: Watching for both NordVPN releases and base image updates. Draft PRs and dev builds are automated.
+**None active — awaiting direction.** Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
 
 ### Base Image Refresh Cadence (Complete)
 
@@ -18,31 +18,21 @@ Current work in progress.
 
 ---
 
-- [x] Deep analysis of Dockerfile + all rootfs scripts, build tooling, CI workflows, .gitattributes, .dockerignore, git index permissions
-- [x] Master plan written + all 7 owner questions answered (2026-06-26)
-- [x] **Phase 0** — baseline captured: build OK, size 110.2 MB, verify 3/4 (MSYS on Windows)
-- [x] **Phase 1** — zero-risk hygiene complete (2026-06-26)
-- [x] **Phase 2** — COPY --chmod=0755 complete (2026-06-26)
-- [x] **Phase 3** — base image digest pin complete (2026-06-26)
-- [x] **Phase 4** — wireguard→wireguard-tools + explicit iptables complete (2026-06-26)
-- [x] **Phase 5** — HEALTHCHECK complete (2026-06-26)
-- [x] **Phase 6** — documentation sync complete (2026-06-26)
+### Dockerfile Optimization (Complete)
 
-**Dockerfile optimization COMPLETE** — all 6 phases complete.
+- [x] All 6 phases complete (2026-06-26)
 
 ### prime-ai-docs v3.x template update (Complete)
 
 - [x] Template applied via `npx github:fredplex/vibe-coding-template .`
 - [x] Backup merge: all project-specific content restored from `.ai-prime-backup/2026-06-30-10-56-56/`
 
-### AGENTS.md improvements — gaps and doc-drift fixes (In Progress)
+### AGENTS.md improvements — gaps and doc-drift fixes (Complete)
 
 - [x] Phase 1 — `# syntax` directive constraint added to "Must not" list
 - [x] Phase 2 — Session close working rule added to Working Rules
 - [x] Phase 3 — `.gitignore` added to Project File Map
 - [x] Phase 4 — `current.md` fragile area note corrected
-
-Plan: `.ai/plans/agents-md-improvements.md`
 
 **Watching**: next NordVPN release — the daily checker auto-builds/tests a dev image and opens a draft PR.
 
@@ -81,7 +71,6 @@ Plan: `.ai/plans/agents-md-improvements.md`
 - [ ] `task release` runs cleanly (tag created and pushed)
 - [ ] GitHub publish workflow completes; image appears on Docker Hub
 - [ ] `.ai/current.md` updated with new versions and date
-- [ ] `CLAUDE.md` pinned version block updated
 
 ### README.md rewrite (Tier 3 — deferred, not yet approved)
 
@@ -93,6 +82,6 @@ Plan: `.ai/plans/agents-md-improvements.md`
 
 ## Recently Completed
 
+- **AGENTS.md improvements** (2026-06-30) — 4 gaps/doc-drift fixes; `# syntax` constraint, session close rule, `.gitignore` file map, `current.md` correction.
 - **prime-ai-docs v3.x template update** (2026-06-30) — workspace updated to v3 template; all project content restored from backup.
 - **Base image refresh cadence (Phases A–D)** (2026-06-27) — All 4 phases implemented.
-- **Dockerfile optimization** (2026-06-25/26) — All 6 phases complete.
