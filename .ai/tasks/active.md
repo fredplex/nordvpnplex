@@ -11,12 +11,10 @@ Current work in progress.
 
 ### Base Image Refresh Cadence (Complete)
 
-- [x] **Phase A** — `scripts/check-base-image.sh` (local digest checker script) (2026-06-27)
-- [x] **Phase B** — `.github/workflows/check-base-image.yml` (monthly cron, dev build, draft PR) (2026-06-27)
+- [x] **Phase A** — `scripts/check-base-image.sh` (2026-06-27)
+- [x] **Phase B** — `.github/workflows/check-base-image.yml` (2026-06-27)
 - [x] **Phase C** — `task check-base` entry in `Taskfile.yml` *(Taskfile edit explicitly approved)* (2026-06-27)
-- [x] **Phase D** — doc updates (`.ai/current.md`, `active.md`, `AGENTS.md`, `docs/build-and-publish.md`) (2026-06-27)
-
----
+- [x] **Phase D** — doc updates (2026-06-27)
 
 ### Dockerfile Optimization (Complete)
 
@@ -33,6 +31,11 @@ Current work in progress.
 - [x] Phase 2 — Session close working rule added to Working Rules
 - [x] Phase 3 — `.gitignore` added to Project File Map
 - [x] Phase 4 — `current.md` fragile area note corrected
+
+### prime-ai-docs v3.4.1 re-prime (Complete)
+
+- [x] Dry-run: Re-prime scenario detected (4 would-update)
+- [x] Script run: AGENTS.md backup merge + 3 workflow files updated (23f4059)
 
 **Watching**: next NordVPN release — the daily checker auto-builds/tests a dev image and opens a draft PR.
 
@@ -82,6 +85,6 @@ Current work in progress.
 
 ## Recently Completed
 
+- **prime-ai-docs v3.4.1 re-prime** (2026-06-30) — AGENTS.md backup merge + 3 workflow file template updates.
 - **AGENTS.md improvements** (2026-06-30) — 4 gaps/doc-drift fixes; `# syntax` constraint, session close rule, `.gitignore` file map, `current.md` correction.
 - **prime-ai-docs v3.x template update** (2026-06-30) — workspace updated to v3 template; all project content restored from backup.
-- **Base image refresh cadence (Phases A–D)** (2026-06-27) — All 4 phases implemented.
