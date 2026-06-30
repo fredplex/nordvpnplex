@@ -221,6 +221,7 @@ Taskfile.yml                      — local build/publish tasks (do not modify w
 README.md                         — user docs + Changelog
 CLAUDE.md                         — AI context and workflow rules
 AGENTS.md                         — this file
+.gitignore                        — excludes .ai-prime-backup/ from version control
 scripts/
   bump.sh                         — version-bump script; edits all 5 locations
   check-version.sh                — scrapes NordVPN Debian repo; prints task bump command
