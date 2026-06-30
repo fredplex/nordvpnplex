@@ -1,3 +1,4 @@
+<!-- prime: version=3.0.0 template=CLAUDE.md date=2026-06-30 -->
 # CLAUDE.md
 
 This file is read automatically by Claude Code at the start of every session.
@@ -38,5 +39,4 @@ Full onboarding workflow: `.ai/workflows/onboarding.md`
 
 ## Current Pinned Version
 
-<!-- Update this after each successful rebuild -->
 NordVPN: 5.1.0  |  Image tag: fredplex/nordvpn:5.5.1  |  Built: 2026-06-24

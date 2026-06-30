@@ -1,3 +1,4 @@
+<!-- prime: version=3.0.0 template=.ai/rules/mutation-rules.md date=2026-06-30 -->
 ---
 paths:
   - "Dockerfile"
@@ -31,11 +32,11 @@ State-changing operations must be explicitly scoped, approved, and guarded.
 
 ## Currently Approved
 
-- `version bump` — via `task bump` or direct Dockerfile/README.md/CLAUDE.md/.ai/current.md edits. Show diff first, wait for approval.
+- `version bump` — via `task bump` or direct Dockerfile/README.md/CLAUDE.md edits. Show diff first, wait for approval. `.ai/current.md` is hand-maintained — bump.sh no longer writes it (fixed 2026-06-24).
 - `rootfs/ script edits` — cont-init.d, services.d, usr/bin scripts. Show diff first, wait for approval.
 - `documentation updates` — AGENTS.md, CLAUDE.md, docs/, .ai/ files.
 - `GitHub Actions workflow edits` — when explicitly requested.
-- `Taskfile.yml: env: DOCKER_BUILDKIT: "1"` — top-level env block addition (approved 2026-06-26, Q4). Ensures BuildKit for `COPY --chmod`. No other Taskfile.yml edits are pre-approved.
+- `Taskfile.yml: env: DOCKER_BUILDKIT: "1"` — top-level env block addition (approved 2026-06-26). Ensures BuildKit for `COPY --chmod`. No other Taskfile.yml edits are pre-approved.
 - `Taskfile.yml: task verify-live` — new task added after `verify` (approved 2026-06-26). Wraps `scripts/connect-test.sh`. No other Taskfile.yml edits are pre-approved.
 
 ---
@@ -46,7 +47,7 @@ State-changing operations must be explicitly scoped, approved, and guarded.
 1. **Verify package exists first** — check `https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/` for the `.deb` before editing any file.
 2. **Confirm versions with owner** — do not assume what the new version strings should be.
 3. **Show diff before applying** — never silently edit version-sensitive files.
-4. **All 5 locations in one commit** — Dockerfile (×2), README.md, CLAUDE.md, .ai/current.md.
+4. **All 5 locations in one commit** — Dockerfile (×2), README.md, CLAUDE.md. `.ai/current.md` is updated manually.
 
 ### For rootfs/ edits
 1. **LF line endings** — CRLF causes `bad interpreter` errors inside the container.

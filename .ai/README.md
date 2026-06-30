@@ -1,3 +1,4 @@
+<!-- prime: version=3.0.0 template=.ai/README.md date=2026-06-30 -->
 # Agent Workspace
 
 Welcome to the `.ai/` directory — the operational context for working on **nordvpnplex**.
@@ -7,10 +8,10 @@ Welcome to the `.ai/` directory — the operational context for working on **nor
 ## Quick Orientation
 
 **What is this app?**
-- NordVPN container
-- **Stack**: Docker
+- NordVPN container — custom Docker image packaging the official NordVPN Linux client as a VPN gateway on Unraid NAS systems
+- **Stack**: Docker, Ubuntu Noble (linuxserver.io base), NordVPN Linux client, WireGuard/NordLynx, s6-overlay, Taskfile, GitHub Actions
 
-**Current phase**: Stable maintenance — update NordVPN client version as new packages release, verify locally, publish via `task release`
+**Current phase**: Stable maintenance — update NordVPN client version as new packages release, verify locally, publish via `task release`. Base image refresh is automated monthly.
 
 ---
 
@@ -34,9 +35,9 @@ _When to update_: when a new rule is established; when the Currently Approved li
 Repeatable procedures for common tasks. One workflow per file — do not let them become catch-all documents.
 
 - **`onboarding.md`** — prescribed reading order, scope filter, and report-back format for starting a session.
-- **`implementation.md`** — the Plan → Code → Test → Validate cycle; intermediate phase commit protocol; session close protocol.
-- **`validation.md`** — the two validation gates (static and runtime) and per-change-type test chains.
-- **`review.md`** — pre-commit checklist covering layer boundaries, security, tests, commit hygiene, and mutation requirements.
+- **`implementation.md`** — the Plan → Code → Test → Validate cycle and phase commit protocol (Supervised / Autonomous modes).
+- **`definition-of-done.md`** — the validation gates (static + runtime), the Done checklist, and the review checklist.
+- **`session-close.md`** — the handoff & session close protocol (gates, handoff docs, memory, merge).
 
 _When to update_: when validation commands change; when checklist items are added or revised.
 

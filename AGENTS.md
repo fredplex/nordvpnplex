@@ -1,3 +1,4 @@
+<!-- prime: version=3.0.1 template=AGENTS.md date=2026-06-30 -->
 # AGENTS.md
 
 Main entry point for coding agents working in this repository.
@@ -10,17 +11,11 @@ Main entry point for coding agents working in this repository.
 
 ### First Time Here?
 
-1. Read this file (5 minutes)
-2. Read `docs/README.md` — product documentation overview
-3. **Read the core product docs (required, not optional):**
-   - `docs/project-rules.md` — product vision, boundaries, and governance
-   - `docs/architecture.md` — full architecture philosophy and design decisions
-   - `docs/tech-stack.md` — technology choices, rationale, and dependency versions
-   - `docs/testing.md` — testing strategy, validation gates, and coverage expectations
-4. Read `.ai/README.md` — agent workspace overview
-5. Follow `.ai/workflows/onboarding.md` — complete onboarding
-6. Read `.ai/current.md` — handoff state: what's done, what's next, fragile areas
-7. Read `.ai/SESSION_NOTES.md` (last entry only) — stopping point and key decisions from the previous session
+Every session — follow `.ai/workflows/onboarding.md`. It defines the mandatory reading order,
+conditional reads, and report format. Do not substitute a different order.
+
+**First time in this repo only**: Skim `docs/README.md` and `.ai/README.md` to orient yourself
+to the layout, then follow `onboarding.md` as normal.
 
 ### Commands
 
@@ -61,7 +56,7 @@ Key characteristics:
 This is a **Docker container build project** — not a web app, API, or library.
 
 ```
-NordVPN Debian repo ──► Weekly GitHub Action ──► Draft PR (human reviews)
+NordVPN Debian repo ──► Daily GitHub Action ──► Draft PR (human reviews)
                                                         │
                                                         ▼
                                                Human merges PR
@@ -112,9 +107,10 @@ See `docs/architecture.md` for the full architecture reference.
 
 ## Required Reading
 
-Before significant work, read relevant files:
+Index of every important file in this project. `.ai/workflows/onboarding.md` decides what is
+mandatory vs. conditional each session — do not treat this list as a per-session checklist.
 
-### Core Product Docs (required)
+### Core Product Docs
 - `docs/project-rules.md` — product vision, boundaries, governance
 - `docs/architecture.md` — architecture, startup sequence, design decisions
 - `docs/tech-stack.md` — technology choices and rationale
@@ -133,16 +129,15 @@ Before significant work, read relevant files:
 ### Workflows
 - `.ai/workflows/onboarding.md` — getting started
 - `.ai/workflows/implementation.md` — plan → code → test → validate
-- `.ai/workflows/validation.md` — testing gates
-- `.ai/workflows/review.md` — code review checklist
+- `.ai/workflows/definition-of-done.md` — validation gates, Done + review checklists
+- `.ai/workflows/session-close.md` — handoff & session close protocol
 
 ### Tasks
 - `.ai/current.md` — live handoff state
 - `.ai/tasks/active.md` — what is in flight or queued next
 
 ### Version
-- `.ai-prime-version` — template version used to generate this project
-- `.ai-prime-versions.json` — per-file version record; used by the script's smart update to detect which files have improved templates available
+- `.ai-prime-versions.json` — version cache; authoritative source is the `<!-- prime: ... -->` control section on line 1 of each generated file
 
 ---
 
@@ -228,6 +223,7 @@ AGENTS.md                         — this file
 scripts/
   bump.sh                         — version-bump script; edits all 5 locations
   check-version.sh                — scrapes NordVPN Debian repo; prints task bump command
+  check-base-image.sh             — checks base image for newer digest
   verify.sh                       — smoke-tests the locally built image (credentialless; MSYS-safe)
   connect-test.sh                 — real-token NordVPN connect + Spain egress test (task verify-live)
 docs/
@@ -240,7 +236,8 @@ docs/
 .github/workflows/
   build-validate.yml              — PR → docker build (no push)
   publish.yml                     — tag push → build + push to Docker Hub
-  check-nordvpn-release.yml       — weekly cron: detect new NordVPN, open draft PR
+  check-nordvpn-release.yml       — daily cron: detect new NordVPN, open draft PR
+  check-base-image.yml            — monthly cron (1st at 09:00 UTC): detect base digest change, open draft PR
 .gitattributes                    — enforces LF line endings on all rootfs/ scripts
 .ai/
   current.md                      — live session state (update after each bump)
@@ -332,8 +329,6 @@ task docker-build
 task verify
 ```
 
-For narrower per-change-type validation chains, see `.ai/workflows/validation.md`.
-
 ### Before Declaring Done
 ```bash
 task docker-build                            # Must succeed (image builds)
@@ -401,10 +396,10 @@ Do not skip either step, even for small tasks. The branch protects `main`; the p
 ```
 Dockerfile            # Primary build file; version numbers live here
 Taskfile.yml          # Local build/publish tasks
-scripts/              # bump.sh, check-version.sh, verify.sh
+scripts/              # bump.sh, check-version.sh, verify.sh, check-base-image.sh
 rootfs/               # Container filesystem (cont-init.d, services.d, usr/bin)
 docs/                 # Product documentation (comprehensive reference)
-.github/workflows/    # CI/CD: build-validate, publish, check-nordvpn-release
+.github/workflows/    # CI/CD: build-validate, publish, check-nordvpn-release, check-base-image
 .ai/                  # Agent workspace (distilled working context)
 ```
 

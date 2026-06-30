@@ -1,8 +1,9 @@
+<!-- prime: version=3.0.0 template=docs/tech-stack.md date=2026-06-30 -->
 # Tech Stack
 
 Technology choices, rationale, and dependency versions for **fredplex/nordvpn**.
 
-**Last Updated**: 2026-06-26
+**Last Updated**: 2026-06-27
 
 ---
 
@@ -12,7 +13,7 @@ Technology choices, rationale, and dependency versions for **fredplex/nordvpn**.
 
 ---
 
-## Container Layer
+## Application Layer
 
 | Technology | Version | Role | Rationale |
 |------------|---------|------|-----------|
@@ -27,28 +28,15 @@ Technology choices, rationale, and dependency versions for **fredplex/nordvpn**.
 
 ---
 
-## Build Tooling
+## Infrastructure & Deployment
 
-| Tool | Version | Role | Notes |
-|------|---------|------|-------|
-| Docker / Docker Desktop | 24+ | Build and run images | Local builds and smoke tests |
-| BuildKit (`DOCKER_BUILDKIT=1`) | bundled with Docker 18.09+ | BuildKit builder | Required for `COPY --chmod=0755`; `Taskfile.yml` sets `env: DOCKER_BUILDKIT: "1"` globally; CI uses `docker/setup-buildx-action` |
-| Taskfile (`task`) | 3.x | Local task runner | `task docker-build`, `task verify`, `task verify-live`, `task release`, etc. |
-| Bash | system | `scripts/*.sh` | bump.sh, check-version.sh, verify.sh, connect-test.sh |
-| curl | system | Package verification + version check | Used in check-version.sh and bump.sh |
-| sed / grep | system | File editing in bump.sh | Edits Dockerfile, README.md, CLAUDE.md |
-
----
-
-## CI/CD
-
-| Technology | Role | Trigger |
-|------------|------|---------|
-| GitHub Actions | PR validation, version detection, publish | PR → main, weekly cron, tag push |
+| Technology | Role | Notes |
+|------------|------|-------|
+| GitHub Actions | PR validation, version detection, base-image check, publish | PR → main, daily/monthly cron, tag push |
 | `docker/build-push-action@v6` | Build + push to Docker Hub | publish.yml |
 | `docker/login-action@v3` | Docker Hub authentication | publish.yml |
 | `docker/setup-buildx-action@v3` | Multi-platform build setup | publish.yml |
-| `peter-evans/create-pull-request@v6` | Open draft PR from Actions | check-nordvpn-release.yml |
+| `peter-evans/create-pull-request@v6` | Open draft PR from Actions | check-nordvpn-release.yml, check-base-image.yml |
 
 ---
 
@@ -65,10 +53,23 @@ No unit test framework — the project is shell scripts + a Dockerfile. The two-
 
 ---
 
+## Development Tooling
+
+| Tool | Version | Role |
+|------|---------|------|
+| Docker / Docker Desktop | 24+ | Build and run images; local builds and smoke tests |
+| BuildKit (`DOCKER_BUILDKIT=1`) | bundled with Docker 18.09+ | Required for `COPY --chmod=0755`; `Taskfile.yml` sets `env: DOCKER_BUILDKIT: "1"` globally; CI uses `docker/setup-buildx-action` |
+| Taskfile (`task`) | 3.x | Local task runner: `task docker-build`, `task verify`, `task verify-live`, `task release`, etc. |
+| Bash | system | `scripts/*.sh` — bump.sh, check-version.sh, verify.sh, connect-test.sh, check-base-image.sh |
+| curl | system | Package verification + version check — used in check-version.sh and bump.sh |
+| sed / grep | system | File editing in bump.sh — edits Dockerfile, README.md, CLAUDE.md |
+
+---
+
 ## Key Version Constraints
 
 - **NordVPN version** is pinned in `Dockerfile ARG NORDVPN_VERSION`. Do not bump without verifying the `.deb` exists at `https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/`.
-- **Base image** (`ghcr.io/linuxserver/baseimage-ubuntu:noble`) is **digest-pinned** (`@sha256:53411508…`). Do not change the digest without explicit owner instruction. Future work: adopt a base-refresh cadence (periodic re-pin + rebuild) rather than always relying on `apt-get upgrade` for OS patches.
+- **Base image** (`ghcr.io/linuxserver/baseimage-ubuntu:noble`) is **digest-pinned** (`@sha256:53411508…`). Do not change the digest without explicit owner instruction. A monthly base-refresh cadence (check-base-image.yml) automates detection, dev testing, and draft PRs.
 - **No Renovate** — `renovate.json` has been removed. No automated dependency PRs.
 
 ---
@@ -77,6 +78,7 @@ No unit test framework — the project is shell scripts + a Dockerfile. The two-
 
 | Date | Change | Reason |
 |------|--------|--------|
+| 2026-06-27 | Base image refresh cadence implemented (check-base-image.sh + check-base-image.yml + task check-base) | Automate monthly digest detection, dev builds, and draft PRs |
 | 2026-06-26 | Dockerfile optimization (Phases 0–5) | Security hardening, reproducibility, health reporting |
 | 2026-06-26 | Base image digest-pinned (`@sha256:53411508…`) | Enforce no-silent-base-bump constraint |
 | 2026-06-26 | `wireguard` → `wireguard-tools`; `iptables` made explicit | Package rationalisation; F5/F6 findings |

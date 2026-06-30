@@ -1,3 +1,4 @@
+<!-- prime: version=3.0.0 template=docs/project-rules.md date=2026-06-30 -->
 # Project Rules
 
 Product vision, boundaries, and governance for **fredplex/nordvpn**.
@@ -8,7 +9,7 @@ Product vision, boundaries, and governance for **fredplex/nordvpn**.
 
 ## Product Vision
 
-`fredplex/nordvpn` is a minimal, reliable Docker image that packages the official NordVPN Linux client for use as a VPN gateway on Unraid NAS systems. The container acts as a network proxy — other containers route their traffic through it via `--net=container:vpn`. The owner is the sole maintainer and the primary user. Releases are infrequent and deliberate, always triggered by a new NordVPN client version.
+`fredplex/nordvpn` is a minimal, reliable Docker image that packages the official NordVPN Linux client for use as a VPN gateway on Unraid NAS systems. The container acts as a network proxy — other containers route their traffic through it via `--net=container:vpn`. The owner is the sole maintainer and the primary user. Releases are infrequent and deliberate, always triggered by a new NordVPN client version or base image refresh.
 
 ---
 
@@ -20,7 +21,8 @@ Product vision, boundaries, and governance for **fredplex/nordvpn**.
 - Support for NordLynx (WireGuard) and OpenVPN
 - Meshnet, DNS override, port allowlist, and LAN discovery configuration
 - Watchdog reconnection on connection loss
-- Automated version detection (weekly GitHub Action → draft PR)
+- Automated version detection (daily GitHub Action → draft PR)
+- Automated base image refresh detection (monthly GitHub Action → draft PR)
 - Local build and smoke-test tooling (Taskfile + scripts)
 - Human-in-the-loop publish workflow (owner reviews, builds locally, verifies, then tags)
 
@@ -37,7 +39,7 @@ Product vision, boundaries, and governance for **fredplex/nordvpn**.
 
 The following state-changing operations are currently approved:
 
-- **Version bumps** — `task bump NORDVPN_VERSION=x IMAGE_VERSION=y`; edits Dockerfile, README.md, CLAUDE.md, .ai/current.md; requires owner confirmation of both version strings first
+- **Version bumps** — `task bump NORDVPN_VERSION=x IMAGE_VERSION=y`; edits Dockerfile, README.md, CLAUDE.md; requires owner confirmation of both version strings first. `.ai/current.md` is updated by hand.
 - **rootfs/ script edits** — cont-init.d, services.d, usr/bin; show diff before applying
 - **Documentation updates** — AGENTS.md, CLAUDE.md, docs/, .ai/ files
 - **GitHub Actions workflow edits** — when explicitly requested by owner

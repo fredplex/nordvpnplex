@@ -1,8 +1,9 @@
+<!-- prime: version=3.0.0 template=.ai/memory/project-state.md date=2026-06-30 -->
 # Project State
 
 Current product posture and approved scope for **nordvpn**.
 
-**Last Updated**: 2026-06-24
+**Last Updated**: 2026-06-27
 
 ---
 
@@ -94,7 +95,7 @@ See `.ai/memory/architecture-decisions.md` for the detailed model.
 
 - **Unit tests**: None
 - **Smoke tests**: `task verify` — 4 checks (entrypoint overridden for stateless checks to prevent capabilities/HOME errors)
-- **CI/CD**: GitHub Actions — `build-validate.yml` (on PRs); `publish-dev.yml` (manual/auto checker); `publish.yml` (on PR merges to main / tags / manual dispatch)
+- **CI/CD**: GitHub Actions — `build-validate.yml` (on PRs); `publish.yml` (on PR merges to main / tags / manual dispatch)
 
 ---
 

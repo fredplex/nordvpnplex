@@ -1,3 +1,4 @@
+<!-- prime: version=3.0.0 template=.ai/memory/architecture-decisions.md date=2026-06-30 -->
 # Architecture Decisions
 
 Key architectural choices that define how this codebase works.
@@ -63,6 +64,15 @@ Container is stateless between restarts. The only persistent state is:
 
 - NordVPN authentication: `TOKEN` env var (plain token) or `TOKENFILE` env var (path to file, for docker secrets)
 - No web auth — this is a headless container
+
+---
+
+## Caching Strategy
+
+No application-level caching — the container is stateless between restarts. Docker layer caching applies at build time. `task docker-build` does not use `--no-cache`, so apt layers are cached across builds. Force a cache bust with:
+```bash
+docker build --no-cache --platform linux/amd64 . -f Dockerfile -t "fredplex/nordvpn:$(git log --format='%h' -n 1)"
+```
 
 ---
 
@@ -136,7 +146,7 @@ Container is stateless between restarts. The only persistent state is:
 
 **Choice**: `publish.yml` ends with `gh release create` (auth: built-in `GITHUB_TOKEN`), which creates the tag + a GitHub Release. Success = native release email to repo watchers; failure = GitHub's built-in Actions emails.
 **Rationale**: No SMTP/app-password, no third-party action to pin/trust, no extra secrets. Real Releases page as a bonus. An SMTP step was drafted and deliberately reverted.
-**Gotcha**: The owner must opt in once (Watch → Custom → Releases) or the success email isn't delivered. `gh release create` makes a *lightweight* tag (the old step made an annotated one); release notes carry the context. The step runs on both merge and `task release` paths; `gh release view` dedups. (2026-06-24, `7c61b2a`)
+**Gotcha**: The owner must opt in once (Watch → Custom → Releases) or the success email isn't delivered. `gh release create` makes a *lightweight* tag (the old step made an annotated one); release notes carry the context.
 
 ### Decision: Human-in-the-loop publish gate
 
@@ -153,9 +163,7 @@ Container is stateless between restarts. The only persistent state is:
 - **No `/.version` file**: Older agent docs may reference `/.version` at the container root — this was removed in the version-mechanism-refactor. The source of truth is now `ENV IMAGE_VERSION` and the OCI label.
 - **`task release` requires a clean working tree and non-duplicate tag**: Always commit before running.
 - **nordvpnd socket check takes 12s**: The verify script waits for the daemon to start. Expected.
-- **Running a CMD without NET_ADMIN halts at s6 init**: A bare `docker run <image> nordvpn --version` goes through the default s6 `/init` entrypoint. Without `--cap-add=NET_ADMIN`, `00-firewall`'s `iptables` commands fail, s6 aborts init, and the CMD never runs (empty output). To run the binary directly for a stateless check, override the entrypoint: `docker run --rm --entrypoint /bin/bash <image> -c "nordvpn --version"`. This is what `scripts/verify.sh:49` does, and what the CI smoke tests in `publish-dev.yml` / `publish.yml` must do (fixed 2026-06-24, `fc8a147`). The alternative — granting `--cap-add=NET_ADMIN` — is used by the kill-switch smoke check instead.
-- **`curl` is a runtime dependency, not build-only**: The Dockerfile installs `curl` to fetch the NordVPN repo `.deb` during build, but `nord_watch` (`rootfs/usr/bin/nord_watch:9`) also uses `curl -Is -m 30` at runtime to poll `CHECK_CONNECTION_URL` every 300s. Removing `curl` from the final image would silently break the watchdog. (Found 2026-06-25 during Dockerfile optimization deep analysis.)
-- **18 of 19 rootfs files are non-executable in git (`100644`)**: Only `nord_watch` had the executable bit. Fixed via `git update-index --chmod=+x` on all 17 scripts; `COPY --chmod=0755` now stamps permissions at build time. (Fixed 2026-06-26, Phase 2.)
+- **Running a CMD without NET_ADMIN halts at s6 init**: A bare `docker run <image> nordvpn --version` goes through the default s6 `/init` entrypoint. Without `--cap-add=NET_ADMIN`, `00-firewall`'s `iptables` commands fail, s6 aborts init, and the CMD never runs. Use `--entrypoint /bin/bash` for stateless checks. This is what `scripts/verify.sh:49` does.
 - **`curl` is a runtime dependency, not build-only**: `nord_watch:9` uses `curl -Is -m 30` at runtime to poll `CHECK_CONNECTION_URL`. Do not remove `curl` from the image.
-- **wireguard-tools is sufficient; wireguard metapackage not needed**: NordVPN `.deb` brings WireGuard kernel support. `wireguard-tools` provides the userspace tools. `wireguard` metapackage is unnecessary. (Validated 2026-06-26 via `task verify-live`.)
+- **wireguard-tools is sufficient; wireguard metapackage not needed**: NordVPN `.deb` brings WireGuard kernel support. `wireguard-tools` provides the userspace tools.
 - **`# syntax` directive must NOT be added to the Dockerfile**: In this environment it triggers a 401 from Docker Hub for the BuildKit frontend image. BuildKit is satisfied by `DOCKER_BUILDKIT=1` in Taskfile env or CI buildx.

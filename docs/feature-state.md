@@ -1,8 +1,9 @@
+<!-- prime: version=3.0.0 template=docs/feature-state.md date=2026-06-30 -->
 # Feature State
 
 Authoritative inventory of all features in **fredplex/nordvpn**.
 
-**Last Updated**: 2026-06-26
+**Last Updated**: 2026-06-27
 
 **Working copy**: `.ai/memory/project-state.md`
 
@@ -55,11 +56,13 @@ Authoritative inventory of all features in **fredplex/nordvpn**.
 | `task verify` (smoke tests) | ✅ Implemented | 3 stateless checks (uses entrypoint override) + 1 runtime daemon socket check; MSYS/Git-Bash safe on Windows (no WSL2 required for verify) |
 | `task verify-live` (real-token gate) | ✅ Implemented | Real NordVPN token + Spain egress test; reads token from file; mandatory pre-release gate; `scripts/connect-test.sh` |
 | `task check-version` | ✅ Implemented | Scrapes NordVPN Debian repo; shows latest 5 versions vs pinned |
+| `task check-base` | ✅ Implemented | Checks base image for newer digest via `docker buildx imagetools inspect`; `scripts/check-base-image.sh` |
 | `task bump` | ✅ Implemented | Single-command version bump; verifies package exists first |
 | `task release` | ✅ Implemented | Creates annotated git tag + pushes (retained as local release fallback) |
 | GitHub Actions: build-validate | ✅ Implemented | `docker build` on PR → main; no push |
 | GitHub Actions: publish | ✅ Implemented | PR merge (main push), tag push, or manual: builds, tests, publishes to Docker Hub, then creates a GitHub Release (tag + native notification) |
 | GitHub Actions: check-nordvpn-release | ✅ Implemented | Daily cron: check repo, auto-run dev build & verify, open draft PR if successful |
+| GitHub Actions: check-base-image | ✅ Implemented | Monthly cron (1st at 09:00 UTC): check base digest, open draft PR + trigger dev build if changed |
 | `task dev-build` | ✅ Implemented | Builds `:dev` + `:dev-<hash>`; optional NORDVPN_VERSION override |
 | `task dev-push` | ✅ Implemented | Pushes `:dev` + `:dev-<hash>` to Docker Hub |
 | `task dev-latest` | ✅ Implemented | Auto-discovers newest NordVPN version + builds dev image |
@@ -79,6 +82,11 @@ Authoritative inventory of all features in **fredplex/nordvpn**.
 
 ## Recently Shipped
 
+- **Base image refresh cadence (Phases A–D)** — 2026-06-27 (`chore/base-image-refresh-plan`):
+  - `scripts/check-base-image.sh` — local digest checker using `docker buildx imagetools inspect`
+  - `.github/workflows/check-base-image.yml` — monthly cron (1st at 09:00 UTC), auto dev build + draft PR
+  - `task check-base` added to Taskfile (explicitly approved)
+  - Documentation updated: `.ai/current.md`, `active.md`, `AGENTS.md`, `docs/build-and-publish.md`, `README.md`, `user-guide.md`
 - **Dockerfile optimization (Phases 0–5)** — 2026-06-26 (`chore/dockerfile-optimization`):
   - Base image digest-pinned (`noble@sha256:53411508…`)
   - `wireguard` → `wireguard-tools`; `iptables` + `curl` made explicit; `net-tools`, `iputils-ping`, `libc6` removed
@@ -94,7 +102,6 @@ Authoritative inventory of all features in **fredplex/nordvpn**.
 - Unified release pipeline — 2026-06-23 (GHA-centric release on PR merge, daily cron version checker + dev build, manual dispatch, verify script entrypoint override, LF normalisation)
 - Version mechanism refactor — 2026-06-22 (removed `/.version`, added `ENV IMAGE_VERSION` + OCI labels, moved banner to `cont-init.d/00-version`)
 - Build/publish workflow — 2026-06-22 (added scripts/bump.sh, check-version.sh, verify.sh; Taskfile tasks; 3 GitHub Actions)
-- AI agent docs — 2026-06-23 (prime-ai-docs.mjs scaffold + nordvpn content merge)
 
 ---
 
@@ -104,3 +111,4 @@ These have been explicitly considered and deferred. Do not implement without re-
 
 - **README.md project-specific rewrite (R8)** — Current README mirrors upstream `bubuntux/nordvpn` project. Needs a project-specific README with actual Changelog section. Deferred as Tier 3.
 - **Auto-generated Changelog (R9)** — Considered but deferred along with README rewrite.
+- **Remove `apt-get upgrade`** — Revisit after first few monthly base image refreshes have run successfully. Deferred to evaluate reproducibility tradeoff.
