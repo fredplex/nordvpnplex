@@ -173,6 +173,7 @@ mandatory vs. conditional each session — do not treat this list as a per-sessi
 - Add sleep loops or background processes to `cont-init.d/` scripts
 - Push Docker images without the human-in-the-loop gate
 - Add mutations without approval gate
+- Add a `# syntax` directive to the Dockerfile — triggers a 401 from Docker Hub for the BuildKit frontend in this environment
 
 ---
 
@@ -220,6 +221,7 @@ Taskfile.yml                      — local build/publish tasks (do not modify w
 README.md                         — user docs + Changelog
 CLAUDE.md                         — AI context and workflow rules
 AGENTS.md                         — this file
+.gitignore                        — excludes .ai-prime-backup/ from version control
 scripts/
   bump.sh                         — version-bump script; edits all 5 locations
   check-version.sh                — scrapes NordVPN Debian repo; prints task bump command
@@ -370,6 +372,13 @@ Do not skip either step, even for small tasks. The branch protects `main`; the p
 ### Keep the Onboarding Path Current
 - When work lands or priorities change, update `.ai/current.md` and `.ai/tasks/active.md`
 - A new agent must learn current state from the standard path without hunting
+
+### Before Ending a Session
+
+Follow `.ai/workflows/session-close.md`. Key rules:
+- Update `.ai/current.md` and `.ai/tasks/active.md` with **work state only** — no branch names, PR numbers, merge status, or approval state; those belong in git
+- Prepend a close entry to `.ai/SESSION_NOTES.md`
+- Commit the handoff files; then **stop and request explicit owner approval before merge or push**
 
 ---
 

@@ -6,6 +6,32 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-06-30 (agents-md-improvements)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Phase 1 — `# syntax` Dockerfile constraint added to AGENTS.md Must-not list | `d5152ed` |
+| 2 | Phase 2 — Session close working rule added to AGENTS.md Working Rules | `3db5744` |
+| 3 | Phase 3 — `.gitignore` added to AGENTS.md Project File Map | `ddda5d2` |
+| 4 | Phase 4 — `current.md` fragile area note corrected re: bump.sh built date | `58ee25b` |
+| 5 | Session close — current.md, active.md, SESSION_NOTES.md, plan archived | this commit |
+
+### Key decisions
+
+- `# syntax` constraint was present in CLAUDE.md but absent from AGENTS.md; added to Architecture Boundaries so agents that read AGENTS.md only still see the build-breaking constraint.
+- Session close rule added to Working Rules to complete the agent lifecycle coverage (before/during/after now all have entries).
+- `current.md` fragile area was wrong: `bump.sh` writes `${TODAY}` into CLAUDE.md's Built date automatically (verified at line 44 of bump.sh). Only `.ai/current.md` requires manual update after a release PR.
+- Plan file archived to `.ai/plans/archive/` via `git mv` per session-close protocol.
+
+### Stopping point
+
+- Working tree: clean after close commit
+- Validation: N/A — docs/workspace change only; no source, Dockerfile, or rootfs changes
+
+---
+
 ## Session Close — 2026-06-30 (prime-ai-docs v3.x template update)
 
 ### Completed this session

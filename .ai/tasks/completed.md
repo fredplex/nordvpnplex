@@ -11,6 +11,8 @@ Full session detail (decisions, validation, follow-ups) lives in `SESSION_NOTES.
 > Newest at top. Move items here from `active.md` `## Recently Completed` at session close when the list exceeds 3 entries.
 > Format: `- Task name (commit, YYYY-MM-DD)`
 
+- AGENTS.md improvements — gaps + doc-drift fixes (d5152ed–58ee25b, 2026-06-30)
+- prime-ai-docs v3.x template update (f4604c3, 2026-06-30)
 - Base image refresh cadence — Phases A–D (89f71f5–18940b2, 2026-06-27)
 - Dockerfile optimization — Phases 0–5 + merge (chore/dockerfile-optimization, 7886cc8, 2026-06-26)
 - prime-ai-docs v1.2.1 template update (8257459, 2026-06-26)
