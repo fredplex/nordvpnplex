@@ -1,7 +1,7 @@
 # AGENTS.md Improvements — Gaps and Doc-Drift Fixes
 
 **Created**: 2026-06-30
-**Status**: In progress
+**Status**: Complete
 
 ## Background
 

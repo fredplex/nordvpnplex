@@ -48,7 +48,7 @@ Watch for both the next NordVPN release (daily cron) and the next base image dig
 - **Base digest must be updated manually**: Dockerfile is pinned to `noble@sha256:53411508…`. A future base-refresh requires an explicit digest change — do not remove the pin.
 - **`# syntax` directive must NOT be added to Dockerfile**: Triggers a 401 from Docker Hub for the BuildKit frontend in this environment.
 - **Token for `task verify-live` stays outside the repo**: Never commit, print, or pass as CLI arg.
-- **`.ai/current.md` is hand-maintained**: `bump.sh` no longer touches it. After any release PR, update this file and `CLAUDE.md` built date by hand.
+- **`.ai/current.md` is hand-maintained**: `bump.sh` no longer touches it. After any release PR, update this file by hand. `CLAUDE.md` (including the Built date) is handled automatically by `task bump`.
 - **s6 init + capabilities**: Stateless `docker run` checks must use `--entrypoint /bin/bash` to bypass `00-firewall` when `NET_ADMIN` isn't granted.
 
 ---

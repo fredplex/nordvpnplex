@@ -40,7 +40,7 @@ Current work in progress.
 - [x] Phase 1 — `# syntax` directive constraint added to "Must not" list
 - [x] Phase 2 — Session close working rule added to Working Rules
 - [x] Phase 3 — `.gitignore` added to Project File Map
-- [ ] Phase 4 — `current.md` fragile area note corrected
+- [x] Phase 4 — `current.md` fragile area note corrected
 
 Plan: `.ai/plans/agents-md-improvements.md`
 
