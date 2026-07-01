@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.5 template=.ai/workflows/session-close.md date=2026-06-30 -->
+<!-- prime: version=3.0.6 template=.ai/workflows/session-close.md date=2026-07-01 -->
 # Session Close Workflow
 
 The Handoff & Session Close Protocol — triggered by `.ai/prompts/session-close-prompt.md`.
@@ -13,9 +13,9 @@ Run these steps in order at the end of a working session.
    - Separate changes that belong to this task from unrelated or pre-existing changes.
    - Do not stage, revert, or modify unrelated local changes unless explicitly asked.
 
-2. **Run verification gates (final pre-merge gate)** — run the gates defined in `.ai/workflows/definition-of-done.md`
+2. **Run verification gates (final pre-integration gate)** — run the gates defined in `.ai/workflows/definition-of-done.md`
    (static gate always; test gate if logic, templates, or runtime behavior changed). This is the last safety gate before the
-   irreversible merge-to-main, so run it even if a phase already passed. If a gate fails, stop and
+   irreversible integration to main (PR or local merge), so run it even if a phase already passed. If a gate fails, stop and
    report. Do not commit, merge, or push unless the human explicitly approves closing with a failing gate.
 
 3. **Clean build artifacts** — confirm artifacts are clean. If a phase already cleaned them, verify; if the session was interrupted before cleanup ran, revert compile-time edits added by build tools now. Do not revert unrelated files.
@@ -46,7 +46,9 @@ Run these steps in order at the end of a working session.
 5. **Add a session close entry to `.ai/SESSION_NOTES.md`** — add a new `## Session Close — YYYY-MM-DD (task name)`
    section immediately after the file's header block, before any existing entries (do not append to the
    bottom). Include completed items, commit hashes, decisions/reasoning, known bugs or technical debt,
-   and fragile areas. Use "this commit" as a placeholder for the final close commit hash when it is not yet known.
+   and fragile areas. Use the literal phrase `this commit` as a placeholder for the final close commit hash;
+   do not attempt to substitute the hash — the entry is committed as part of the close commit, so `this commit`
+   is correct as-is.
 
 6. **Update task tracking**
    - Check off completed items in `.ai/tasks/active.md`. The same **category** rule from step 4
@@ -59,7 +61,8 @@ Run these steps in order at the end of a working session.
    - **Prune `## Recently Completed` in `active.md`** to the last 3 entries — move older items to `completed.md` as single-line archive entries: `- Task name (commit, YYYY-MM-DD)`.
    - **Prune `## Recently Completed` in `current.md`** to the last 3 entries — older history lives in `SESSION_NOTES.md`.
    - Keep the onboarding path current if priorities or start-here guidance changed.
-   - If a plan's status is now Complete, move the plan file using `git mv .ai/plans/<name>.md .ai/plans/archive/<name>.md` — **not** a bare `mv`. A bare `mv` removes the file from the working tree but leaves it tracked in the git index, causing a duplicate to appear in the merge diff and requiring a clean-up commit after every merge.
+    - If a plan's status is now Complete, move the plan file using `git mv .ai/plans/<name>.md .ai/plans/archive/<name>.md` — **not** a bare `mv`. A bare `mv` removes the file from the working tree but leaves it tracked in the git index, causing a duplicate to appear in the merge diff and requiring a clean-up commit after every merge.
+    - If the plan's status is not `Complete`, do **not** archive it — leave it in `.ai/plans/` for the next session and note its incomplete status in `current.md`.
    - **First session only**: if `definition-of-done.md` Review Checklist still has multiple archetype sections, delete the non-applicable ones now.
 
 7. **Memory check**
@@ -70,7 +73,7 @@ Run these steps in order at the end of a working session.
 8. **Verify documentation sync**
    - Confirm each behavioral commit this session already synced both the relevant `docs/` file **and** its `.ai/` working copy (doc sync is a per-phase requirement — see *Documentation Sync* in `.ai/workflows/implementation.md`). If any commit missed its pair, sync it now.
    - **Active AGENTS.md scan — mandatory before closing**: Check `AGENTS.md` for staleness in two passes:
-     - **Numeric claims**: grep for every count, number, or version in prose (file counts, test counts, version numbers). For each, verify it still matches actual project state — compare file/module counts against the real directory structure, test counts against `echo ok` output, version numbers against project manifests.
+     - **Numeric claims**: grep for every count, number, or version in prose (file counts, test counts, version numbers). For each, verify it still matches actual project state — compare file/module counts against the real directory structure, test counts against `npm run test:e2e` output, version numbers against project manifests.
      - **Structural sections**: if this session changed architecture, key boundaries, tech stack, or validation commands — verify the corresponding `AGENTS.md` sections (Architecture, Key Boundaries, Validation, Quick Reference) still reflect the current state.
      If any claim or section is stale, fix it in a `chore(docs):` commit before closing.
    - Both layers must reflect all changes before the session closes.

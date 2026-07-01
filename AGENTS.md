@@ -241,6 +241,7 @@ docs/
 .github/workflows/
   build-validate.yml              — PR → docker build (no push)
   publish.yml                     — tag push → build + push to Docker Hub
+  publish-dev.yml                 — workflow_dispatch + workflow_call → build + push `:dev` / `:dev-<sha>` (never `:latest` or git tags)
   check-nordvpn-release.yml       — daily cron: detect new NordVPN, open draft PR
   check-base-image.yml            — monthly cron (1st at 09:00 UTC): detect base digest change, open draft PR
 .gitattributes                    — enforces LF line endings on all rootfs/ scripts
@@ -314,6 +315,7 @@ rootfs/
 |---|---|---|
 | `.github/workflows/build-validate.yml` | PR → main | `docker build` only — no push. Catches Dockerfile errors early. |
 | `.github/workflows/publish.yml` | Push of semver tag (e.g. `5.6.0`) | Builds and pushes `:latest` + `:<tag>` to Docker Hub. |
+| `.github/workflows/publish-dev.yml` | `workflow_dispatch` + `workflow_call` | Builds and pushes `fredplex/nordvpn:dev` + `:dev-<sha>` (and version-tagged) to Docker Hub. Never touches `:latest` or git tags. Called by the two cron workflows to publish a pre-tested dev image; also manually runnable. |
 | `.github/workflows/check-nordvpn-release.yml` | Daily cron (08:00 UTC) + manual | Checks NordVPN package repo; opens draft PR if newer version available. |
 | `.github/workflows/check-base-image.yml` | Monthly cron (1st at 09:00 UTC) + manual | Checks base image for newer digest; opens draft PR + triggers dev build. |
 

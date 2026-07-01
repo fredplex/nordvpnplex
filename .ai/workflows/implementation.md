@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.3 template=.ai/workflows/implementation.md date=2026-06-30 -->
+<!-- prime: version=3.0.4 template=.ai/workflows/implementation.md date=2026-07-01 -->
 # Implementation Workflow
 
 Plan → Code → Test → Validate cycle for effective development.
@@ -185,7 +185,7 @@ Trigger **Autonomous** mode with `execute-plan-prompt.md`.
 
 Use this mode when executing one phase at a time with human approval before each commit.
 
-1. **Preflight** — run `git status --short --branch`. **Confirm you are on a task branch; stop and report if on `main`/`master`.** Identify only phase-relevant changes; note any unrelated pre-existing changes but do not touch them — if they would interfere with this phase's validation, recommend the human stash or commit them first. Do not modify, stage, revert, or commit unrelated files unless explicitly asked.
+1. **Preflight** — run `git status --short --branch`. **Confirm you are on a task branch (created during onboarding); if on `main`/`master`, stop and request the human create the branch first.** Identify only phase-relevant changes; note any unrelated pre-existing changes but do not touch them — if they would interfere with this phase's validation, recommend the human stash or commit them first. Do not modify, stage, revert, or commit unrelated files unless explicitly asked.
 2. **Confirm scope** — name the active plan file and the requested phase; confirm the phase's scoped changes before editing anything; if the requested phase does not match the active plan, or the phase scope is ambiguous, stop and report — do not guess.
 3. **Implement this phase only** — no work from other phases, no opportunistic cleanup.
 4. **Run focused validation** — run the gates in `definition-of-done.md` for this change type; if validation fails due to this phase, fix within scope; if unrelated, stop and report. If the failure can't be fixed in scope, output in this format and do not stage broken files:
@@ -197,13 +197,8 @@ Use this mode when executing one phase at a time with human approval before each
    Do not commit a failing phase unless the human explicitly approves it.
 5. **Clean build artifacts** — revert compile-time edits by build tools if present; do not revert unrelated files.
 6. **Update tracking and documentation** — update the plan's `Status` to `In progress` (if not already); mark phase complete in the plan + `.ai/tasks/active.md`. If this phase altered behavior, architecture, features, rules, tech stack, or user-facing workflows: **update both the affected `docs/` file and its `.ai/` working copy — required, not optional, in this same commit** (see *Documentation Sync* above for the pairs table).
-7. **Stage and formulate** — first run the doc-sync gate, then stage:
-   - [ ] Behavior / features changed → `docs/feature-state.md` + `.ai/memory/project-state.md`
-   - [ ] Architecture changed        → `docs/architecture.md` + `.ai/memory/architecture-decisions.md` + `AGENTS.md` Architecture section
-   - [ ] Rules / boundaries changed  → `docs/project-rules.md` + `.ai/rules/` + `AGENTS.md` Key Boundaries section
-   - [ ] Tech stack changed          → `docs/tech-stack.md` + `AGENTS.md` + `.ai/memory/`
-   - [ ] Scaffold file count or structure changed → `AGENTS.md` Key rules prose + file-structure table + `docs/feature-state.md`
-   - [ ] User-facing guide changed   → `README.md`
+7. **Stage and formulate** — first apply the doc-sync checklist, then stage.
+   - **Apply the doc-sync pairs table from the *Documentation Sync* section above** — for every row whose topic this phase touched, update the listed `docs/` file **and** its `.ai/` working copy in this same commit. If the phase touched no listed topic, skip doc-sync.
 
    Stage only phase files + docs/tracking updates; write a proposed commit message with a semantic prefix that references the phase (number/name) and formulate the push command.
 8. **Stop — request explicit human approval** before commit and push. Stop calling tools and end your turn; do not run the commit or push until the human approves in a new turn.
@@ -218,7 +213,7 @@ Use this mode when the plan is approved and you want the agent to execute all ph
 
 **Before starting:**
 - Confirm the plan is already approved by the human.
-- **Confirm you are on a task branch; stop and report if on `main`/`master`.**
+- **Confirm you are on a task branch (created during onboarding); if on `main`/`master`, stop and request the human create the branch first.**
 - Read all phases to understand the full scope.
 - Record the pre-run commit hash: `git rev-parse HEAD` — this is the rollback point if needed.
 - **Mid-run rule:** if you discover the plan itself is flawed, stop, report the finding, and request approval before deviating — do not silently amend the plan.
@@ -236,13 +231,8 @@ Use this mode when the plan is approved and you want the agent to execute all ph
      - **Rollback commands**: `git reset --hard HEAD && git clean -fd` (this phase only) or `git reset --hard <pre-run-hash> && git clean -fd` (full initiative) — print but **do not execute**; wait for human instructions.
 4. **Clean build artifacts** if present — do not revert unrelated files.
 5. **Update tracking and documentation** — update the plan's `Status` to `In progress` (if not already); mark phase complete in plan + `active.md`. If this phase altered behavior, architecture, features, rules, tech stack, or user-facing workflows: **update both the affected `docs/` file and its `.ai/` working copy in this same commit — required, not optional** (see *Documentation Sync* above).
-6. **Stage and commit** — first run the doc-sync gate, then stage:
-   - [ ] Behavior / features changed → `docs/feature-state.md` + `.ai/memory/project-state.md`
-   - [ ] Architecture changed        → `docs/architecture.md` + `.ai/memory/architecture-decisions.md` + `AGENTS.md` Architecture section
-   - [ ] Rules / boundaries changed  → `docs/project-rules.md` + `.ai/rules/` + `AGENTS.md` Key Boundaries section
-   - [ ] Tech stack changed          → `docs/tech-stack.md` + `AGENTS.md` + `.ai/memory/`
-   - [ ] Scaffold file count or structure changed → `AGENTS.md` Key rules prose + file-structure table + `docs/feature-state.md`
-   - [ ] User-facing guide changed   → `README.md`
+6. **Stage and commit** — first apply the doc-sync checklist, then stage.
+   - **Apply the doc-sync pairs table from the *Documentation Sync* section above** — for every row whose topic this phase touched, update the listed `docs/` file **and** its `.ai/` working copy in this same commit. If the phase touched no listed topic, skip doc-sync.
 
    Stage phase files + tracking updates; commit with a semantic prefix that references the phase (number/name) — **do not push**.
 7. **Print phase-complete line** — phase name, commit hash, validation result.

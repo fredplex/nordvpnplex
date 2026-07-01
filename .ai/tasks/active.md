@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.0 template=.ai/tasks/active.md date=2026-06-30 -->
+<!-- prime: version=3.0.0 template=.ai/tasks/active.md date=2026-07-01 -->
 # Active Tasks
 
 Current work in progress.
@@ -8,6 +8,10 @@ Current work in progress.
 ## Current Status
 
 **None active — awaiting direction.** Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
+
+### prime-ai-docs v3.4.x template refresh (Complete)
+
+- [x] Resumed in-progress script run at GUIDE Step 5 — 6 template-pure files updated and committed (2026-07-01)
 
 ### Base Image Refresh Cadence (Complete)
 
@@ -85,6 +89,6 @@ Current work in progress.
 
 ## Recently Completed
 
+- **prime-ai-docs v3.4.x template refresh** (2026-07-01) — resumed in-progress script run; 6 template-pure workflow/prompt files updated and committed.
 - **prime-ai-docs v3.4.1 re-prime** (2026-06-30) — AGENTS.md backup merge + 3 workflow file template updates.
 - **AGENTS.md improvements** (2026-06-30) — 4 gaps/doc-drift fixes; `# syntax` constraint, session close rule, `.gitignore` file map, `current.md` correction.
-- **prime-ai-docs v3.x template update** (2026-06-30) — workspace updated to v3 template; all project content restored from backup.
