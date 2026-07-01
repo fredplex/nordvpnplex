@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.1 template=.ai/workflows/definition-of-done.md date=2026-06-30 -->
+<!-- prime: version=3.0.2 template=.ai/workflows/definition-of-done.md date=2026-07-01 -->
 # Definition of Done
 
 The single gate every change passes before it is "done": the validation commands, the Done
@@ -13,13 +13,13 @@ Before marking any task complete, run the appropriate gates:
 
 ### Static Checks (always run)
 ```bash
-docker
+npm run validate:local
 ```
 Runs the static validation gate (syntax, linting, and any type checks applicable to this stack).
 
 ### Tests (always run if logic, templates, or runtime behavior changed)
 ```bash
-docker
+npm run test:e2e
 ```
 Runs the unit, integration, and E2E suites.
 
@@ -28,8 +28,8 @@ Runs the unit, integration, and E2E suites.
 ## What "Done" Means
 
 A task is complete when:
-- [ ] Static validation (`docker`) passes with exit code 0.
-- [ ] Test validation (`docker`) passes all tests.
+- [ ] Static validation (`npm run validate:local`) passes with exit code 0.
+- [ ] Test validation (`npm run test:e2e`) passes all tests.
 - [ ] Manual verification completed (browser checks for web apps; test runs for CLIs / libraries).
 - [ ] Workspace state logged in `.ai/current.md` and `.ai/tasks/active.md`.
 - [ ] Product docs (`docs/`) updated for any behavior, architecture, feature, rule, or tech-stack change.
@@ -42,7 +42,22 @@ A task is complete when:
 
 ## Review Checklist
 
-### CLI / Container Archetype
+Choose the archetype section that matches this project and delete the others:
+
+### Web UI / BFF Archetype — *delete if N/A*
+- [ ] Client components import only feature hooks and shared UI primitives (no backend service SDKs).
+- [ ] Feature hooks call same-origin API routes only.
+- [ ] No secrets or internal credentials are leaked to the browser bundle.
+- [ ] Every dynamic badge, counter, and status indicator has a `data-testid="{entity}-{id}-{element}"` in the same commit.
+- [ ] Browser verification completed (null, empty, and happy paths).
+
+### API / Backend Service Archetype — *delete if N/A*
+- [ ] API routes validate and sanitize inputs at the entry boundary.
+- [ ] API responses normalize data and redact internal database or server fields.
+- [ ] Secrets stay server-side (retrieved from secure env variables).
+- [ ] Boundary timeouts are bounded on external calls.
+
+### CLI / Library / SDK Archetype — *delete if N/A*
 - [ ] All dependencies are language built-ins or explicitly approved packages.
 - [ ] File writes are atomic (safe temp-and-rename).
 - [ ] Scoped file operations stay strictly inside the target directory boundary.
@@ -62,9 +77,6 @@ A task is complete when:
 - [ ] Semantic prefixes used (`feat`, `fix`, `chore`, `test`, `refactor`, `docs`).
 
 ### Documentation Sync
-For any change that alters behavior, architecture, features, rules, tech stack, or user-facing workflows:
-- [ ] The relevant `docs/` file was updated in the same commit (not deferred).
-- [ ] The matching `.ai/` working copy was updated in the same commit — no drift between the two layers.
-- [ ] Cross-references between `docs/` and `.ai/` remain accurate and consistent.
+For any change that alters behavior, architecture, features, rules, tech stack, or user-facing workflows, doc-sync is **mandatory in the same commit** — update both the relevant `docs/` file and its matching `.ai/` working copy; do not defer.
 
-See `.ai/workflows/implementation.md` — *Documentation Sync* for the pairs table.
+**Apply the doc-sync pairs table in `.ai/workflows/implementation.md` — *Documentation Sync*** for the authoritative `docs/` ↔ `.ai/` pairings. It is the single canonical table; this checklist does not restate it.
