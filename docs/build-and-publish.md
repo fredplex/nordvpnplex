@@ -337,6 +337,8 @@ For full dev workflow documentation, see [§3.5 Dev workflow](#35-dev-workflow).
 **File:** `.github/workflows/check-base-image.yml`
 **Trigger:** 1st of each month at 09:00 UTC (cron), or manually
 
+**Why this exists**: The base image (`ghcr.io/linuxserver/baseimage-ubuntu:noble`) is pinned to a specific digest in the Dockerfile to ensure deterministic, reproducible builds. However, linuxserver.io periodically rebuilds this base image to include Ubuntu security patches, s6-overlay updates, and distribution hardening fixes. These updates affect binaries and libraries baked into the base image layers — the Dockerfile's `apt-get upgrade -y` patches packages installed into the image but cannot update base layer components. This workflow detects when a new digest is available, automatically builds and smoke-tests a dev image against it, and opens a draft PR — bridging the security patch gap while preserving the digest pin. See `docs/architecture.md` > "Why the base image changes" for the full rationale.
+
 **What it does:**
 1. Resolves the latest digest for `ghcr.io/linuxserver/baseimage-ubuntu:noble` without pulling the image.
 2. Compares the latest digest against the pinned digest in the `FROM` line of the `Dockerfile`.
