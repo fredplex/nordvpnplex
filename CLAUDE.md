@@ -18,4 +18,21 @@ task verify    # Runtime gate
 
 Follow the mandatory reading order and report format in `.ai/workflows/onboarding.md`.
 
+<<<<<<< HEAD
 First write action: create a task branch — `type/name` — before any file edits.
+=======
+Full onboarding workflow: `.ai/workflows/onboarding.md`
+
+## Constraints
+
+- **Never push to the remote** — without explicit instruction
+- **Never bump the base image** (`ghcr.io/linuxserver/baseimage-ubuntu:noble`) without explicit instruction. The base is now digest-pinned (`@sha256:53411508…`) — changing the digest is the same as bumping the base.
+- **Never modify `Taskfile.yml`** without explicit instruction. Two pre-approved changes already landed (2026-06-26): `env: DOCKER_BUILDKIT: "1"` top-level env block + `task verify-live` task. No further Taskfile.yml edits are pre-approved.
+- **Do not add a `# syntax` directive to the Dockerfile** — triggers a 401 from Docker Hub for the BuildKit frontend in this environment.
+- Changelog entries go in `README.md` under `## Changelog`, newest first
+- No Renovate bot — `renovate.json` has been removed
+
+## Current Pinned Version
+
+NordVPN: 5.1.0  |  Image tag: fredplex/nordvpn:5.5.2  |  Built: 2026-07-01
+>>>>>>> 5c8b10361c545a5529801699319d1174ab931b3f
