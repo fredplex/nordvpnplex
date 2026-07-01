@@ -166,7 +166,7 @@ The base image (`ghcr.io/linuxserver/baseimage-ubuntu:noble`) is linuxserver.io'
 
 **The security patch gap**: The Dockerfile's `apt-get upgrade -y` patches packages installed *into* the image at build time, but it cannot update binaries and libraries that were baked into the base image layers at linuxserver.io's build time (s6-overlay, base system libraries, etc.). These only change when the base image digest changes.
 
-The monthly `check-base-image.yml` workflow bridges this gap: it detects when linuxserver.io has published a new digest, automatically builds and smoke-tests a dev image against it, and opens a draft PR with the updated digest pin. This keeps the image current with security patches while preserving deterministic, reproducible builds via the digest pin. Each base refresh is a first-class release: the `IMAGE_VERSION` patch increments, and the same production publish pipeline (verify → push → GitHub Release) fires on merge.
+The monthly `check-base-image.yml` workflow bridges this gap: it detects when linuxserver.io has published a new digest, automatically builds and smoke-tests a dev image against it, and opens a draft PR with the updated digest pin. This keeps the image current with security patches while preserving deterministic, reproducible builds via the digest pin. Each base refresh is a first-class release: the `IMAGE_VERSION` patch increments, and the same production publish pipeline (verify → push → GitHub Release) fires on merge. See the [User Guide §5 Rebuilding / Refreshing the Base Image](user-guide.md#rebuilding--refreshing-the-base-image) for the owner-facing operational steps.
 
 ### wireguard → wireguard-tools (package rationalisation)
 

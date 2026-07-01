@@ -348,7 +348,7 @@ For full dev workflow documentation, see [§3.5 Dev workflow](#35-dev-workflow).
    - Triggers the dev build workflow (`publish-dev.yml`) to build and verify a pre-tested dev image (e.g. `dev-<version>`, `<image_version>-dev`).
    - Opens a **draft PR** on branch `auto/base-image-<suggested_image_version>`.
 
-**Human action required:** Review the draft PR, confirm/adjust the suggested patch version, test the dev build container on Unraid/local, and merge the PR.
+**Human action required:** Review the draft PR, confirm/adjust the suggested patch version, test the dev build container on Unraid/local, and merge the PR. See the [User Guide §5 Rebuilding / Refreshing the Base Image](user-guide.md#rebuilding--refreshing-the-base-image) for the full owner-facing walkthrough.
 **Secrets needed:** None.
 
 ---
