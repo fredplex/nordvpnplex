@@ -1,17 +1,17 @@
 {
-  "templateVersion": "3.4.2",
-  "primedAt": "2026-07-01T10:19:41.413Z",
+  "templateVersion": "3.7.3",
+  "primedAt": "2026-07-01T18:27:49.945Z",
   "targetDir": "C:\\Users\\fredp\\Documents\\GitHub\\nordvpnplex",
   "mode": "update",
   "context": {
+    "date": "2026-07-01",
     "name": "nordvpnplex",
-    "description": "",
-    "stack": "",
-    "install": "npm ci",
-    "dev": "npm run dev",
-    "validate": "npm run validate:local",
-    "test": "npm run test:e2e",
-    "date": "2026-07-01"
+    "description": "Custom NordVPN Docker image for Unraid NAS systems",
+    "stack": "Docker, Ubuntu Noble, NordVPN, WireGuard/NordLynx, s6-overlay, Taskfile",
+    "install": "echo ok",
+    "dev": "echo ok",
+    "validate": "task docker-build",
+    "test": "task verify"
   },
   "files": [
     {
@@ -52,24 +52,16 @@
     },
     {
       "path": ".ai/workflows/implementation.md",
-      "status": "updated",
-      "fromVersion": "3.0.3",
-      "toVersion": "3.0.4",
-      "needsReview": false
+      "status": "current"
     },
     {
       "path": ".ai/workflows/definition-of-done.md",
-      "status": "updated",
-      "fromVersion": "3.0.1",
-      "toVersion": "3.0.2",
-      "needsReview": false
+      "status": "failed",
+      "error": "EPERM: operation not permitted, rename 'C:\\Users\\fredp\\Documents\\GitHub\\nordvpnplex\\.ai\\workflows\\definition-of-done.md.prime-tmp' -> 'C:\\Users\\fredp\\Documents\\GitHub\\nordvpnplex\\.ai\\workflows\\definition-of-done.md'"
     },
     {
       "path": ".ai/workflows/session-close.md",
-      "status": "updated",
-      "fromVersion": "3.0.5",
-      "toVersion": "3.0.6",
-      "needsReview": false
+      "status": "current"
     },
     {
       "path": ".ai/tasks/active.md",
@@ -85,24 +77,15 @@
     },
     {
       "path": ".ai/prompts/intermediate-phase-prompt.md",
-      "status": "updated",
-      "fromVersion": "3.0.0",
-      "toVersion": "3.0.1",
-      "needsReview": false
+      "status": "current"
     },
     {
       "path": ".ai/prompts/session-close-prompt.md",
-      "status": "updated",
-      "fromVersion": "3.0.0",
-      "toVersion": "3.0.1",
-      "needsReview": false
+      "status": "current"
     },
     {
       "path": ".ai/prompts/execute-plan-prompt.md",
-      "status": "updated",
-      "fromVersion": "3.0.0",
-      "toVersion": "3.0.1",
-      "needsReview": false
+      "status": "current"
     },
     {
       "path": ".ai/memory/project-state.md",
@@ -114,7 +97,8 @@
     },
     {
       "path": ".ai/GUIDE.md",
-      "status": "current"
+      "status": "failed",
+      "error": "EPERM: operation not permitted, rename 'C:\\Users\\fredp\\Documents\\GitHub\\nordvpnplex\\.ai\\GUIDE.md.prime-tmp' -> 'C:\\Users\\fredp\\Documents\\GitHub\\nordvpnplex\\.ai\\GUIDE.md'"
     },
     {
       "path": ".ai/prompts/prime-prompt.md",
