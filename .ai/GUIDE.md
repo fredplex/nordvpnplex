@@ -1,4 +1,4 @@
-<!-- prime: version=3.4.0 template=.ai/GUIDE.md date=2026-06-30 -->
+<!-- prime: version=3.5.0 template=.ai/GUIDE.md date=2026-07-01 -->
 # AI Workspace Guide
 
 > **You are an AI coding agent.** This file is written for you. Read it when setting up
@@ -267,8 +267,8 @@ npx github:fredplex/vibe-coding-template . --yes \
   --stack "Node.js, TypeScript" \
   --install "npm ci" \
   --dev "npm run dev" \
-  --validate "docker" \
-  --test "docker"
+  --validate "echo ok" \
+  --test "echo ok"
 
 # Force overwrite existing files (backs up first)
 npx github:fredplex/vibe-coding-template . --overwrite --yes --name "My App" ...
@@ -355,6 +355,12 @@ an agent can draft the content, but should not start coding until a human has ap
 8. **`docs/tech-stack.md`** — real technology versions and rationale
 9. **`docs/testing.md`** — actual test framework name, file location, current test count, and
    coverage targets; delete the test-type sections that do not apply to this project
+10. **`.ai/workflows/definition-of-done.md` and `.ai/rules/engineering-rules.md` → Archetype
+    sections** — delete the Web UI/BFF, API/Backend, or CLI/Library sections that don't match
+    this project, keeping only the one that applies. The script detects leftover sections
+    automatically: `⚠️ ARCHETYPE SECTIONS PRESENT` prints after any run that writes either
+    file — treat that warning as your reminder to complete this step. (`AGENTS.md`'s
+    archetype-flavored pattern examples are covered by item 1 above, not this automated check.)
 
 ### Files that need no fill-in
 
@@ -374,12 +380,6 @@ Start a new session and say:
 
 The agent will read the existing source, infer accurate content, and present each section
 for your review before writing.
-
-### Archetype cleanup
-
-`AGENTS.md`, `.ai/rules/engineering-rules.md`, and `.ai/workflows/definition-of-done.md` ship with
-multiple archetype sections (Web UI/BFF, API/Backend, CLI/Library). Delete the sections that
-do not apply to this project during the fill-in pass.
 
 ---
 

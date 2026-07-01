@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.4 template=.ai/workflows/implementation.md date=2026-07-01 -->
+<!-- prime: version=3.1.0 template=.ai/workflows/implementation.md date=2026-07-01 -->
 # Implementation Workflow
 
 Plan → Code → Test → Validate cycle for effective development.
@@ -73,10 +73,14 @@ Plan → Code → Test → Validate cycle for effective development.
 
 ## Execution Order
 
-| Step | Description | Commit prefix |
-|------|-------------|---------------|
-| 1 | Phase 1 — [brief] | `feat:` |
-| 2 | Phase 2 — [brief] | `feat:` |
+| Step | Description | Commit prefix | Status |
+|------|-------------|---------------|--------|
+| 1 | Phase 1 — [brief] | `feat:` | Pending |
+| 2 | Phase 2 — [brief] | `feat:` | Pending |
+
+Per-phase `Status` (`Pending` / `Done`) is distinct from the plan's top-level
+`**Status**` field above — it tracks whether each individual phase has been committed,
+not the plan's overall lifecycle.
 
 ## Validation
 <What must pass before complete>
@@ -196,14 +200,14 @@ Use this mode when executing one phase at a time with human approval before each
    - **Rollback commands**: [commands]
    Do not commit a failing phase unless the human explicitly approves it.
 5. **Clean build artifacts** — revert compile-time edits by build tools if present; do not revert unrelated files.
-6. **Update tracking and documentation** — update the plan's `Status` to `In progress` (if not already); mark phase complete in the plan + `.ai/tasks/active.md`. If this phase altered behavior, architecture, features, rules, tech stack, or user-facing workflows: **update both the affected `docs/` file and its `.ai/` working copy — required, not optional, in this same commit** (see *Documentation Sync* above for the pairs table).
+6. **Update tracking and documentation** — update the plan's `Status` to `In progress` (if not already); mark phase complete in the plan + `.ai/tasks/active.md`, setting this phase's `Execution Order` row `Status` to `Done`. Check whether every row in the `Execution Order` table is now `Done` — if so, this is the **final phase**; carry that forward to step 9. If this phase altered behavior, architecture, features, rules, tech stack, or user-facing workflows: **update both the affected `docs/` file and its `.ai/` working copy — required, not optional, in this same commit** (see *Documentation Sync* above for the pairs table).
 7. **Stage and formulate** — first apply the doc-sync checklist, then stage.
    - **Apply the doc-sync pairs table from the *Documentation Sync* section above** — for every row whose topic this phase touched, update the listed `docs/` file **and** its `.ai/` working copy in this same commit. If the phase touched no listed topic, skip doc-sync.
 
    Stage only phase files + docs/tracking updates; write a proposed commit message with a semantic prefix that references the phase (number/name) and formulate the push command.
 8. **Stop — request explicit human approval** before commit and push. Stop calling tools and end your turn; do not run the commit or push until the human approves in a new turn.
-9. **Execute** — once approved, commit and push to the task branch.
-10. **Report** — commit hash, committed files, validation summary, remaining local changes — **wait for instructions**.
+9. **Execute** — once approved, commit and push to the task branch. **If step 6 found this was the final phase**, mark the plan's top-level `Status: Complete` now that the push has succeeded. If the human rejects the push, leave `Status: In progress` and report that delivery did not happen; do not mark `Complete` for work that was not pushed — the next session can retry delivery from the same branch.
+10. **Report** — commit hash, committed files, validation summary, remaining local changes, and the plan's `Status` transition if it just became `Complete` — **wait for instructions**.
 
 ---
 
@@ -239,11 +243,16 @@ Use this mode when the plan is approved and you want the agent to execute all ph
 
 **After all phases complete:**
 
-1. Update the plan's `Status` to `Complete`.
-2. Print a full run summary: all phases, commit hashes, any warnings.
-3. Formulate the push command.
-4. **Stop — request explicit human approval before push.**
-5. Once approved: push task branch; report final pushed state.
+1. Print a full run summary: all phases, commit hashes, any warnings. The plan's
+   `Status` stays `In progress` until delivery is confirmed below — do not mark it
+   `Complete` yet.
+2. Formulate the push command.
+3. **Stop — request explicit human approval before push.**
+4. Once approved: push the task branch; report the final pushed state.
+5. **Mark the plan `Status: Complete`** — only after the push succeeds. If the human
+   rejects the push, leave the plan `In progress` and report that delivery did not
+   happen; do not mark `Complete` for work that was not pushed. The next session can
+   retry delivery from the same branch.
 
 ---
 
