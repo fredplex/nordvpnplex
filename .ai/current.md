@@ -1,52 +1,50 @@
-<!-- prime: version=3.0.2 template=.ai/current.md date=2026-06-30 -->
+<!-- prime: version=3.0.2 template=.ai/current.md date=2026-07-01 -->
 # Current Project State
 
-## prime-ai-docs v3.4.1 Re-prime Complete (2026-06-30)
+## prime-ai-docs v3.4.x template refresh (2026-07-01)
 
-**Status**: Workspace re-primed to template v3.4.1. AGENTS.md backup merge complete. Three workflow files updated with template improvements (onboarding.md, implementation.md, session-close.md).
+**Status**: AI workspace template-pure files refreshed. Six workflow/prompt files updated to current template versions; all accepted as-is (no project-specific content to merge).
 
 ### Recently Completed
 
 > Keep the last 3 entries. Prune older items at session close — the full history lives in `SESSION_NOTES.md`.
 
+- prime-ai-docs v3.4.x template refresh — 2026-07-01 (6779991)
 - prime-ai-docs v3.4.1 re-prime — 2026-06-30 (23f4059)
 - AGENTS.md improvements (gaps + doc-drift) — 2026-06-30
-- prime-ai-docs v3.x template update — 2026-06-30 (f4604c3)
 
 ### Next step
 
-Watch for the next NordVPN release (daily cron) and base image digest refresh (monthly cron). Both automatically open draft PRs and publish tested dev builds.
+None queued — awaiting direction. Watching for the next NordVPN release (daily cron) and base image digest refresh (monthly cron). Both automatically open draft PRs and publish tested dev builds.
 
 **Future work logged**: Reconsider `apt-get upgrade` — once the base-refresh cadence has run successfully a few times, evaluate whether to remove `apt-get upgrade` from the Dockerfile to improve local build reproducibility.
 
 ---
 
-## Session Handoff — 2026-06-30 (prime-ai-docs v3.4.1 re-prime)
+## Session Handoff — 2026-07-01 (prime-ai-docs v3.4.x template refresh)
 
 ### What was just completed
 
 | Commit | Change |
 |--------|--------|
-| `23f4059` | Re-prime: AGENTS.md backup merge + 3 workflow files updated |
+| `6779991` | Re-prime: 6 template-pure workflow/prompt files updated to current versions |
 | this commit | Session close — current.md, active.md, SESSION_NOTES.md updated |
 
 ### Stopping point
 
-- Working tree: clean after close commit (`.ai-prime-manifest.json` and `.ai-prime-versions.json` left unstaged — runtime artifacts)
-- Validation: N/A — workspace-only change; no source, Dockerfile, or rootfs changes
+- Working tree: clean of task work (6 template files committed). Runtime artifacts `.ai-prime-manifest.json` / `.ai-prime-versions.json` left unstaged per GUIDE Step 6.
+- Validation: N/A — workspace-only change; no source, Dockerfile, or rootfs changes.
 
 ### Decisions / reasoning
 
-- Re-prime detected via `prime-prompt.md` + `GUIDE.md` Part 1. Dry-run scenario: Re-prime (4 would-update, no would-create).
-- GUIDE.md and prime-prompt.md both reported "Up to date" — execution context was current, no stale-guide stop needed.
-- AGENTS.md (3.0.1 → 3.0.2): regenerated from template; full backup merge from `.ai-prime-backup/2026-06-30-12-19-02/`. New template additions kept: `prompts/` Required Reading entry, `manifest.json` version note, AGENTS.md self-update Working Rule. Project-specific sections all restored (Version Bump Workflow, Project File Map, Env Vars, GHA Workflows, Known Issues, Before Ending a Session rule).
-- `onboarding.md` (3.0.0 → 3.0.1): new AGENTS.md staleness check during read-only pass.
-- `implementation.md` (3.0.2 → 3.0.3): doc-sync checklist now explicitly calls out AGENTS.md Architecture and Key Boundaries; upkeep note expanded.
-- `session-close.md` (3.0.4 → 3.0.5): Step 8 AGENTS.md scan broadened to structural sections.
-- Web/API environment setup paragraph in new Quick Start removed (not applicable — no .env, Docker/Taskfile project).
+- A script run on 2026-07-01 (backup `.ai-prime-backup/2026-07-01-10-19-41/`) updated 6 files but was never committed, leaving changes unstaged on `main`. Session picked up at GUIDE Step 5: moved the unstaged changes onto a fresh task branch, completed the backup-merge determination, and committed.
+- Backup-merge determination: for all 6 files the backup content equalled HEAD (version string + line count matched exactly) — no pre-existing project customizations existed to carry over. All 6 are Template-pure per GUIDE Part 3 classification; accepted as-is.
+- Updated files: `definition-of-done.md` (3.0.1→3.0.2), `implementation.md` (3.0.3→3.0.4), `session-close.md` (3.0.5→3.0.6), `execute-plan-prompt.md` (3.0.0→3.0.1), `intermediate-phase-prompt.md` (3.0.0→3.0.1), `session-close-prompt.md` (3.0.0→3.0.1).
+- Runtime artifacts intentionally left unstaged in the prime commit, matching the documented pattern. A separate manifest-refresh commit can follow if desired (precedent: `11ccc07`).
 
 ### Fragile areas
 
+- **`definition-of-done.md` references npm commands that don't exist in this project**: the freshly-updated template still lists `npm run validate:local` / `npm run test:e2e` as the static/test gates, and still contains the Web UI/BFF and API/Backend archetype sections. This project has no npm (Docker/Taskfile stack; real gates are `task docker-build` / `task verify`). Archetype prune and npm-command correction are a separate `chore(docs):` task — not done this session.
 - **Base digest must be updated manually**: Dockerfile is pinned to `noble@sha256:53411508…`. A future base-refresh requires an explicit digest change — do not remove the pin.
 - **`# syntax` directive must NOT be added to Dockerfile**: Triggers a 401 from Docker Hub for the BuildKit frontend in this environment. In both CLAUDE.md and AGENTS.md.
 - **Token for `task verify-live` stays outside the repo**: Never commit, print, or pass as CLI arg.
@@ -55,9 +53,9 @@ Watch for the next NordVPN release (daily cron) and base image digest refresh (m
 
 ---
 
-## Previously Completed — AGENTS.md Improvements + prime-ai-docs v3.x Template Update (2026-06-30)
+## Previously Completed — prime-ai-docs v3.4.1 Re-prime (2026-06-30)
 
-**Status**: All complete. AGENTS.md gaps closed (# syntax constraint, session close rule, .gitignore entry, current.md doc-drift fix). Template v3.x backup merge done.
+**Status**: Workspace re-primed to template v3.4.1. AGENTS.md backup merge complete. Three workflow files updated with template improvements (onboarding.md, implementation.md, session-close.md).
 
 ---
 

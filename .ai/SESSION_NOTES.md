@@ -6,6 +6,36 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-07-01 (prime-ai-docs v3.4.x template refresh)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Read-only onboarding pass — confirmed `main` at `11ccc07`, dirty working tree (8 uncommitted files), stale handoff docs vs git | — |
+| 2 | Re-prime: 6 template-pure workflow/prompt files updated to current versions | `6779991` |
+| 3 | Session close — current.md, active.md, SESSION_NOTES.md updated | this commit |
+
+### Key decisions
+
+- Investigated an in-progress script run: a 2026-07-01 script run (backup `.ai-prime-backup/2026-07-01-10-19-41/`) had updated 6 files but was never committed, leaving changes unstaged on `main`. Session resumed at GUIDE Step 5 rather than re-running the script.
+- Backup-merge determination: for all 6 updated files the backup content equalled HEAD (version string + line count matched exactly) — confirming no pre-existing project customizations existed to carry over. All 6 are Template-pure per GUIDE Part 3 classification; accepted as-is. No `⚠️ CONTENT REVIEW REQUIRED` warnings; no placeholders.
+- Updated files: `definition-of-done.md` (3.0.1→3.0.2), `implementation.md` (3.0.3→3.0.4), `session-close.md` (3.0.5→3.0.6), `execute-plan-prompt.md` (3.0.0→3.0.1), `intermediate-phase-prompt.md` (3.0.0→3.0.1), `session-close-prompt.md` (3.0.0→3.0.1).
+- Runtime artifacts (`.ai-prime-manifest.json`, `.ai-prime-versions.json`) left unstaged in the prime commit per GUIDE Step 6. A separate manifest-refresh commit can follow if desired (precedent: `11ccc07`).
+- Verification gates N/A: workspace-only markdown change, no source/Dockerfile/rootfs/runtime behavior touched. No static gate exists in this Docker/Taskfile stack.
+
+### Stopping point
+
+- Working tree: clean of task work (6 template files committed at `6779991`). Runtime artifacts intentionally unstaged.
+- Validation: N/A — workspace-only change; no source, Dockerfile, or rootfs changes.
+
+### Fragile areas
+
+- `definition-of-done.md` (freshly updated template) still references `npm run validate:local` / `npm run test:e2e` and still contains the Web UI/BFF + API/Backend archetype sections — none applicable to this Docker/Taskfile stack. Archetype prune + npm-command correction is a separate `chore(docs):` task, not done this session.
+- Handoff docs (`current.md`, `SESSION_NOTES.md`) were stale vs git at session start — they stopped at the v3.4.1 re-prime and did not mention `72d60b6` (prime-ai-docs-update merge) or `11ccc07` (manifest refresh). Corrected this session via the close entry.
+
+---
+
 ## Session Close — 2026-06-30 (prime-ai-docs v3.4.1 re-prime)
 
 ### Completed this session
