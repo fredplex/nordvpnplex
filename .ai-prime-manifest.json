@@ -1,17 +1,17 @@
 {
-  "templateVersion": "3.4.1",
-  "primedAt": "2026-06-30T12:19:02.912Z",
+  "templateVersion": "3.4.2",
+  "primedAt": "2026-07-01T10:19:41.413Z",
   "targetDir": "C:\\Users\\fredp\\Documents\\GitHub\\nordvpnplex",
   "mode": "update",
   "context": {
     "name": "nordvpnplex",
-    "description": "Custom NordVPN image built for Unraid",
-    "stack": "Docker, NordVPN Linux client, Ubuntu Noble (linuxserver.io), WireGuard/NordLynx, s6-overlay, Taskfile, GitHub Actions",
-    "install": "echo ok",
-    "dev": "echo ok",
-    "validate": "echo ok",
-    "test": "echo ok",
-    "date": "2026-06-30"
+    "description": "",
+    "stack": "",
+    "install": "npm ci",
+    "dev": "npm run dev",
+    "validate": "npm run validate:local",
+    "test": "npm run test:e2e",
+    "date": "2026-07-01"
   },
   "files": [
     {
@@ -20,10 +20,7 @@
     },
     {
       "path": "AGENTS.md",
-      "status": "updated",
-      "fromVersion": "3.0.1",
-      "toVersion": "3.0.2",
-      "needsReview": true
+      "status": "current"
     },
     {
       "path": ".ai/README.md",
@@ -51,27 +48,27 @@
     },
     {
       "path": ".ai/workflows/onboarding.md",
-      "status": "updated",
-      "fromVersion": "3.0.0",
-      "toVersion": "3.0.1",
-      "needsReview": false
+      "status": "current"
     },
     {
       "path": ".ai/workflows/implementation.md",
       "status": "updated",
-      "fromVersion": "3.0.2",
-      "toVersion": "3.0.3",
+      "fromVersion": "3.0.3",
+      "toVersion": "3.0.4",
       "needsReview": false
     },
     {
       "path": ".ai/workflows/definition-of-done.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "3.0.1",
+      "toVersion": "3.0.2",
+      "needsReview": false
     },
     {
       "path": ".ai/workflows/session-close.md",
       "status": "updated",
-      "fromVersion": "3.0.4",
-      "toVersion": "3.0.5",
+      "fromVersion": "3.0.5",
+      "toVersion": "3.0.6",
       "needsReview": false
     },
     {
@@ -88,15 +85,24 @@
     },
     {
       "path": ".ai/prompts/intermediate-phase-prompt.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "3.0.0",
+      "toVersion": "3.0.1",
+      "needsReview": false
     },
     {
       "path": ".ai/prompts/session-close-prompt.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "3.0.0",
+      "toVersion": "3.0.1",
+      "needsReview": false
     },
     {
       "path": ".ai/prompts/execute-plan-prompt.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "3.0.0",
+      "toVersion": "3.0.1",
+      "needsReview": false
     },
     {
       "path": ".ai/memory/project-state.md",
