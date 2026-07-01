@@ -9,6 +9,13 @@ Current work in progress.
 
 **None active — awaiting direction.** Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
 
+### Fix check-base-image verify + docs (In Progress)
+
+- [x] Phase A — Fix `publish-dev.yml` verify bug: split build into load+verify then push steps (`2febec9`)
+- [x] Phase B — Add base image explanation to `docs/architecture.md` + sync `.ai/memory/` (`6d1f7f5`)
+- [x] Phase C — Expand `docs/build-and-publish.md` §4.5 with "why" context (`63549bd`)
+- [x] Phase D — Cross-reference user-guide.md from new docs sections (`12ad5e6`)
+
 ### prime-ai-docs v3.4.x template refresh (Complete)
 
 - [x] Resumed in-progress script run at GUIDE Step 5 — 6 template-pure files updated and committed (2026-07-01)
@@ -89,6 +96,7 @@ Current work in progress.
 
 ## Recently Completed
 
+- **Fix check-base-image verify + docs** (2026-07-01) — fixed `publish-dev.yml` verify step (image never loaded into local daemon), added base image rationale to architecture.md and build-and-publish.md, cross-referenced user-guide.md.
 - **prime-ai-docs v3.4.x template refresh** (2026-07-01) — resumed in-progress script run; 6 template-pure workflow/prompt files updated and committed.
 - **prime-ai-docs v3.4.1 re-prime** (2026-06-30) — AGENTS.md backup merge + 3 workflow file template updates.
 - **AGENTS.md improvements** (2026-06-30) — 4 gaps/doc-drift fixes; `# syntax` constraint, session close rule, `.gitignore` file map, `current.md` correction.
