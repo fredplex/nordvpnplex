@@ -156,6 +156,18 @@ The kill switch fires **first** — traffic is blocked before the VPN establishe
 **Rationale**: The CLAUDE.md constraint "never bump the base image without explicit instruction" was aspirational without the pin — a tag re-target would bypass it. The digest makes the constraint enforceable.
 **Consequences**: Upgrading the base requires an explicit `@sha256:…` update. A monthly base-refresh cadence has been implemented (via check-base-image.yml cron) to automate digest updates, dev testing, and draft PRs while keeping the digest pin protection.
 
+### Why the base image changes (and why we check monthly)
+
+The base image (`ghcr.io/linuxserver/baseimage-ubuntu:noble`) is linuxserver.io's Ubuntu Noble Docker base. It provides the s6-overlay process supervisor, core OS libraries, and a curated set of base utilities. linuxserver.io periodically rebuilds this image to include:
+
+- **Ubuntu security patches** — fixes for CVEs in base OS packages
+- **s6-overlay updates** — the process supervisor that runs init scripts and manages services
+- **linuxserver-specific hardening and fixes** — patches and improvements from their base-image project
+
+**The security patch gap**: The Dockerfile's `apt-get upgrade -y` patches packages installed *into* the image at build time, but it cannot update binaries and libraries that were baked into the base image layers at linuxserver.io's build time (s6-overlay, base system libraries, etc.). These only change when the base image digest changes.
+
+The monthly `check-base-image.yml` workflow bridges this gap: it detects when linuxserver.io has published a new digest, automatically builds and smoke-tests a dev image against it, and opens a draft PR with the updated digest pin. This keeps the image current with security patches while preserving deterministic, reproducible builds via the digest pin. Each base refresh is a first-class release: the `IMAGE_VERSION` patch increments, and the same production publish pipeline (verify → push → GitHub Release) fires on merge.
+
 ### wireguard → wireguard-tools (package rationalisation)
 
 **Context**: The Dockerfile installed the `wireguard` metapackage. The NordVPN `.deb` itself brings in WireGuard kernel support.

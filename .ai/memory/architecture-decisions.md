@@ -88,6 +88,9 @@ docker build --no-cache --platform linux/amd64 . -f Dockerfile -t "fredplex/nord
 
 **Choice**: `FROM ghcr.io/linuxserver/baseimage-ubuntu:noble@sha256:53411508…`
 **Rationale**: Makes the "never bump base without instruction" constraint enforceable — a tag re-target can no longer bypass it silently.
+
+**Why the base image changes**: linuxserver.io periodically rebuilds `baseimage-ubuntu:noble` to include Ubuntu security patches, s6-overlay updates, and linuxserver-specific fixes. These updates affect libraries and binaries baked into the base image layers — the Dockerfile's `apt-get upgrade -y` patches installed packages but cannot update base layer components. The monthly `check-base-image.yml` workflow detects new digests, auto-builds a dev image against the new base, smoke-tests it, and opens a draft PR. Each base refresh is a first-class release: IMAGE_VERSION patch increment + full production publish pipeline on merge.
+
 **Gotcha**: Upgrading the base requires an explicit `@sha256:…` change. A monthly base-refresh cadence has been implemented to automate updates, dev builds, and draft PRs while keeping the digest pin protection.
 
 ### Decision: wireguard → wireguard-tools; iptables explicit
