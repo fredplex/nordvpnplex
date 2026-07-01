@@ -39,4 +39,4 @@ Full onboarding workflow: `.ai/workflows/onboarding.md`
 
 ## Current Pinned Version
 
-NordVPN: 5.1.0  |  Image tag: fredplex/nordvpn:5.5.1  |  Built: 2026-06-24
+NordVPN: 5.1.0  |  Image tag: fredplex/nordvpn:5.5.2  |  Built: 2026-07-01
