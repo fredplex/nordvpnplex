@@ -1,17 +1,17 @@
 <!-- prime: version=3.0.2 template=.ai/current.md date=2026-07-01 -->
 # Current Project State
 
-## prime-ai-docs v3.4.x template refresh (2026-07-01)
+## prime-ai-docs v3.5.0 re-prime (2026-07-01)
 
-**Status**: AI workspace template-pure files refreshed. Six workflow/prompt files updated to current template versions; all accepted as-is (no project-specific content to merge).
+**Status**: AI workspace re-primed to template v3.5.0. Three template-pure workflow/guide files updated; no project-specific content to merge. Branch `chore/prime-ai-docs-update-350` at `534c709`.
 
 ### Recently Completed
 
 > Keep the last 3 entries. Prune older items at session close — the full history lives in `SESSION_NOTES.md`.
 
+- prime-ai-docs v3.5.0 re-prime — 2026-07-01 (534c709)
+- Fix check-base-image verify + docs — 2026-07-01 (2febec9, 6d1f7f5, 63549bd, 12ad5e6)
 - prime-ai-docs v3.4.x template refresh — 2026-07-01 (6779991)
-- prime-ai-docs v3.4.1 re-prime — 2026-06-30 (23f4059)
-- AGENTS.md improvements (gaps + doc-drift) — 2026-06-30
 
 ### Next step
 
@@ -21,26 +21,26 @@ None queued — awaiting direction. Watching for the next NordVPN release (daily
 
 ---
 
-## Session Handoff — 2026-07-01 (prime-ai-docs v3.4.x template refresh)
+## Session Handoff — 2026-07-01 (prime-ai-docs v3.5.0 re-prime)
 
 ### What was just completed
 
 | Commit | Change |
 |--------|--------|
-| `6779991` | Re-prime: 6 template-pure workflow/prompt files updated to current versions |
+| `534c709` | Re-prime: 3 template-pure workflow/guide files updated (GUIDE.md 3.4.0→3.5.0, implementation.md 3.0.4→3.1.0, session-close.md 3.0.6→3.0.7) |
 | this commit | Session close — current.md, active.md, SESSION_NOTES.md updated |
 
 ### Stopping point
 
-- Working tree: clean of task work (6 template files committed). Runtime artifacts `.ai-prime-manifest.json` / `.ai-prime-versions.json` left unstaged per GUIDE Step 6.
+- Working tree: clean of task work (3 template files committed at `534c709`). Runtime artifacts `.ai-prime-manifest.json` / `.ai-prime-versions.json` left unstaged per GUIDE Step 6.
 - Validation: N/A — workspace-only change; no source, Dockerfile, or rootfs changes.
 
 ### Decisions / reasoning
 
-- A script run on 2026-07-01 (backup `.ai-prime-backup/2026-07-01-10-19-41/`) updated 6 files but was never committed, leaving changes unstaged on `main`. Session picked up at GUIDE Step 5: moved the unstaged changes onto a fresh task branch, completed the backup-merge determination, and committed.
-- Backup-merge determination: for all 6 files the backup content equalled HEAD (version string + line count matched exactly) — no pre-existing project customizations existed to carry over. All 6 are Template-pure per GUIDE Part 3 classification; accepted as-is.
-- Updated files: `definition-of-done.md` (3.0.1→3.0.2), `implementation.md` (3.0.3→3.0.4), `session-close.md` (3.0.5→3.0.6), `execute-plan-prompt.md` (3.0.0→3.0.1), `intermediate-phase-prompt.md` (3.0.0→3.0.1), `session-close-prompt.md` (3.0.0→3.0.1).
-- Runtime artifacts intentionally left unstaged in the prime commit, matching the documented pattern. A separate manifest-refresh commit can follow if desired (precedent: `11ccc07`).
+- GUIDE.md guard fired at 3.4.0→3.5.0 — human ran the script directly. Session picked up at GUIDE Step 5 (post-script completion): moved unstaged changes from `main` onto `chore/prime-ai-docs-update-350`, completed backup-merge classification.
+- Backup-merge determination: all 3 updated files (GUIDE.md, implementation.md, session-close.md) are Template-pure per GUIDE Part 3. No project-specific content lost. Backup at `.ai-prime-backup/2026-07-01-13-58-10/`.
+- Template improvements: implementation.md gained per-phase Status tracking + final-phase auto-detection; session-close.md archetype cleanup now triggered by warning detection; GUIDE.md example commands normalized + archetype cleanup promoted to Part 2 priority #10.
+- Runtime artifacts intentionally left unstaged in the prime commit.
 
 ### Fragile areas
 
@@ -51,18 +51,4 @@ None queued — awaiting direction. Watching for the next NordVPN release (daily
 - **`.ai/current.md` is hand-maintained**: `bump.sh` no longer touches it. After any release PR, update this file by hand. `CLAUDE.md` (including the Built date) is handled automatically by `task bump`.
 - **s6 init + capabilities**: Stateless `docker run` checks must use `--entrypoint /bin/bash` to bypass `00-firewall` when `NET_ADMIN` isn't granted.
 
----
 
-## Previously Completed — prime-ai-docs v3.4.1 Re-prime (2026-06-30)
-
-**Status**: Workspace re-primed to template v3.4.1. AGENTS.md backup merge complete. Three workflow files updated with template improvements (onboarding.md, implementation.md, session-close.md).
-
----
-
-## Previously Completed — Base Image Refresh Cadence + Dockerfile Optimization (2026-06-26/27)
-
-**Status**: All phases complete.
-
-### Key versioning model decision
-
-`IMAGE_VERSION` tracks the container, not NordVPN. A base image refresh is a first-class release: digest change + `IMAGE_VERSION` patch increment + dev build + full production publish on merge.

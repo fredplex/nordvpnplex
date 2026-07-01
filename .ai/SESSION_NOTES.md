@@ -6,6 +6,35 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-07-01 (prime-ai-docs v3.5.0 re-prime)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Re-prime: GUIDE.md (3.4.0→3.5.0) + implementation.md (3.0.4→3.1.0) + session-close.md (3.0.6→3.0.7) | `534c709` |
+| 2 | Session close — current.md, active.md, SESSION_NOTES.md updated | this commit |
+
+### Key decisions
+
+- GUIDE.md guard fired (3.4.0→3.5.0) — human ran script `npx github:fredplex/vibe-coding-template . --yes --name "nordvpnplex" ...` directly. Session resumed at GUIDE Step 5 (post-script).
+- Script v3.6.0 / templates v3.5.0. Re-prime scenario: 3 would-update, 0 would-create. Backup at `.ai-prime-backup/2026-07-01-13-58-10/`.
+- Backup-merge: all 3 files are Template-pure per Part 3 classification — accepted as-is. No `⚠️ CONTENT REVIEW REQUIRED` warnings.
+- Unstaged changes moved from `main` to `chore/prime-ai-docs-update-350` before committing.
+- Template changes: implementation.md per-phase Status column + final-phase auto-detection; session-close.md archetype cleanup via warning detection; GUIDE.md Part 2 priority #10 (archetype cleanup) + example commands normalized to `echo ok`.
+- Verification gates N/A: workspace-only markdown change; no source/Dockerfile/rootfs/runtime behavior touched.
+
+### Stopping point
+
+- Working tree: clean of task work (3 template files committed at `534c709`). Runtime artifacts `.ai-prime-manifest.json` / `.ai-prime-versions.json` unstaged per GUIDE Step 6.
+- Validation: N/A — workspace-only change.
+
+### Fragile areas
+
+- `definition-of-done.md` still references `npm run validate:local` / `npm run test:e2e` and retains non-applicable archetype sections (Web UI/BFF, API/Backend). This is a known stale-docs issue carried forward.
+
+---
+
 ## Session Close — 2026-07-01 (prime-ai-docs v3.4.x template refresh)
 
 ### Completed this session
