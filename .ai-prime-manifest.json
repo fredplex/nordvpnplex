@@ -1,10 +1,10 @@
 {
-  "templateVersion": "3.7.3",
-  "primedAt": "2026-07-01T18:27:49.945Z",
+  "templateVersion": "3.7.7",
+  "primedAt": "2026-07-02T00:02:29.492Z",
   "targetDir": "C:\\Users\\fredp\\Documents\\GitHub\\nordvpnplex",
   "mode": "update",
   "context": {
-    "date": "2026-07-01",
+    "date": "2026-07-02",
     "name": "nordvpnplex",
     "description": "Custom NordVPN Docker image for Unraid NAS systems",
     "stack": "Docker, Ubuntu Noble, NordVPN, WireGuard/NordLynx, s6-overlay, Taskfile",
@@ -56,8 +56,13 @@
     },
     {
       "path": ".ai/workflows/definition-of-done.md",
-      "status": "failed",
-      "error": "EPERM: operation not permitted, rename 'C:\\Users\\fredp\\Documents\\GitHub\\nordvpnplex\\.ai\\workflows\\definition-of-done.md.prime-tmp' -> 'C:\\Users\\fredp\\Documents\\GitHub\\nordvpnplex\\.ai\\workflows\\definition-of-done.md'"
+      "status": "updated",
+      "fromVersion": "3.0.2",
+      "toVersion": "3.0.3",
+      "needsReview": false,
+      "hasArchetypeMarkers": true,
+      "hash": "95739292507a3c6fca1f9c5edf955d13c3c3b1a249388da368754940613ce9b1",
+      "viaFallback": false
     },
     {
       "path": ".ai/workflows/session-close.md",
@@ -97,8 +102,13 @@
     },
     {
       "path": ".ai/GUIDE.md",
-      "status": "failed",
-      "error": "EPERM: operation not permitted, rename 'C:\\Users\\fredp\\Documents\\GitHub\\nordvpnplex\\.ai\\GUIDE.md.prime-tmp' -> 'C:\\Users\\fredp\\Documents\\GitHub\\nordvpnplex\\.ai\\GUIDE.md'"
+      "status": "updated",
+      "fromVersion": "3.5.0",
+      "toVersion": "3.5.3",
+      "needsReview": false,
+      "hasArchetypeMarkers": false,
+      "hash": "777540db8e0231d2f8fe373397487e75851f9671fb45491c09a7a35ffa99b021",
+      "viaFallback": false
     },
     {
       "path": ".ai/prompts/prime-prompt.md",
@@ -142,7 +152,13 @@
     },
     {
       "path": "docs/testing.md",
-      "status": "current"
+      "status": "updated",
+      "fromVersion": "3.0.4",
+      "toVersion": "3.0.5",
+      "needsReview": false,
+      "hasArchetypeMarkers": false,
+      "hash": "e4d3a7cadf50ff50d347e0aedf69c7b0200f6404a52b7bd1b3b80c84112bead4",
+      "viaFallback": false
     }
   ]
 }
