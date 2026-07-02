@@ -6,6 +6,36 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-07-02 (Template re-prime v3.7.7 + testing.md merge)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Re-prime backup merge: `GUIDE.md` (3.5.0→3.5.3) + `definition-of-done.md` (3.0.2→3.0.3) accepted template-pure; `docs/testing.md` (3.0.4→3.0.5) merged with restored NordVPN-specific content | `fa82c87` |
+| 2 | Tracked `.ai-prime-manifest.json` update from the v3.7.7 run | `20ac94a` |
+| 3 | Session close — current.md, active.md, SESSION_NOTES.md updated | this commit |
+
+### Key decisions
+
+- GUIDE.md guard fired at 3.5.0→3.5.3 — human ran the script directly; session resumed at GUIDE Step 5 on branch `chore/prime-template-update2`.
+- `docs/testing.md` classified Project-specific per GUIDE Part 3 — the new template had regenerated it with generic JS-framework content (Unit/Integration/E2E test-framework boilerplate, Mock Data). Real NordVPN testing content (two-tier verify/verify-live model, 4-check table, HEALTHCHECK behavior, troubleshooting) restored from `.ai-prime-backup/2026-07-02-00-02-29/docs/testing.md` under the new template's section headings. Human confirmed dropping the non-applicable generic sections rather than keeping them alongside the real content.
+- `.claude/settings.json` staging was blocked by the auto-mode self-modification classifier (it would have written a Bash permission allowlist into the shared repo). Human chose to unstage it and leave `.claude/` untracked rather than commit it or add it to `.gitignore` this session.
+- `.ai-prime-manifest.json` staged and committed on explicit human instruction, despite `GUIDE.md` Step 6 describing it as a gitignored runtime artifact that should not be staged — it is not actually gitignored and has been tracked across multiple prior prime commits. Flagged as a doc/behavior mismatch, not resolved this session.
+
+### Stopping point
+
+- Working tree: clean, commits `fa82c87` + `20ac94a`.
+- Validation: N/A — workspace-only change (docs/templates only); no source, Dockerfile, or rootfs changes.
+
+### Fragile areas
+
+- Archetype sections (`Web UI/BFF`, `API/Backend`, `CLI/Library/SDK`) still present in `definition-of-done.md` (confirmed via `hasArchetypeMarkers: true` in the v3.7.7 manifest); none cleanly fits this Docker-image/infra project. Deferred across multiple re-prime sessions now — needs a human decision on which (if any) to keep.
+- `GUIDE.md` Step 6's claim that `.ai-prime-manifest.json` is gitignored is inaccurate — it's tracked in git and has been for several prime commits.
+- `AGENTS.md` Architecture / Key Boundaries / Current posture sections remain unfilled template placeholders (pre-existing, not part of this session's scope).
+
+---
+
 ## Session Close — 2026-07-01 (prime-ai-docs v3.5.0 re-prime)
 
 ### Completed this session

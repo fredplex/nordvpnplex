@@ -9,6 +9,11 @@ Current work in progress.
 
 **None active — awaiting direction.** Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
 
+### Template re-prime v3.7.7 + testing.md merge (Complete)
+
+- [x] Backup merge: `GUIDE.md` (3.5.0→3.5.3) + `definition-of-done.md` (3.0.2→3.0.3) accepted template-pure; `docs/testing.md` (3.0.4→3.0.5) merged with restored project content (`fa82c87`)
+- [x] Tracked `.ai-prime-manifest.json` update from the v3.7.7 run (`20ac94a`)
+
 ### Fix check-base-image verify + docs (Complete)
 
 - [x] Phase A — Fix `publish-dev.yml` verify bug: split build into load+verify then push steps (`2febec9`)
@@ -100,6 +105,6 @@ Current work in progress.
 
 ## Recently Completed
 
+- **Template re-prime v3.7.7 + testing.md merge** (2026-07-02) — GUIDE.md (3.5.0→3.5.3) + definition-of-done.md (3.0.2→3.0.3) accepted template-pure; docs/testing.md (3.0.4→3.0.5) merged with restored NordVPN-specific content (`fa82c87`, `20ac94a`)
 - **prime-ai-docs v3.5.0 re-prime** (2026-07-01) — GUIDE.md (3.4.0→3.5.0), implementation.md (3.0.4→3.1.0), session-close.md (3.0.6→3.0.7) (`534c709`)
 - **Fix check-base-image verify + docs** (2026-07-01) — fixed `publish-dev.yml` verify step (image never loaded into local daemon), added base image rationale to architecture.md and build-and-publish.md, cross-referenced user-guide.md.
-- **prime-ai-docs v3.4.x template refresh** (2026-07-01) — resumed in-progress script run; 6 template-pure workflow/prompt files updated and committed.
