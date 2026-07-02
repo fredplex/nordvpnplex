@@ -1,7 +1,7 @@
-<!-- prime: version=3.0.4 template=docs/testing.md date=2026-06-30 -->
+<!-- prime: version=3.0.5 template=docs/testing.md date=2026-07-02 -->
 # Testing
 
-Testing strategy, validation gates, and coverage expectations for **fredplex/nordvpn**.
+Testing strategy, framework configuration, and coverage expectations for **nordvpnplex**.
 
 **Working copy**: `.ai/workflows/definition-of-done.md`
 
@@ -16,6 +16,8 @@ Two-tier testing model:
 - **Tier 2** (`task verify-live`) — real NordVPN token, real NordLynx egress, Spain. Validates tunnel connectivity. Required before every `task release`.
 
 `task verify` is structurally blind to tunnel connectivity — it uses a fake token and checks that the daemon socket exists, not that the VPN connects. `task verify-live` is the only gate that catches protocol-level regressions.
+
+Static validation (`task docker-build`) verifies code correctness; runtime tests (`task verify` / `task verify-live`) verify feature correctness.
 
 ---
 

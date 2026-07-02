@@ -1,7 +1,7 @@
 {
   "schemaVersion": "3.0",
-  "templateVersion": "3.6.2",
-  "primed": "2026-07-01T18:27:49.945Z",
+  "templateVersion": "3.6.3",
+  "primed": "2026-07-02T00:02:29.490Z",
   "files": {
     "CLAUDE.md": "3.0.1",
     "AGENTS.md": "3.0.3",
@@ -13,7 +13,7 @@
     ".ai/rules/mutation-rules.md": "3.0.0",
     ".ai/workflows/onboarding.md": "3.0.1",
     ".ai/workflows/implementation.md": "3.1.0",
-    ".ai/workflows/definition-of-done.md": "3.0.2",
+    ".ai/workflows/definition-of-done.md": "3.0.3",
     ".ai/workflows/session-close.md": "3.0.8",
     ".ai/tasks/active.md": "3.0.0",
     ".ai/tasks/completed.md": "3.0.0",
@@ -23,7 +23,7 @@
     ".ai/prompts/execute-plan-prompt.md": "3.0.1",
     ".ai/memory/project-state.md": "3.0.0",
     ".ai/memory/architecture-decisions.md": "3.0.0",
-    ".ai/GUIDE.md": "3.5.0",
+    ".ai/GUIDE.md": "3.5.3",
     ".ai/prompts/prime-prompt.md": "3.3.0",
     ".ai/integrations/_TEMPLATE.md": "3.0.0",
     ".ai/assessments/_TEMPLATE.md": "3.0.0",
@@ -35,6 +35,11 @@
     "docs/feature-state.md": "3.0.0",
     "docs/tech-stack.md": "3.0.0",
     "docs/testing.md": "3.0.5"
+  },
+  "hashes": {
+    ".ai/workflows/definition-of-done.md": "95739292507a3c6fca1f9c5edf955d13c3c3b1a249388da368754940613ce9b1",
+    ".ai/GUIDE.md": "777540db8e0231d2f8fe373397487e75851f9671fb45491c09a7a35ffa99b021",
+    "docs/testing.md": "e4d3a7cadf50ff50d347e0aedf69c7b0200f6404a52b7bd1b3b80c84112bead4"
   },
   "context": {
     "name": "nordvpnplex",

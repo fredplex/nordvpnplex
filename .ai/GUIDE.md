@@ -1,4 +1,4 @@
-<!-- prime: version=3.5.0 template=.ai/GUIDE.md date=2026-07-01 -->
+<!-- prime: version=3.5.3 template=.ai/GUIDE.md date=2026-07-02 -->
 # AI Workspace Guide
 
 > **You are an AI coding agent.** This file is written for you. Read it when setting up
@@ -27,7 +27,21 @@ not this file. Return here only when running the script again or merging a templ
 
 ---
 
-#### Step 1 — Discover project context and build the flag set
+#### Step 1 — Check saved context, then discover only what's missing
+
+**First, check what the script already has on record.** Run:
+
+```bash
+npx github:fredplex/vibe-coding-template . --status
+```
+
+Read the `Recorded Context` block. Any field shown there was saved from a previous run and
+will be **reused automatically** if you omit its flag entirely — you do not need to
+rediscover it, and you should not pass a flag for it unless the human has told you the
+recorded value is wrong or the project has genuinely changed. Passing a flag always
+overrides the saved value, including for future runs, so only do it deliberately.
+
+**For any field `--status` shows as `(none)`, or that the human says is wrong**, discover it:
 
 Read the following files in this repository (if they exist):
 - `package.json` — extract: `name`, `description`, `scripts.validate` (or similar),
@@ -35,8 +49,6 @@ Read the following files in this repository (if they exist):
 - Root `README.md` — extract: project description, tech stack if mentioned
 - Any lockfile present (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`)
   to detect the package manager
-
-From this, determine values for all seven headless flags:
 
 | Flag | Where to find it |
 |------|-----------------|
@@ -50,9 +62,12 @@ From this, determine values for all seven headless flags:
 
 Use `echo ok` **only** for commands that genuinely do not exist yet in the project.
 Do not guess or invent commands. If `package.json` does not exist, use the directory
-name for `--name` and `echo ok` for all command flags.
+name for `--name` and `echo ok` for all command flags. If `--status` reports no recorded
+context at all (first-ever prime, or a repo primed before this feature existed), discover
+all seven values this way.
 
-**Resolve these seven values once now.** Steps 2 and 4 reuse the same set — do not rebuild.
+**Resolve only the fields that need it.** Steps 2 and 4 reuse this same, possibly-partial,
+set — do not rebuild it, and do not pass a flag for a field `--status` already showed correct.
 
 ---
 
@@ -92,7 +107,8 @@ Read the output and classify using this table:
 >   template update. I should not continue — my execution instructions are the prior version
 >   and the new version may differ. Please run the script directly to apply all updates
 >   (including the guide files), then start a fresh agent session for any remaining work.
->   Use this headless command with the flag values discovered in Step 1:"
+>   Use this headless command with only the flag values Step 1 needed to discover
+>   (omit any field `--status` already showed as recorded and correct):"
 >
 >   Provide the fully-formed headless invocation. Do not proceed further.
 
@@ -118,17 +134,27 @@ Never run the script on `main` or any existing feature branch.
 
 #### Step 4 — Run the script
 
-Construct and execute the headless invocation using the seven values resolved in Step 1:
+Construct and execute the headless invocation using **only the flags Step 1 actually needed
+to resolve** — a field `--status` already showed as recorded and correct takes no flag at all;
+the script reuses its saved value automatically. Example where only `--stack` needed
+correcting (every other field was already recorded):
+
+```bash
+npx github:fredplex/vibe-coding-template . --yes --stack "<corrected stack>"
+```
+
+Example on a repo with no recorded context yet (first re-prime after upgrading, or every
+field genuinely needed discovery in Step 1):
 
 ```bash
 npx github:fredplex/vibe-coding-template . --yes \
-  --name "" \
-  --description "" \
-  --stack "" \
-  --install "" \
-  --dev "" \
-  --validate "" \
-  --test ""
+  --name "<discovered name>" \
+  --description "<discovered description>" \
+  --stack "<discovered stack>" \
+  --install "<discovered install>" \
+  --dev "<discovered dev>" \
+  --validate "<discovered validate>" \
+  --test "<discovered test>"
 ```
 
 **Do not add `--overwrite`** unless the human has explicitly instructed it in this session.
@@ -148,8 +174,9 @@ After the script completes, record:
 - **Files updated** — count and list (Re-prime scenario only)
 - **Files skipped** — count (already current or `skipIfExists` — includes the four
   `_TEMPLATE.md` stubs)
-- **Warnings** — any `⚠️ CONTENT REVIEW REQUIRED` lines (means a project-specific file
-  was overwritten and its backup must be merged before committing)
+- **Warnings** — any `⚠️ LOCAL EDITS WILL BE REPLACED` lines (means a file you or the
+  human customized — whether or not it still has placeholder markers — was overwritten
+  and its backup must be merged before committing)
 - **Backup location** — if any files were updated or overwritten, note the path:
   `.ai-prime-backup/{timestamp}/`
 
@@ -160,7 +187,7 @@ After the script completes, record:
 | Init | No | No merge needed — proceed to Step 6 |
 | Partial (only `would-create` fired) | No | No merge needed — proceed to Step 6 |
 | Re-prime / Partial with updates | Yes | **Backup merge required** — follow Step 5c before proceeding |
-| Any — `⚠️ CONTENT REVIEW REQUIRED` fired | Yes | **Stop** — report warnings + backup path to human; wait for instruction |
+| Any — `⚠️ LOCAL EDITS WILL BE REPLACED` fired | Yes | **Stop** — report warnings + backup path to human; wait for instruction |
 
 **5c — Backup merge (Re-prime path):**
 
@@ -184,15 +211,17 @@ the line if it is not already present (never overwrite the file):
 grep -qxF '.ai-prime-backup/' .gitignore || echo '.ai-prime-backup/' >> .gitignore
 ```
 
-Then stage and commit the workspace files:
+Then stage and commit the workspace files, including `.ai-prime-versions.json` — it is
+git-tracked by design so recorded context and per-file versions survive a fresh clone or CI,
+not just your local machine:
 
 ```bash
-git add .ai/ docs/ AGENTS.md CLAUDE.md .gitignore
+git add .ai/ docs/ AGENTS.md CLAUDE.md .gitignore .ai-prime-versions.json
 git commit -m "chore: prime AI agent workspace via vibe-coding-template"
 ```
 
-Do not stage `.ai-prime-backup/`, `.ai-prime-versions.json`, or `.ai-prime-manifest.json`
-— these are runtime artifacts, not workspace files.
+Do not stage `.ai-prime-backup/` or `.ai-prime-manifest.json` — both are gitignored runtime
+artifacts (a per-run backup directory and a per-run log), unlike `.ai-prime-versions.json`.
 
 ---
 
@@ -257,7 +286,7 @@ npx github:fredplex/vibe-coding-template .
 # Dry run — preview what would be created or updated, no files written
 npx github:fredplex/vibe-coding-template . --dry-run
 
-# Show deployed template versions for all files (read-only)
+# Show deployed template versions + recorded project context (read-only)
 npx github:fredplex/vibe-coding-template . --status
 
 # Headless — skip prompts, supply all values via flags
@@ -267,8 +296,8 @@ npx github:fredplex/vibe-coding-template . --yes \
   --stack "Node.js, TypeScript" \
   --install "npm ci" \
   --dev "npm run dev" \
-  --validate "echo ok" \
-  --test "echo ok"
+  --validate "task docker-build" \
+  --test "task verify"
 
 # Force overwrite existing files (backs up first)
 npx github:fredplex/vibe-coding-template . --overwrite --yes --name "My App" ...
@@ -287,8 +316,9 @@ npx github:fredplex/vibe-coding-template . --overwrite --yes --name "My App" ...
 | **Runtime / E2E test command** | Command that runs integration or E2E tests. |
 
 Accurate values save rework — these appear throughout the generated files. If your project
-doesn't yet have a static validation or test command, use `echo ok` as a placeholder — update
-the generated files later with `--overwrite` once the real commands are known.
+doesn't yet have a static validation or test command, use `echo ok` as a placeholder — once
+the real command is known, just pass that one flag on a later run (see *Saved context
+replay* below); no `--overwrite` needed.
 
 #### Smart update (re-running on an existing repo)
 
@@ -307,27 +337,42 @@ npx github:fredplex/vibe-coding-template . --yes --name "My App" ...
 When files are updated, a timestamped backup is written to `.ai-prime-backup/{timestamp}/`.
 Add `.ai-prime-backup/` to your `.gitignore`.
 
+#### Saved context replay
+
+Every run saves the resolved context (`name`/`description`/`stack`/`install`/`dev`/`validate`/
+`test`) to `.ai-prime-versions.json`. The next run reuses it automatically — a repeat update
+with no flags at all needs no prompts. `--status` shows what's currently recorded under
+`Recorded Context`. Three ways to change what's saved:
+
+- **Pass a flag** — overrides that one field for this run, and becomes the new saved value.
+- **`--reconfigure`** — re-opens the interactive questionnaire for every field, pre-filled with
+  its current saved value, so you can review and update several at once instead of crafting
+  flags by hand. No effect combined with `--yes`.
+- **`--reset-context`** — ignores everything saved and re-derives from scratch (flags →
+  auto-detection → prompt), as if the repo had never been primed. Whatever gets resolved this
+  run becomes the new saved state.
+
 #### Verify generated commands after priming
 
 Open `AGENTS.md` and `CLAUDE.md` and confirm the commands in the Quick Commands block match
-your project's actual commands. If they need correction, re-run with `--overwrite` and the
-correct flag values, or edit the files directly.
+your project's actual commands.
 
 #### If context values need correction
 
-If the script ran with wrong values (wrong project name, wrong commands), regenerate all
-files cleanly:
+For one or two wrong values, pass just those flags — no `--overwrite` needed:
 
 ```bash
-npx github:fredplex/vibe-coding-template . --overwrite --yes \
-  --name "Correct Name" \
-  --description "Correct description" \
-  --stack "..." \
-  --install "..." \
-  --dev "..." \
-  --validate "..." \
-  --test "..."
+npx github:fredplex/vibe-coding-template . --yes --stack "Correct stack" --validate "correct-command"
 ```
+
+To review and correct several values interactively:
+
+```bash
+npx github:fredplex/vibe-coding-template . --reconfigure
+```
+
+Reserve `--overwrite` (regenerates every file from scratch, backing up first) for when a
+file's structure itself is broken, not just a wrong context value.
 
 ---
 
@@ -400,9 +445,11 @@ accepted directly:
 | **Project-specific** (always merge) | `AGENTS.md`, `CLAUDE.md`, `docs/architecture.md`, `docs/tech-stack.md`, `docs/feature-state.md`, `docs/testing.md`, `.ai/memory/project-state.md`, `.ai/rules/mutation-rules.md` | **Always open the backup** — verify no placeholder markers remain; restore custom content before committing |
 | **Template-pure** (safe to accept) | `.ai/GUIDE.md`, `.ai/prompts/prime-prompt.md`, all `.ai/workflows/`, all other `.ai/prompts/`, `.ai/rules/engineering-rules.md`, `.ai/rules/security-rules.md`, `.ai/tasks/`, `.ai/SESSION_NOTES.md`, `.ai/README.md` | Safe to accept directly if you have not made deliberate customisations to the live file. Note: `GUIDE.md` and `prime-prompt.md` are called out explicitly because these are the files the guide meta-file update guard watches for — if either was updated, the agent stopped before the script run and the human ran the script directly. |
 
-> The script emits `⚠️ CONTENT REVIEW REQUIRED` when placeholder markers are detected in a
-> regenerated file. This always means a merge review is required — do not commit until the
-> backup content has been merged in.
+> The script emits `⚠️ LOCAL EDITS WILL BE REPLACED` when a regenerated file's prior content
+> no longer matches what the script last wrote — either because it still has unfilled
+> placeholder markers, or because the file was hand-edited since (detected by comparing a
+> content hash, independent of markers). This always means a merge review is required — do
+> not commit until the backup content has been merged in.
 
 ### Merge principle
 

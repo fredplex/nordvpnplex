@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.2 template=.ai/workflows/definition-of-done.md date=2026-07-01 -->
+<!-- prime: version=3.0.3 template=.ai/workflows/definition-of-done.md date=2026-07-02 -->
 # Definition of Done
 
 The single gate every change passes before it is "done": the validation commands, the Done
@@ -13,13 +13,13 @@ Before marking any task complete, run the appropriate gates:
 
 ### Static Checks (always run)
 ```bash
-npm run validate:local
+task docker-build
 ```
 Runs the static validation gate (syntax, linting, and any type checks applicable to this stack).
 
 ### Tests (always run if logic, templates, or runtime behavior changed)
 ```bash
-npm run test:e2e
+task verify
 ```
 Runs the unit, integration, and E2E suites.
 
@@ -28,8 +28,8 @@ Runs the unit, integration, and E2E suites.
 ## What "Done" Means
 
 A task is complete when:
-- [ ] Static validation (`npm run validate:local`) passes with exit code 0.
-- [ ] Test validation (`npm run test:e2e`) passes all tests.
+- [ ] Static validation (`task docker-build`) passes with exit code 0.
+- [ ] Test validation (`task verify`) passes all tests.
 - [ ] Manual verification completed (browser checks for web apps; test runs for CLIs / libraries).
 - [ ] Workspace state logged in `.ai/current.md` and `.ai/tasks/active.md`.
 - [ ] Product docs (`docs/`) updated for any behavior, architecture, feature, rule, or tech-stack change.
