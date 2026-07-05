@@ -232,5 +232,7 @@ Nord Security companies are not responsible for and have no control over the nat
 
 ## Changelog
 
+- **2026-07-02** — NordVPN 5.1.0 → 5.2.0 (image → 5.5.3), via the automated daily version-check pipeline.
+- **2026-07-01** — Base image refresh: digest bump for `ghcr.io/linuxserver/baseimage-ubuntu:noble` (image 5.5.1 → 5.5.2), via the automated monthly base-image check pipeline. NordVPN version unchanged.
 - **2026-06-27** — Base image refresh cadence implemented: added monthly digest check workflow (`.github/workflows/check-base-image.yml`) and local diagnostics script (`scripts/check-base-image.sh` / `task check-base`) to detect base image updates, automate dev builds, and open draft PRs.
 - **2026-06-26** — Dockerfile optimization complete (Phases 0–5): base image digest-pinned (`noble@sha256:53411508…`), `wireguard` → `wireguard-tools` + `iptables` explicit + `net-tools`/`iputils-ping`/`libc6` removed, `COPY --chmod=0755` replaces 10-line chmod block, `DOCKER_BUILDKIT=1` enforced, HEALTHCHECK added (surfaces tunnel state to Docker/Unraid, healthy in ~5s on NordLynx). Pre-release gate: `task verify-live` real-token Spain egress test. `verify.sh` now MSYS/Git Bash safe — no WSL2 needed for `task verify`. Fix shebang paths in `nord_config`/`nord_watch`, expand `.dockerignore`, harden curl bootstrap fetch (`--proto '=https' --tlsv1.2`), add `ARG NORDVPN_RELEASE`.

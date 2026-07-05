@@ -12,7 +12,7 @@
 | B | Fix stale header comment in `check-nordvpn-release.yml` | `docs:` | Done |
 | C | Correct cadence/smoke-test-count in `docs/build-and-publish.md` | `docs:` | Done |
 | D | Add Check Base Image workflow docs to `docs/user-guide.md` | `docs:` | Done |
-| E | Auto-append Changelog entries in `bump.sh` + backfill `README.md` | `feat:` | Pending |
+| E | Auto-append Changelog entries in `bump.sh` + backfill `README.md` | `feat:` | Done |
 | F | Add `verify-live` checklist item to draft PR bodies | `feat:` | Pending |
 | G | Guard against concurrent bump-PR races | `feat:` | Pending |
 
@@ -124,7 +124,9 @@ Replace with accurate text, e.g.:
 
 **File**: `README.md`, `scripts/bump.sh`
 
-Extend `scripts/bump.sh` to append a one-line placeholder Changelog entry (date + "NordVPN X → Y" or "Base image refresh — IMAGE_VERSION X → Y") under `README.md`'s `## Changelog` (newest first) every time it runs, so the entry can no longer be silently skipped — the human/agent still fleshes out the detail before merging the bump PR, but the line itself always exists. Backfill the missing entries for the 3 unlogged releases (base image → 5.5.2, template re-prime v3.7.7, NordVPN 5.2.0 / image 5.5.3) as part of this phase.
+Extend `scripts/bump.sh` to append a one-line placeholder Changelog entry (date + "NordVPN X → Y" or "Base image refresh — IMAGE_VERSION X → Y") under `README.md`'s `## Changelog` (newest first) every time it runs, so the entry can no longer be silently skipped — the human/agent still fleshes out the detail before merging the bump PR, but the line itself always exists. Backfill the missing entries as part of this phase.
+
+**Deviation from the plan text (flagged, not silent)**: backfilled only the 2 entries that changed the shipped image (base image → 5.5.2; NordVPN 5.2.0 / image 5.5.3) — the "template re-prime v3.7.7" event was workspace/`.ai`-only with zero Dockerfile/rootfs/runtime impact (confirmed via its own session-close notes: "Validation: N/A — workspace-only change"). README's Changelog is user-facing and its two existing entries are both image/build-relevant, so a pure agent-tooling re-prime doesn't belong there — it's already correctly recorded in `.ai/SESSION_NOTES.md`. Happy to add it if the owner disagrees.
 
 ### Phase F — Strengthen the `verify-live` gate on the recommended path — **APPROVED (visible checklist item only)**
 

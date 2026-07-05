@@ -31,6 +31,16 @@ for f in Dockerfile README.md CLAUDE.md; do
   fi
 done
 
+# Capture the outgoing versions before anything is edited, so the changelog
+# entry below can describe what actually changed (NordVPN bump vs. base-image-only).
+OLD_NORDVPN="$(grep "ARG NORDVPN_VERSION" Dockerfile | sed "s/ARG NORDVPN_VERSION='//;s/'$//")"
+OLD_IMAGE="$(grep "ARG IMAGE_VERSION" Dockerfile | sed "s/ARG IMAGE_VERSION='//;s/'$//")"
+if [[ "${OLD_NORDVPN}" != "${NORDVPN_VERSION}" ]]; then
+  CHANGELOG_SUMMARY="NordVPN ${OLD_NORDVPN} → ${NORDVPN_VERSION} (image ${OLD_IMAGE} → ${IMAGE_VERSION})"
+else
+  CHANGELOG_SUMMARY="Base image refresh — image ${OLD_IMAGE} → ${IMAGE_VERSION} (NordVPN unchanged at ${NORDVPN_VERSION})"
+fi
+
 # Verify the package exists before editing anything
 echo "Verifying nordvpn_${NORDVPN_VERSION}_amd64.deb in the official repo..."
 if ! curl -sf "${REPO_URL}" | grep -qF "nordvpn_${NORDVPN_VERSION}_amd64.deb"; then
@@ -49,6 +59,13 @@ sed -i "s#ARG IMAGE_VERSION='[^']*'#ARG IMAGE_VERSION='${IMAGE_VERSION}'#" Docke
 sed -i "s#<!-- current-version:.*-->#<!-- current-version: nordvpn=${NORDVPN_VERSION} image=${IMAGE_VERSION} -->#" README.md
 sed -i "s#> \*\*Current image:\*\*.*#> **Current image:** fredplex/nordvpn:${IMAGE_VERSION} — NordVPN ${NORDVPN_VERSION}#" README.md
 
+# 2b. README.md — auto-append a Changelog placeholder (newest first) so a bump can
+# no longer silently skip logging. The one-line summary is generated from what
+# actually changed; flesh out the detail before merging the bump PR.
+sed -i "/^## Changelog\$/{n; a\\
+- **${TODAY}** — ${CHANGELOG_SUMMARY} <!-- TODO: expand with real details before merging -->
+}" README.md
+
 # 3. CLAUDE.md — pinned version block
 sed -i "s#NordVPN: .*  |  Image tag: .*  |  Built: .*#NordVPN: ${NORDVPN_VERSION}  |  Image tag: fredplex/nordvpn:${IMAGE_VERSION}  |  Built: ${TODAY}#" CLAUDE.md
 
@@ -56,4 +73,5 @@ echo "All files updated. Review the diff before committing:"
 echo ""
 git diff
 echo ""
+echo "Reminder: replace the auto-generated Changelog TODO line in README.md with real details."
 echo "Reminder: update .ai/current.md by hand to reflect this bump (handoff state)."
