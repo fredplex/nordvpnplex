@@ -14,7 +14,7 @@ Current work in progress.
 - [x] Phase C — Correct cadence/smoke-test-count in `docs/build-and-publish.md`
 - [x] Phase D — Add Check Base Image workflow docs to `docs/user-guide.md`
 - [x] Phase E — Auto-append Changelog entries in `bump.sh` + backfill `README.md`
-- [ ] Phase F — Add `verify-live` checklist item to draft PR bodies
+- [x] Phase F — Add `verify-live` checklist item to draft PR bodies
 - [ ] Phase G — Guard against concurrent bump-PR races
 
 ### Template re-prime v3.7.7 + testing.md merge (Complete)

@@ -112,14 +112,14 @@ jobs:
             - **Moving dev tag**: `fredplex/nordvpn:dev`
 
             ## Before merging
-            1. Review [linuxserver.io release notes](https://github.com/linuxserver/docker-baseimage-ubuntu/releases)
-               for breaking changes (s6-overlay API changes, dropped packages, etc.)
-            2. Pull the dev image and test on Unraid:
-               ```bash
-               docker pull fredplex/nordvpn:dev-${{ needs.check-base.outputs.current_nordvpn_version }}
-               ```
-            3. Locally: `git pull && task docker-build && task verify`
-            4. `task verify-live TOKEN_FILE=<path>` — mandatory pre-release egress check
+            - [ ] Review [linuxserver.io release notes](https://github.com/linuxserver/docker-baseimage-ubuntu/releases)
+              for breaking changes (s6-overlay API changes, dropped packages, etc.)
+            - [ ] Pull the dev image and test on Unraid:
+              ```bash
+              docker pull fredplex/nordvpn:dev-${{ needs.check-base.outputs.current_nordvpn_version }}
+              ```
+            - [ ] Locally: `git pull && task docker-build && task verify`
+            - [ ] Ran `task verify-live TOKEN_FILE=<path>` against the dev image and confirmed Spain egress (the mandatory pre-release gate — `task verify` alone cannot validate tunnel connectivity).
 
             ## After merging
             Merging triggers the production release pipeline automatically:

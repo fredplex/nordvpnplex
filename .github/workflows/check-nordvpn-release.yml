@@ -98,13 +98,14 @@ jobs:
             | `IMAGE_VERSION` | `${{ needs.check-version.outputs.current_image_version }}` | `${{ needs.check-version.outputs.suggested_image_version }}` *(suggested — adjust if needed)* |
 
             ## Before merging (Testing Instructions)
-            1. Pull the dev build to your testing system (e.g. Unraid):
-               ```bash
-               docker pull fredplex/nordvpn:dev-${{ needs.check-version.outputs.latest_version }}
-               ```
-            2. Update your test container to use this image and verify the VPN connects and traffic flows correctly.
-            3. Review the PR file diff.
-            4. Check [NordVPN release notes](https://nordvpn.com/blog/nordvpn-linux-release-notes/) for any breaking changes.
+            - [ ] Pull the dev build to your testing system (e.g. Unraid):
+              ```bash
+              docker pull fredplex/nordvpn:dev-${{ needs.check-version.outputs.latest_version }}
+              ```
+            - [ ] Update your test container to use this image and verify the VPN connects and traffic flows correctly.
+            - [ ] Ran `task verify-live TOKEN_FILE=<path>` against the dev image and confirmed Spain egress (the mandatory pre-release gate — `task verify` alone cannot validate tunnel connectivity).
+            - [ ] Review the PR file diff.
+            - [ ] Check [NordVPN release notes](https://nordvpn.com/blog/nordvpn-linux-release-notes/) for any breaking changes.
 
             ## After merging
             Merging this PR will automatically trigger the production release pipeline:
