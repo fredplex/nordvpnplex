@@ -1,8 +1,8 @@
 # Plan: Build & Release Workflow — Doc Drift Fixes + Reliability Hardening
 
 **Date**: 2026-07-05
-**Branch**: `claude/nordvpnplex-onboarding-a1n6pb` (session-designated; rename to a `chore/`-prefixed branch if the owner wants the standard local convention before merge)
-**Status**: Awaiting owner review
+**Branch**: `claude/nordvpnplex-onboarding-a1n6pb` (owner confirmed — stay on this branch, no rename)
+**Status**: Owner decisions resolved (2026-07-05) — all phases (A–G) approved in scope. Awaiting final go-ahead to begin implementation.
 
 ---
 
@@ -60,7 +60,7 @@ Both `check-nordvpn-release.yml` (daily) and `check-base-image.yml` (monthly) ca
 
 ## Proposed Changes
 
-### Phase A — Fix the broken `CLAUDE.md` (do first, blocks nothing else, highest value)
+### Phase A — Fix the broken `CLAUDE.md` (do first, blocks nothing else, highest value) — **APPROVED**
 
 **File**: `CLAUDE.md`
 
@@ -106,17 +106,17 @@ Replace with accurate text, e.g.:
 - Add a row to the §4 "Quick reference" workflows table: `Check Base Image | Monthly cron (1st, 09:00 UTC) | Yes — Actions UI | Yes (:dev tags via publish-dev)`.
 - Add a `### Check Base Image` subsection under §4, mirroring the structure of the other four workflow subsections (File / Trigger / What it does / To trigger manually / Secrets needed), sourced from `check-base-image.yml` and the existing (accurate) content in `docs/build-and-publish.md` §4.5.
 
-### Phase E — Changelog: decide and implement a durable fix
+### Phase E — Changelog: auto-append on bump — **APPROVED (auto-append chosen)**
 
-**File**: `README.md`, and either `scripts/bump.sh` or `.ai/workflows/session-close.md`
+**File**: `README.md`, `scripts/bump.sh`
 
-Owner decision needed on approach (see below). Recommended: extend `scripts/bump.sh` to append a one-line placeholder Changelog entry (date + "NordVPN X → Y" or "Base image refresh — IMAGE_VERSION X → Y") that the human/agent fleshes out before merging the bump PR, rather than relying on someone remembering to add it separately. Backfill the missing entries for the 3 unlogged releases as part of this phase.
+Extend `scripts/bump.sh` to append a one-line placeholder Changelog entry (date + "NordVPN X → Y" or "Base image refresh — IMAGE_VERSION X → Y") under `README.md`'s `## Changelog` (newest first) every time it runs, so the entry can no longer be silently skipped — the human/agent still fleshes out the detail before merging the bump PR, but the line itself always exists. Backfill the missing entries for the 3 unlogged releases (base image → 5.5.2, template re-prime v3.7.7, NordVPN 5.2.0 / image 5.5.3) as part of this phase.
 
-### Phase F — Strengthen the `verify-live` gate on the recommended path
+### Phase F — Strengthen the `verify-live` gate on the recommended path — **APPROVED (visible checklist item only)**
 
 **Files**: `.github/workflows/check-nordvpn-release.yml`, `.github/workflows/check-base-image.yml`, draft PR body templates
 
-Owner decision needed on mechanism (see below). Lightweight option: add an explicit unchecked checklist item to the draft PR body — "- [ ] Ran `task verify-live TOKEN_FILE=...` against the dev image and confirmed Spain egress" — so it's at least a visible, individually-checkable gate rather than folded into vague "test the dev image" prose. (GitHub can't block merge on an unchecked markdown checkbox without a required-review/status-check setup, so this raises visibility but doesn't hard-block — flagged as a limitation, not solved by this phase alone.)
+Add an explicit unchecked checklist item to both workflows' draft PR body — "- [ ] Ran `task verify-live TOKEN_FILE=...` against the dev image and confirmed Spain egress" — so it's a visible, individually-checkable gate rather than folded into vague "test the dev image" prose. Owner confirmed this lightweight visibility bump is sufficient for now; branch-protection / required-check enforcement is explicitly out of scope for this pass (GitHub can't block merge on an unchecked markdown checkbox without that separate, larger effort — noted as a known limitation, not solved here).
 
 ### Phase G — Prevent concurrent bump-PR races
 
@@ -176,15 +176,18 @@ Add a step early in each workflow's `create-pr` job that checks for existing ope
 | `docs/build-and-publish.md` | Fix cadence wording + smoke-test count in 4 locations | C |
 | `docs/user-guide.md` | Add Check Base Image row + subsection to §4 | D |
 | `README.md` | Backfill missing Changelog entries | E |
+| `scripts/bump.sh` | Auto-append a Changelog placeholder line on every bump | E |
 | `.github/workflows/check-base-image.yml` | Add open-PR guard (Phase G) | G |
 | PR body templates in both `create-pr` jobs | Add explicit `verify-live` checklist item | F |
 
 ---
 
-## Owner Decisions Required
+## Owner Decisions — RESOLVED (2026-07-05)
 
-1. **Approve resolving the `CLAUDE.md` conflict now** (Phase A) — recommend doing this first regardless of the rest, since it's an active defect.
-2. **Changelog mechanism (Phase E)**: auto-append a placeholder line via `bump.sh` (recommended) vs. leave fully manual but add a reminder step to `bump.sh`'s printed output vs. drop the Changelog requirement from `CLAUDE.md` entirely if it's not valued.
-3. **`verify-live` gate strength (Phase F)**: checklist-item visibility bump only (recommended, low effort) vs. invest in real branch-protection / required-check enforcement (larger, separate effort — could be spun into its own plan if wanted).
-4. **Scope for this pass**: all phases A–G, or just the doc-drift fixes (A–D) with E–G deferred to a follow-up plan?
-5. **Branch**: keep working on the session-designated `claude/nordvpnplex-onboarding-a1n6pb`, or cut a conventional `chore/build-release-workflow-hardening` branch per `AGENTS.md` working rules before implementing?
+1. **Resolve the `CLAUDE.md` conflict (Phase A)** — **Approved.**
+2. **Changelog mechanism (Phase E)** — **Auto-append** a placeholder line via `bump.sh` on every bump.
+3. **`verify-live` gate strength (Phase F)** — **Visible checklist item** in the draft PR body only (no branch-protection/required-check work in this pass).
+4. **Scope for this pass** — **All phases A–G.**
+5. **Branch** — **Stay on** `claude/nordvpnplex-onboarding-a1n6pb`; no rename.
+
+All decisions are locked in above. Implementation has **not** started — awaiting explicit go-ahead to begin Phase A.
