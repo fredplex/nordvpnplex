@@ -37,7 +37,7 @@ NordVPN package repo ──► Daily GitHub Action ──► Auto-builds Dev con
                                                         ▼
                                          GHA Release Pipeline:
                                          - Builds Prod image
-                                         - Executes 3 smoke tests
+                                         - Executes 4 smoke tests
                                          - Pushes :latest + :<tag> to Docker Hub
                                          - Publishes GitHub Release (creates tag + sends notification email)
 ```
@@ -112,7 +112,7 @@ or similar errors. `task verify` and `task verify-live` work in Git Bash without
 ┌─────────────────────────────────────────────────────────────────────┐
 │  PRODUCTION RELEASE (GitHub Actions)                                │
 │  Merge triggers release pipeline → Builds Prod image                │
-│  → Executes 3 smoke tests → Pushes :latest & :<tag> to Docker Hub   │
+│  → Executes 4 smoke tests → Pushes :latest & :<tag> to Docker Hub   │
 │  → Publishes GitHub Release + email                                 │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -131,7 +131,7 @@ or similar errors. `task verify` and `task verify-live` work in Git Bash without
 
 **Publishing and tagging (automated)**
 - Merging the PR triggers the release workflow on GitHub.
-- GHA builds the release image, verifies it with 3 smoke tests, and pushes `fredplex/nordvpn:latest` + `fredplex/nordvpn:<tag>` to Docker Hub.
+- GHA builds the release image, verifies it with 4 smoke tests, and pushes `fredplex/nordvpn:latest` + `fredplex/nordvpn:<tag>` to Docker Hub.
 - GHA publishes a **GitHub Release** (creating the version tag + release notes), which sends a native notification email to repo watchers. Workflow failures are emailed natively via GitHub Actions notifications. See [§4.6 Release notifications](#46-release-notifications).
 
 **If an agent is doing a manual bump (no PR)**
@@ -214,9 +214,9 @@ Trigger a dev build from the GitHub Actions UI — no local Docker needed:
    - **Type an explicit version** (e.g. `4.6.0`) — use that exact version
 4. Click **Run workflow**
 
-The workflow builds the image, runs 3 stateless smoke tests (IMAGE_VERSION label,
-`nordvpn --version`, iptables kill-switch), then pushes `:dev` and `:dev-<sha>` to
-Docker Hub. All steps are logged; a summary is printed at the end.
+The workflow builds the image, runs 4 unified smoke tests (IMAGE_VERSION label,
+`nordvpn --version`, iptables kill-switch, and nordvpnd socket presence), then pushes
+`:dev` and `:dev-<sha>` to Docker Hub. All steps are logged; a summary is printed at the end.
 
 #### Consuming the dev image
 
@@ -245,10 +245,10 @@ Switch back to `fredplex/nordvpn:latest` when done testing.
 
 Five workflows run automatically or on-demand. None of them push a production image without a human-created git tag.
 
-### 4.1 Weekly version check
+### 4.1 Daily version check
 
 **File:** `.github/workflows/check-nordvpn-release.yml`
-**Trigger:** Every Monday at 08:00 UTC (cron), or manually (see [Section 6](#6-manual-triggers))
+**Trigger:** Every day at 08:00 UTC (cron), or manually (see [Section 6](#6-manual-triggers))
 **What it does:**
 1. Scrapes `https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/` for available `.deb` versions
 2. Compares the latest available version against the `NORDVPN_VERSION` pinned in `Dockerfile`
@@ -409,7 +409,7 @@ When the daily check detects a new version, it builds/verifies a dev container, 
 
 **4. Monitor the Release Pipeline**
 - Merging the PR triggers the `Publish to Docker Hub` release pipeline automatically.
-- GHA builds the release image, verifies it with 3 smoke tests, publishes it, and automatically tags the git commit with the release version tag.
+- GHA builds the release image, verifies it with 4 smoke tests, publishes it, and automatically tags the git commit with the release version tag.
 - Monitor this at: **GitHub → Actions → Publish to Docker Hub**.
 
 **5. Pull Git Tag**
@@ -457,7 +457,7 @@ task release                                      # Tags git locally and pushes,
 
 ### Trigger the version check manually
 
-Useful when you want to check for a new NordVPN release without waiting for Monday.
+Useful when you want to check for a new NordVPN release without waiting for the next daily run.
 
 **Option 1 — Local:**
 ```bash

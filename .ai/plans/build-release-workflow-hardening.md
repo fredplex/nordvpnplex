@@ -10,7 +10,7 @@
 |-------|-------------|---------------|--------|
 | A | Fix `CLAUDE.md` conflict markers + add guard to `bump.sh` | `fix:` | Done |
 | B | Fix stale header comment in `check-nordvpn-release.yml` | `docs:` | Done |
-| C | Correct cadence/smoke-test-count in `docs/build-and-publish.md` | `docs:` | Pending |
+| C | Correct cadence/smoke-test-count in `docs/build-and-publish.md` | `docs:` | Done |
 | D | Add Check Base Image workflow docs to `docs/user-guide.md` | `docs:` | Pending |
 | E | Auto-append Changelog entries in `bump.sh` + backfill `README.md` | `feat:` | Pending |
 | F | Add `verify-live` checklist item to draft PR bodies | `feat:` | Pending |
