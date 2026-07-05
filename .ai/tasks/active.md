@@ -7,7 +7,15 @@ Current work in progress.
 
 ## Current Status
 
-**None active — awaiting direction.** Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
+**Active**: Build & release workflow hardening — see `.ai/plans/build-release-workflow-hardening.md`. Autonomous execution in progress on branch `claude/nordvpnplex-onboarding-a1n6pb`.
+
+- [x] Phase A — Fix `CLAUDE.md` conflict markers + add guard to `bump.sh`
+- [ ] Phase B — Fix stale header comment in `check-nordvpn-release.yml`
+- [ ] Phase C — Correct cadence/smoke-test-count in `docs/build-and-publish.md`
+- [ ] Phase D — Add Check Base Image workflow docs to `docs/user-guide.md`
+- [ ] Phase E — Auto-append Changelog entries in `bump.sh` + backfill `README.md`
+- [ ] Phase F — Add `verify-live` checklist item to draft PR bodies
+- [ ] Phase G — Guard against concurrent bump-PR races
 
 ### Template re-prime v3.7.7 + testing.md merge (Complete)
 

@@ -2,7 +2,21 @@
 
 **Date**: 2026-07-05
 **Branch**: `claude/nordvpnplex-onboarding-a1n6pb` (owner confirmed — stay on this branch, no rename)
-**Status**: Owner decisions resolved (2026-07-05) — all phases (A–G) approved in scope. Awaiting final go-ahead to begin implementation.
+**Status**: In progress — Autonomous execution per `.ai/workflows/implementation.md`. Pre-run commit: `abaef726ce2f67b91f071d2a5d0b82370027b7cd`.
+
+## Execution Progress
+
+| Phase | Description | Commit prefix | Status |
+|-------|-------------|---------------|--------|
+| A | Fix `CLAUDE.md` conflict markers + add guard to `bump.sh` | `fix:` | Done |
+| B | Fix stale header comment in `check-nordvpn-release.yml` | `docs:` | Pending |
+| C | Correct cadence/smoke-test-count in `docs/build-and-publish.md` | `docs:` | Pending |
+| D | Add Check Base Image workflow docs to `docs/user-guide.md` | `docs:` | Pending |
+| E | Auto-append Changelog entries in `bump.sh` + backfill `README.md` | `feat:` | Pending |
+| F | Add `verify-live` checklist item to draft PR bodies | `feat:` | Pending |
+| G | Guard against concurrent bump-PR races | `feat:` | Pending |
+
+> **Environment note**: this sandbox has no `task` CLI and no live Docker build available, so the `definition-of-done.md` gates (`task docker-build`, `task verify`) cannot be executed literally here. No phase in this plan touches `Dockerfile` or `rootfs/`, so the production build/runtime gates are not implicated. Substitute validation used per phase: `bash -n` for shell scripts, `python3 -c "import yaml; yaml.safe_load(...)"` for GitHub Actions YAML, and manual proofreading/`grep` cross-checks for doc accuracy. The owner should still run `task docker-build && task verify` locally before merging as a final confirmation.
 
 ---
 

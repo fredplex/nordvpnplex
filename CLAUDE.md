@@ -18,10 +18,7 @@ task verify    # Runtime gate
 
 Follow the mandatory reading order and report format in `.ai/workflows/onboarding.md`.
 
-<<<<<<< HEAD
 First write action: create a task branch — `type/name` — before any file edits.
-=======
-Full onboarding workflow: `.ai/workflows/onboarding.md`
 
 ## Constraints
 
@@ -35,4 +32,3 @@ Full onboarding workflow: `.ai/workflows/onboarding.md`
 ## Current Pinned Version
 
 NordVPN: 5.2.0  |  Image tag: fredplex/nordvpn:5.5.3  |  Built: 2026-07-02
->>>>>>> 5c8b10361c545a5529801699319d1174ab931b3f

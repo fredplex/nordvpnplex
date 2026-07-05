@@ -22,6 +22,15 @@ REPO_URL="https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/"
   echo "ERROR: IMAGE_VERSION '${IMAGE_VERSION}' must be x.y.z format" >&2; exit 1
 }
 
+# Refuse to touch a file with leftover unresolved merge conflict markers —
+# a blind sed on a broken file silently perpetuates the break instead of failing loudly.
+for f in Dockerfile README.md CLAUDE.md; do
+  if grep -qE '^(<{7}|={7}|>{7})' "$f"; then
+    echo "ERROR: ${f} has unresolved merge conflict markers — refusing to edit." >&2
+    exit 1
+  fi
+done
+
 # Verify the package exists before editing anything
 echo "Verifying nordvpn_${NORDVPN_VERSION}_amd64.deb in the official repo..."
 if ! curl -sf "${REPO_URL}" | grep -qF "nordvpn_${NORDVPN_VERSION}_amd64.deb"; then
