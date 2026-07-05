@@ -7,15 +7,19 @@ Current work in progress.
 
 ## Current Status
 
-**Active**: Build & release workflow hardening — see `.ai/plans/build-release-workflow-hardening.md`. Autonomous execution in progress on branch `claude/nordvpnplex-onboarding-a1n6pb`.
+**None active — awaiting direction.** Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
 
-- [x] Phase A — Fix `CLAUDE.md` conflict markers + add guard to `bump.sh`
-- [x] Phase B — Fix stale header comment in `check-nordvpn-release.yml`
-- [x] Phase C — Correct cadence/smoke-test-count in `docs/build-and-publish.md`
-- [x] Phase D — Add Check Base Image workflow docs to `docs/user-guide.md`
-- [x] Phase E — Auto-append Changelog entries in `bump.sh` + backfill `README.md`
-- [x] Phase F — Add `verify-live` checklist item to draft PR bodies
-- [x] Phase G — Guard against concurrent bump-PR races
+### Build & release workflow hardening (Complete)
+
+- [x] Phase A — Fix `CLAUDE.md` conflict markers + add guard to `bump.sh` (`91363e0`)
+- [x] Phase B — Fix stale header comment in `check-nordvpn-release.yml` (`eb1f84f`)
+- [x] Phase C — Correct cadence/smoke-test-count in `docs/build-and-publish.md` (`9e77dd4`)
+- [x] Phase D — Add Check Base Image workflow docs to `docs/user-guide.md` (`bf67f7c`)
+- [x] Phase E — Auto-append Changelog entries in `bump.sh` + backfill `README.md` (`49b9f8d`)
+- [x] Phase F — Add `verify-live` checklist item to draft PR bodies (`19ec758`)
+- [x] Phase G — Guard against concurrent bump-PR races (`0afa08b`)
+
+Pushed to `origin/claude/nordvpnplex-onboarding-a1n6pb`. See `.ai/plans/build-release-workflow-hardening.md` for full detail. Not yet merged to `main`.
 
 ### Template re-prime v3.7.7 + testing.md merge (Complete)
 
