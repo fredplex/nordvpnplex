@@ -14,7 +14,7 @@
 | D | Add Check Base Image workflow docs to `docs/user-guide.md` | `docs:` | Done |
 | E | Auto-append Changelog entries in `bump.sh` + backfill `README.md` | `feat:` | Done |
 | F | Add `verify-live` checklist item to draft PR bodies | `feat:` | Done |
-| G | Guard against concurrent bump-PR races | `feat:` | Pending |
+| G | Guard against concurrent bump-PR races | `feat:` | Done |
 
 > **Environment note**: this sandbox has no `task` CLI and no live Docker build available, so the `definition-of-done.md` gates (`task docker-build`, `task verify`) cannot be executed literally here. No phase in this plan touches `Dockerfile` or `rootfs/`, so the production build/runtime gates are not implicated. Substitute validation used per phase: `bash -n` for shell scripts, `python3 -c "import yaml; yaml.safe_load(...)"` for GitHub Actions YAML, and manual proofreading/`grep` cross-checks for doc accuracy. The owner should still run `task docker-build && task verify` locally before merging as a final confirmation.
 

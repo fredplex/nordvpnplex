@@ -15,7 +15,7 @@ Current work in progress.
 - [x] Phase D — Add Check Base Image workflow docs to `docs/user-guide.md`
 - [x] Phase E — Auto-append Changelog entries in `bump.sh` + backfill `README.md`
 - [x] Phase F — Add `verify-live` checklist item to draft PR bodies
-- [ ] Phase G — Guard against concurrent bump-PR races
+- [x] Phase G — Guard against concurrent bump-PR races
 
 ### Template re-prime v3.7.7 + testing.md merge (Complete)
 

@@ -74,18 +74,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check for an already-open bump PR
+        id: guard
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Both this workflow and check-nordvpn-release.yml bump Dockerfile/README.md/CLAUDE.md
+          # via scripts/bump.sh. If one's PR is still open, don't open a second — it would
+          # conflict with or silently clobber the first PR's version fields.
+          EXISTING=$(gh pr list --state open --json number,headRefName,url --jq '[.[] | select(.headRefName | startswith("auto/"))]')
+          if [[ "$(echo "${EXISTING}" | jq 'length')" -gt 0 ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "An auto/* bump PR is already open — skipping this run to avoid a conflicting second bump:"
+            echo "${EXISTING}" | jq -r '.[] | "  - #\(.number) (\(.headRefName)): \(.url)"'
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Apply bump (version increment)
+        if: steps.guard.outputs.skip != 'true'
         run: |
           bash scripts/bump.sh \
             "${{ needs.check-base.outputs.current_nordvpn_version }}" \
             "${{ needs.check-base.outputs.suggested_image_version }}"
 
       - name: Update base image digest in Dockerfile
+        if: steps.guard.outputs.skip != 'true'
         run: |
           LATEST="${{ needs.check-base.outputs.latest_digest }}"
           sed -i "s|@sha256:[a-f0-9]*|@${LATEST}|" Dockerfile
 
       - name: Open draft PR
+        if: steps.guard.outputs.skip != 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
