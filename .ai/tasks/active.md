@@ -19,7 +19,7 @@ Current work in progress.
 - [x] Phase F — Add `verify-live` checklist item to draft PR bodies (`19ec758`)
 - [x] Phase G — Guard against concurrent bump-PR races (`0afa08b`)
 
-Pushed to `origin/claude/nordvpnplex-onboarding-a1n6pb`. See `.ai/plans/build-release-workflow-hardening.md` for full detail. Not yet merged to `main`.
+All 7 phases complete. See `.ai/plans/archive/build-release-workflow-hardening.md` for full detail.
 
 ### Template re-prime v3.7.7 + testing.md merge (Complete)
 
@@ -117,6 +117,6 @@ Pushed to `origin/claude/nordvpnplex-onboarding-a1n6pb`. See `.ai/plans/build-re
 
 ## Recently Completed
 
+- **Build & release workflow hardening** (2026-07-05) — fixed `CLAUDE.md` conflict-marker corruption + guarded `bump.sh` against it; corrected doc-drift (cadence, smoke-test count); added Check Base Image workflow docs; auto-appending Changelog; `verify-live` checklist visibility; concurrent-bump-PR race guard (`91363e0`–`0afa08b`)
 - **Template re-prime v3.7.7 + testing.md merge** (2026-07-02) — GUIDE.md (3.5.0→3.5.3) + definition-of-done.md (3.0.2→3.0.3) accepted template-pure; docs/testing.md (3.0.4→3.0.5) merged with restored NordVPN-specific content (`fa82c87`, `20ac94a`)
 - **prime-ai-docs v3.5.0 re-prime** (2026-07-01) — GUIDE.md (3.4.0→3.5.0), implementation.md (3.0.4→3.1.0), session-close.md (3.0.6→3.0.7) (`534c709`)
-- **Fix check-base-image verify + docs** (2026-07-01) — fixed `publish-dev.yml` verify step (image never loaded into local daemon), added base image rationale to architecture.md and build-and-publish.md, cross-referenced user-guide.md.

@@ -196,6 +196,13 @@ The monthly `check-base-image.yml` workflow bridges this gap: it detects when li
 **Rationale**: Makes BuildKit explicit and unconditional for all local builds. CI already uses `docker/setup-buildx-action`.
 **Consequences**: Any local `task docker-build` will always use BuildKit.
 
+### bump.sh hardening — conflict-marker guard, auto-Changelog, and concurrent-PR guard
+
+**Context**: `CLAUDE.md` carried unresolved git conflict markers on `main` for over a week after a bad merge — `bump.sh`'s blind `sed` kept silently rewriting a version line sandwiched inside the broken block on every subsequent release instead of failing loudly. Separately, `README.md`'s `## Changelog` had gone stale because nothing wrote to it automatically, and the two automated bump workflows (`check-nordvpn-release.yml` daily, `check-base-image.yml` monthly) could race on the same `Dockerfile`/`README.md`/`CLAUDE.md` lines if both opened a PR in the same window.
+**Decision**: `scripts/bump.sh` now (1) refuses to edit `Dockerfile`/`README.md`/`CLAUDE.md` if any still contain conflict markers, and (2) auto-appends a one-line Changelog placeholder (with a `<!-- TODO -->` marker) to `README.md` on every run. Both bump workflows now run a `gh pr list` guard for any open `auto/*`-branch PR before applying a bump or opening a new one, skipping (with a logged reason) if one already exists.
+**Rationale**: A blind `sed` on a broken file silently perpetuates corruption instead of surfacing it; a Changelog that nothing writes to will always eventually go stale; two independent automations writing to the same files need a race guard once either can fire in overlapping windows.
+**Consequences**: A `task bump` run will now hard-fail with a clear error if it encounters leftover conflict markers, rather than editing around them. Every bump PR includes a Changelog TODO line that must be replaced with real detail before merging. If a bump PR sits open for a long time, the *other* automation logs a skip on its own runs until that PR is merged or closed.
+
 ---
 
 ## Caching Strategy

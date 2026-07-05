@@ -76,6 +76,28 @@ docker build --no-cache --platform linux/amd64 . -f Dockerfile -t "fredplex/nord
 
 ---
 
+## Key Decisions (2026-07-05 Build & Release Workflow Hardening)
+
+### Decision: bump.sh refuses to edit files with unresolved conflict markers
+
+**Choice**: `scripts/bump.sh` greps `Dockerfile`, `README.md`, and `CLAUDE.md` for `^(<{7}|={7}|>{7})` before touching any of them, and exits with an error if found.
+**Rationale**: `CLAUDE.md` carried unresolved git conflict markers on `main` for over a week after a bad merge (`5c8b103`, 2026-07-01) — `bump.sh`'s blind `sed` kept silently rewriting a version line sandwiched inside the broken block on every subsequent release instead of failing loudly.
+**Gotcha**: If a future `task bump` run errors with "has unresolved merge conflict markers", the file genuinely has a broken merge — resolve it manually before retrying, do not bypass the guard.
+
+### Decision: bump.sh auto-appends a Changelog placeholder on every run
+
+**Choice**: `bump.sh` captures the outgoing `NORDVPN_VERSION`/`IMAGE_VERSION` before editing, derives a one-line summary (NordVPN bump vs. base-image-only refresh), and appends it under `README.md`'s `## Changelog` (newest first) with a `<!-- TODO: expand with real details before merging -->` marker.
+**Rationale**: The Changelog constraint in `CLAUDE.md` had gone stale for over a week because nothing wrote to it automatically — both human and automated bump paths skipped it every time.
+**Gotcha**: The appended line is a placeholder, not a finished entry — replace the TODO text with real detail before merging each bump PR, or literal TODO lines will accumulate in `README.md`.
+
+### Decision: both automated bump workflows guard against concurrent `auto/*` PRs
+
+**Choice**: `check-nordvpn-release.yml` (daily) and `check-base-image.yml` (monthly) each run a `gh pr list --state open` check for any `auto/*`-branch PR before applying a bump or opening a new one; if one is already open, the run logs it (PR number + link) and skips for that run.
+**Rationale**: Both workflows call `scripts/bump.sh` against the same `Dockerfile`/`README.md`/`CLAUDE.md` lines. If both land in the same window, whichever merges second would conflict with or silently clobber the first PR's version fields.
+**Gotcha**: If a bump PR sits open and unmerged for a long time, the *other* automation will keep skipping its own runs (correctly logged, not silently) until that PR is merged or closed.
+
+---
+
 ## Key Decisions (2026-06-26 Dockerfile optimization)
 
 ### Decision: COPY --chmod=0755 (permission model)

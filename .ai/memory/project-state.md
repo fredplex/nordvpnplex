@@ -3,7 +3,7 @@
 
 Current product posture and approved scope for **nordvpn**.
 
-**Last Updated**: 2026-06-27
+**Last Updated**: 2026-07-05
 
 ---
 

@@ -1,17 +1,17 @@
 <!-- prime: version=3.0.2 template=.ai/current.md date=2026-07-01 -->
 # Current Project State
 
-## Template re-prime v3.7.7 + testing.md merge (2026-07-02)
+## Build & Release Workflow Hardening (2026-07-05)
 
-**Status**: AI workspace re-primed to templates v3.7.7. `GUIDE.md` and `definition-of-done.md` accepted as template-pure (no customization lost). `docs/testing.md` merged — real NordVPN testing content (two-tier verify/verify-live model, 4-check table, HEALTHCHECK behavior, troubleshooting) restored under the new template's section structure; generic JS-framework sections removed. (`fa82c87`, `20ac94a`)
+**Status**: Build/release workflow doc-drift fixes and reliability hardening complete — fixed the `CLAUDE.md` merge-conflict corruption (and guarded `bump.sh` against it recurring), corrected stale cadence/smoke-test-count claims in `docs/build-and-publish.md`, added the missing Check Base Image workflow documentation to `docs/user-guide.md`, made `bump.sh` auto-append a Changelog entry on every run, raised the visibility of the `verify-live` gate on draft release PRs, and added a guard against the two automated bump workflows racing on the same files.
 
 ### Recently Completed
 
 > Keep the last 3 entries. Prune older items at session close — the full history lives in `SESSION_NOTES.md`.
 
+- Build & release workflow hardening — 2026-07-05 (91363e0–9de8dd3)
 - Template re-prime v3.7.7 + testing.md merge — 2026-07-02 (fa82c87, 20ac94a)
 - prime-ai-docs v3.5.0 re-prime — 2026-07-01 (534c709)
-- Fix check-base-image verify + docs — 2026-07-01 (2febec9, 6d1f7f5, 63549bd, 12ad5e6)
 
 ### Next step
 
@@ -21,36 +21,35 @@ None queued — awaiting direction. Watching for the next NordVPN release (daily
 
 ---
 
-## Session Handoff — 2026-07-02 (Template re-prime v3.7.7 + testing.md merge)
+## Session Handoff — 2026-07-05 (Build & Release Workflow Hardening)
 
 ### What was just completed
 
 | Commit | Change |
 |--------|--------|
-| `fa82c87` | Re-prime backup merge: `GUIDE.md` (3.5.0→3.5.3) + `definition-of-done.md` (3.0.2→3.0.3) accepted template-pure; `docs/testing.md` (3.0.4→3.0.5) merged — real project content restored under new template structure |
-| `20ac94a` | Tracked `.ai-prime-manifest.json` update from the v3.7.7 run (left uncommitted after the prime commit) |
-| this commit | Session close — current.md, active.md, SESSION_NOTES.md updated |
+| `91363e0` | Phase A — Resolved `CLAUDE.md` conflict markers; added a conflict-marker guard to `bump.sh` |
+| `eb1f84f` | Phase B — Fixed stale header comment in `check-nordvpn-release.yml` (weekly→daily, manual-tag→auto-trigger) |
+| `9e77dd4` | Phase C — Fixed cadence + smoke-test-count drift (weekly→daily, 3→4 checks) in `docs/build-and-publish.md` |
+| `bf67f7c` | Phase D — Added Check Base Image workflow table row + subsection to `docs/user-guide.md` |
+| `49b9f8d` | Phase E — `bump.sh` auto-appends a Changelog entry every run; backfilled 2 missing entries in `README.md` |
+| `19ec758` | Phase F — Converted both draft-PR "Before merging" sections to checklists, calling out `verify-live` explicitly |
+| `0afa08b` | Phase G — Guard step added to both bump workflows to skip if an `auto/*` PR is already open |
+| `f426c4c`, `9de8dd3` | Plan tracking updates (status transitions) |
 
 ### Stopping point
 
-- Working tree: clean of task work, commits `fa82c87` + `20ac94a`.
-- Validation: N/A — workspace-only change; no source, Dockerfile, or rootfs changes (consistent with prior re-prime sessions).
-- `.claude/settings.json` / `.claude/settings.local.json` intentionally left untracked this session — confirmed as personal machine config, not project config.
+- Working tree: clean, 9 commits (`91363e0` through `9de8dd3`).
+- Validation: `task` CLI is not installed in this session's sandbox, so `task docker-build`/`task verify` could not run literally — no phase touched `Dockerfile` or `rootfs/`, so the production build/runtime gates are not implicated either way. Substitute checks used: `bash -n scripts/bump.sh` (syntax), `python3 -c "import yaml; yaml.safe_load(...)"` against every touched workflow file (all valid), and repo-wide `grep` confirming zero remaining conflict markers and zero remaining stale "weekly / 3 smoke tests" strings. **Recommend the owner run `task docker-build && task verify` locally as an additional confirmation.**
 
 ### Decisions / reasoning
 
-- GUIDE.md guard fired again (3.5.0→3.5.3) — human ran the script directly (same pattern as the prior re-prime). Session picked up at GUIDE Step 5.
-- Backup at `.ai-prime-backup/2026-07-02-00-02-29/`. Classification: `GUIDE.md` + `definition-of-done.md` Template-pure — no customization lost; `definition-of-done.md`'s update also auto-fixed the previously-flagged npm→`task` command drift. `docs/testing.md` is Project-specific — the regenerated template had replaced all real content with generic JS-framework boilerplate (Unit/Integration/E2E, Mock Data); restored the two-tier verify/verify-live model, 4-check table, HEALTHCHECK behavior, and troubleshooting from the backup under the new template's headings, dropping the non-applicable generic sections.
-- `.ai-prime-manifest.json` staged and committed on explicit request, despite `GUIDE.md` Step 6 saying not to (it describes the file as gitignored — it is not, and has been tracked across multiple prior prime commits).
-- `.claude/settings.json` staging was blocked by the auto-mode self-modification classifier (would have written a Bash permission allowlist into the shared repo); left untracked pending a deliberate decision on gitignoring `.claude/`.
+- Executed via Autonomous mode per `.ai/workflows/implementation.md`: all 7 phases were plan-approved up front with 5 resolved owner decisions (approve the `CLAUDE.md` fix; auto-append the Changelog; checklist-only `verify-live` visibility bump, not branch-protection enforcement; all phases A–G in scope; stay on the session-designated branch rather than renaming).
+- Backfilled only 2 of the "3 unlogged releases" originally flagged in the plan — deliberately excluded the workspace-only template re-prime (v3.7.7) from README's user-facing Changelog since it had zero Dockerfile/rootfs/runtime impact; it's already correctly recorded in `SESSION_NOTES.md`. Flagged as a deviation from the plan's literal text, not a silent change.
+- Chose visibility-only enforcement for the `verify-live` gate (explicit PR checklist items) over investing in branch-protection/required-check enforcement, per explicit owner choice — the gate still cannot literally block a merge.
 
 ### Fragile areas
 
-- **Archetype sections still present in `definition-of-done.md`** (`hasArchetypeMarkers: true` confirmed in the v3.7.7 manifest) — Web UI/BFF, API/Backend, and CLI/Library/SDK sections are all still in the file, and none cleanly fits an infra/Docker-image project. Deferred across at least two re-prime sessions now; needs a human decision on which (if any) archetype to keep, or whether to write custom review-checklist content. `engineering-rules.md` likely carries the same three sections (not touched this run — unconfirmed).
-- **`.ai/GUIDE.md` Step 6 is inaccurate about `.ai-prime-manifest.json`**: it instructs agents not to stage the file, describing it as a "gitignored runtime artifact." It is not in `.gitignore` and is git-tracked. Either the guide text or the ignore behavior should be corrected — neither has happened yet.
-- **Base digest must be updated manually**: Dockerfile is pinned to `noble@sha256:53411508…`. A future base-refresh requires an explicit digest change — do not remove the pin.
-- **`# syntax` directive must NOT be added to Dockerfile**: Triggers a 401 from Docker Hub for the BuildKit frontend in this environment.
-- **Token for `task verify-live` stays outside the repo**: Never commit, print, or pass as CLI arg.
-- **`.ai/current.md` is hand-maintained**: `bump.sh` no longer touches it. After any release PR, update this file by hand. `CLAUDE.md` (including the Built date) is handled automatically by `task bump`.
-- **s6 init + capabilities**: Stateless `docker run` checks must use `--entrypoint /bin/bash` to bypass `00-firewall` when `NET_ADMIN` isn't granted.
-- **`AGENTS.md` still has unfilled template placeholders** (Architecture section, Key Boundaries lists, Current posture line) — pre-existing, not touched this session.
+- **`verify-live` gate on the recommended automated release path is still not hard-enforced** — it's now a visible, individually-checkable PR item, but GitHub can't block merge on an unchecked markdown checkbox without branch protection / required status checks, which was explicitly out of scope this pass.
+- **`bump.sh`'s Changelog auto-append writes a `<!-- TODO: expand with real details before merging -->` placeholder line** — depends on the human/agent replacing that text before merging each bump PR; if skipped repeatedly, literal TODO lines will accumulate in `README.md`.
+- **This session's validation ran without the `task` CLI or a live Docker daemon build** — every check was a substitute (syntax/YAML-parse/grep), not the actual `definition-of-done.md` gates. No source/Dockerfile change was made, so risk is low, but the owner should still run the real gates locally at some point.
+- Carried forward, not touched this session: archetype sections still present in `definition-of-done.md`/`engineering-rules.md` (needs an owner decision on which to keep); `.ai/GUIDE.md` Step 6's inaccurate claim that `.ai-prime-manifest.json` is gitignored; the base-image digest pin requires manual updates; the `# syntax` Dockerfile directive prohibition (401 from Docker Hub in this environment); `task verify-live` tokens must stay outside the repo; `.ai/current.md` remains hand-maintained (`bump.sh` doesn't touch it); s6 init capability quirk for stateless `docker run` checks; `AGENTS.md` still has unfilled template placeholders (Architecture, Key Boundaries, Current posture).

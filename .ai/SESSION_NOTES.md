@@ -6,6 +6,47 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-07-05 (Build & Release Workflow Hardening)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Reviewed `docs/user-guide.md` and `docs/build-and-publish.md` against actual workflow/script source; wrote `.ai/plans/build-release-workflow-hardening.md` with 7 findings and a 7-phase remediation plan | — |
+| 2 | Owner resolved all 5 open plan decisions (approve conflict fix; auto-append Changelog; checklist-only `verify-live` gate; all phases in scope; stay on session branch) | — |
+| 3 | Phase A — Resolved `CLAUDE.md` conflict markers; added conflict-marker guard to `bump.sh` | `91363e0` |
+| 4 | Phase B — Fixed stale header comment in `check-nordvpn-release.yml` | `eb1f84f` |
+| 5 | Phase C — Fixed cadence + smoke-test-count drift in `docs/build-and-publish.md` | `9e77dd4` |
+| 6 | Phase D — Added Check Base Image workflow docs to `docs/user-guide.md` | `bf67f7c` |
+| 7 | Phase E — `bump.sh` auto-appends Changelog entries; backfilled `README.md` | `49b9f8d` |
+| 8 | Phase F — `verify-live` checklist item added to both draft PR templates | `19ec758` |
+| 9 | Phase G — Guard against concurrent `auto/*` bump-PR races in both workflows | `0afa08b` |
+| 10 | Session close — current.md, active.md, SESSION_NOTES.md updated | this commit |
+
+### Key decisions
+
+- Executed via **Autonomous mode** per `.ai/workflows/implementation.md`: all 7 phases implemented and committed in sequence, stopping only before the final push for explicit owner approval (as required), and again before this session-close's integration step.
+- **`CLAUDE.md` conflict-marker bug (Finding 1) was the highest-priority fix**: the file had carried literal `<<<<<<<`/`=======`/`>>>>>>>` markers since merge `5c8b103` (2026-07-01), and `bump.sh`'s blind `sed` had been silently rewriting a version line sandwiched inside the broken block on every subsequent release (including today's earlier NordVPN 5.2.0 bump). Resolved by keeping both sides' content and adding a guard to `bump.sh` that now refuses to edit `Dockerfile`/`README.md`/`CLAUDE.md` if any still contain conflict markers.
+- **Doc drift corrections were source-verified, not just cross-checked between docs**: confirmed via the actual `.yml` cron lines and `verify.sh`/`Taskfile.yml` that `check-nordvpn-release.yml` runs daily (not weekly, as both the doc and the workflow's own header comment claimed) and that `verify.sh` runs 4 checks (not 3, as several sections of `docs/build-and-publish.md` still said after the 4th nordvpnd-socket check was added later).
+- **Changelog backfill deviated from the plan's literal text** (flagged, not silent): backfilled only the 2 entries that changed the shipped image (base image → 5.5.2; NordVPN 5.2.0 / image 5.5.3), deliberately excluding the workspace-only "template re-prime v3.7.7" event, which had zero Dockerfile/rootfs/runtime impact and is already correctly recorded in this file's own history.
+- **`verify-live` gate strengthening was scoped to visibility only**, per explicit owner choice — converted both draft-PR "Before merging" sections into individually-checkable `- [ ]` items rather than pursuing branch-protection/required-check enforcement, which remains a known, explicitly out-of-scope limitation.
+- **Validation ran without the `task` CLI or a live Docker daemon build** — this sandbox has neither installed. Substituted `bash -n` (shell syntax), `python3 -c "import yaml; yaml.safe_load(...)"` (workflow YAML validity), and repo-wide `grep` (conflict markers, stale doc strings) for every phase. No phase touched `Dockerfile` or `rootfs/`, so the actual `definition-of-done.md` gates are not implicated by this session's changes, but the owner should still run `task docker-build && task verify` locally at some point.
+- A stop-hook flagged all 8 phase/tracking commits as likely to show "Unverified" on GitHub. Investigated and found the flagged remedy (fix `git config user.email`) didn't apply — author/committer were already correctly `Claude <noreply@anthropic.com>`. The actual cause is environment-level: `commit.gpgsign=true` / `gpg.format=ssh` is configured, but `/home/claude/.ssh/commit_signing_key.pub` is an empty file and `ssh-keygen` isn't installed, so no signature can be produced. Did not run `git config` (prohibited) or bypass signing (prohibited without explicit ask) to work around it — surfaced the finding to the owner, who approved pushing as-is with commits Unverified.
+
+### Stopping point
+
+- Working tree: clean, 9 commits (`91363e0` through `9de8dd3`) plus this close commit.
+- Validation: see "Key decisions" above — substitute checks only (no `task` CLI in this sandbox); all passed cleanly with no warnings.
+
+### Fragile areas
+
+- **`verify-live` gate on the recommended automated release path is still not hard-enforced** — now a visible checklist item on both draft PR templates, but GitHub cannot block a merge on an unchecked markdown checkbox without branch protection / required status checks, which is explicitly out of scope for this pass.
+- **`bump.sh`'s new Changelog auto-append writes a `<!-- TODO: expand with real details before merging -->` placeholder** — relies on a human/agent replacing that text before each bump PR is merged; if that's skipped repeatedly, literal TODO lines will accumulate in `README.md`.
+- **This environment's commit signing is broken** (empty SSH signing key, missing `ssh-keygen`) — every commit made this session, and likely every commit made by an agent in this environment until it's fixed, will show as Unverified on GitHub. This is an environment/infrastructure issue, not a per-repo one.
+- Carried forward, unchanged this session: archetype sections still present in `definition-of-done.md`/`engineering-rules.md`; `.ai/GUIDE.md` Step 6's inaccurate claim about `.ai-prime-manifest.json` being gitignored; the base-image digest pin requires manual updates on refresh; the `# syntax` Dockerfile directive must not be added (401 from Docker Hub in this environment); `task verify-live` tokens must stay outside the repo; `.ai/current.md` remains hand-maintained; s6 init capability quirk for stateless `docker run` checks; `AGENTS.md` still has unfilled template placeholders (Architecture, Key Boundaries, Current posture).
+
+---
+
 ## Session Close — 2026-07-02 (Template re-prime v3.7.7 + testing.md merge)
 
 ### Completed this session
