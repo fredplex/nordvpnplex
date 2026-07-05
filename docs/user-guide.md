@@ -621,11 +621,11 @@ correct version, or re-run the correct tag's workflow via a fresh tag push.
 
 ### Draft PR `IMAGE_VERSION` is wrong
 
-The weekly action suggests a patch bump (`5.5.0 → 5.5.1`). If the release warrants a minor
+The daily action suggests a patch bump (`5.5.0 → 5.5.1`). If the release warrants a minor
 or major version bump, edit `Dockerfile` line 7 (`ARG IMAGE_VERSION`) directly in the PR
 before merging.
 
-### Weekly action opened a PR for an already-pinned version
+### Daily action opened a PR for an already-pinned version
 
 This can happen if the repo's default branch is ahead of the PR branch. Close the PR, pull
 the latest `main`, and re-run the workflow manually via the GitHub Actions UI.

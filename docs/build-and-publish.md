@@ -572,10 +572,10 @@ If a tag push was made in error, log in to Docker Hub and manually retag `:lates
 correct version, or re-run the correct tag's publish workflow via a fresh tag push.
 
 ### Draft PR IMAGE_VERSION is wrong
-The weekly action suggests a patch bump. If the release warrants a minor or major bump,
+The daily action suggests a patch bump. If the release warrants a minor or major bump,
 edit `Dockerfile` line 7 (`ARG IMAGE_VERSION`) in the PR before merging. The rest of the
 files will be updated on merge by the PR's existing commits.
 
-### Weekly action opened a PR for an already-pinned version
+### Daily action opened a PR for an already-pinned version
 This can happen if the repo's default branch is ahead of the PR branch. Close the PR,
 pull the latest `main`, and re-run the workflow manually via the GitHub Actions UI.

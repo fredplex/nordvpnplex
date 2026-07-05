@@ -65,7 +65,7 @@ task verify
 
 ## Check for New NordVPN Version
 
-Run this manually to check for updates (GitHub also runs this weekly on Mondays).
+Run this manually to check for updates (GitHub also runs this daily).
 
 ```powershell
 task check-version
