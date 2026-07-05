@@ -12,7 +12,7 @@ Current work in progress.
 - [x] Phase A — Fix `CLAUDE.md` conflict markers + add guard to `bump.sh`
 - [x] Phase B — Fix stale header comment in `check-nordvpn-release.yml`
 - [x] Phase C — Correct cadence/smoke-test-count in `docs/build-and-publish.md`
-- [ ] Phase D — Add Check Base Image workflow docs to `docs/user-guide.md`
+- [x] Phase D — Add Check Base Image workflow docs to `docs/user-guide.md`
 - [ ] Phase E — Auto-append Changelog entries in `bump.sh` + backfill `README.md`
 - [ ] Phase F — Add `verify-live` checklist item to draft PR bodies
 - [ ] Phase G — Guard against concurrent bump-PR races

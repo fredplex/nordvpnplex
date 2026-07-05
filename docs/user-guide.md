@@ -273,6 +273,7 @@ GitHub Actions publish log.
 | Build Validation | Pull request to `main` | No (open a draft PR) | No |
 | Publish to Docker Hub | Push/merge to `main` (Dockerfile bump), tag push, or manual | Yes — Actions UI & tag | Yes (production) |
 | Publish Dev to Docker Hub | Manual or Reusable Workflow call | Yes — Run workflow | Yes (:dev & :dev-<sha>) |
+| Check Base Image | Monthly, 1st at 09:00 UTC | Yes — Actions UI | Yes (`:dev-<version>` via reusable dev workflow) |
 
 ---
 
@@ -363,6 +364,33 @@ What it does:
 
 **Secrets needed:** `DOCKER_USERNAME` and `DOCKER_TOKEN`.
 For full details, see [§9 Dev builds for testing](#9-dev-builds-for-testing).
+
+---
+
+### Check Base Image
+
+**File:** `.github/workflows/check-base-image.yml`
+**Trigger:** Monthly, 1st of each month at 09:00 UTC (cron), or manually via the GitHub Actions UI
+
+What it does:
+1. Resolves the latest digest for `ghcr.io/linuxserver/baseimage-ubuntu:noble` without pulling the image.
+2. Compares it against the digest pinned in the `Dockerfile`'s `FROM` line.
+3. If a newer digest is available:
+   - Triggers the reusable `publish-dev` workflow to build and verify a dev image against the new base.
+   - Runs `scripts/bump.sh` (patch increment) and bumps the digest pin in the `Dockerfile`.
+   - Opens a **draft PR** on branch `auto/base-image-<suggested_image_version>`.
+4. If already up to date: exits cleanly with no PR.
+
+Bridges the gap between the digest pin (which keeps builds deterministic) and linuxserver.io's periodic base-image rebuilds (which carry Ubuntu security patches and s6-overlay updates that `apt-get upgrade` cannot reach — those are baked into the base layers). See `docs/architecture.md` > "Why the base image changes" for the full rationale.
+
+**To trigger manually:**
+1. GitHub → **Actions** → **Check Base Image**
+2. Click **Run workflow** → select branch `main` → **Run workflow**
+3. If a new digest is found, a dev build is created and a draft PR appears automatically.
+
+**Secrets needed:** None (`GITHUB_TOKEN` is automatic for the digest check; `DOCKER_USERNAME`/`DOCKER_TOKEN` are used by the reusable dev-build stage it triggers).
+
+For the full owner-facing walkthrough, see [§5 Rebuilding / Refreshing the Base Image](#rebuilding--refreshing-the-base-image).
 
 ---
 
