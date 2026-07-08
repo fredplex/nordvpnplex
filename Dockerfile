@@ -1,8 +1,8 @@
-FROM ghcr.io/linuxserver/baseimage-ubuntu:noble@sha256:7fca79b08f1669556e76ec40b164e74e77484fae8d67a9bcd06ebeddc35ca5af
+FROM ghcr.io/linuxserver/baseimage-ubuntu:noble@sha256:99ecdba8aefe67d2961c5ffe703585587f523da66e93433520f8883c4a18b6fd
 LABEL maintainer="fredplex@gmail.com"
 
 ARG NORDVPN_VERSION='5.2.0'
-ARG IMAGE_VERSION='5.5.3'
+ARG IMAGE_VERSION='5.5.4'
 ARG NORDVPN_RELEASE='1.0.0'
 
 # OCI standard image labels — externally queryable without running the container:
