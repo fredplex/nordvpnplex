@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/command/with-contenv bash
 
 echo "--------------------------"
 echo "NordVPN Docker Client v.${IMAGE_VERSION}"
