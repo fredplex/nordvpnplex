@@ -603,6 +603,7 @@ During development, pre-release, and automated validation, versioning rules diff
 
 | Environment | Tag / Version Format | s6 Init `IMAGE_VERSION` | Git Tagging | Target |
 |-------------|----------------------|--------------------------|-------------|--------|
+| **Local Dev** | `:<git-sha>` (e.g., `326f7ed`) | `<image-ver>-dev+<git-sha>` (e.g., `5.5.4-dev+326f7ed`) | None | Local Docker daemon only |
 | **Development** | `:dev`, `:dev-<sha>`, `:dev-<nord-ver>`, `:<image-ver>-dev` | `<image-ver>-dev` (e.g., `5.5.4-dev`) | None | Docker Hub (testing/validation) |
 | **Production** | `:latest`, `:<image-ver>` (e.g., `5.5.4`) | `<image-ver>` (e.g., `5.5.4`) | Created (`5.5.4`) | Docker Hub (production release) |
 
@@ -635,3 +636,16 @@ graph TD
    - Runs validation smoke tests locally on the runner.
    - Promotes and tags as `:latest` and `:<image_version>` (e.g. `5.5.4`).
    - Pushes the Git tag back to GitHub, completing the release.
+
+### 9.4 Version Logging at Startup
+
+During container initialization, version information is written to two main areas in the container log stream:
+
+1. **LSIO Branding Block (`/build_version`)**:
+   - Generated dynamically inside the `Dockerfile` at build time.
+   - Contains both the custom wrapper version (`nordvpnplex version`) and the pinned base image digest (`base image digest`).
+   - Appears underneath the UID/GID settings inside the standard `Based on images from linuxserver.io` ASCII art block.
+2. **Custom Init Banner (`00-version`)**:
+   - Run inside `/etc/cont-init.d/00-version` using the `/command/with-contenv` execution wrapper.
+   - Prints the active wrapper version string (e.g., `NordVPN Docker Client v.5.5.4-dev+326f7ed`).
+   - Appears immediately prior to firewall initialization.

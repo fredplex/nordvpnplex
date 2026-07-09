@@ -9,6 +9,13 @@ Current work in progress.
 
 **None active — awaiting direction.** Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
 
+### Container Startup Version Logs (Complete)
+
+- [x] Phase A — Fix Custom Log Version (`1aca39d`)
+- [x] Phase B — Print Base Image Version in Branding Block (`e919b52`)
+
+All 2 phases complete. See `.ai/plans/archive/container-startup-version-logs.md` for full detail.
+
 ### Build & Release Pipeline Review & Optimization (Complete)
 
 - [x] Phase A — Fix `task bump` doc-drift and stale examples (`4620248`)
@@ -21,7 +28,7 @@ Current work in progress.
 - [x] Phase H — Minor automated release checks and concurrency cleanup (`956bac2`)
 - [x] Phase I — Configured PR validation smoke-testing (`0092d81`)
 - [x] Phase J — Document version design and release flow (`89cd08b`)
-- [x] Phase K — Session handoff (this commit)
+- [x] Phase K — Session handoff (`fddec8e`)
 
 All 11 phases complete. See `.ai/plans/archive/build-release-pipeline-review.md` for full detail.
 
@@ -36,11 +43,6 @@ All 11 phases complete. See `.ai/plans/archive/build-release-pipeline-review.md`
 - [x] Phase G — Guard against concurrent bump-PR races (`0afa08b`)
 
 All 7 phases complete. See `.ai/plans/archive/build-release-workflow-hardening.md` for full detail.
-
-### Template re-prime v3.7.7 + testing.md merge (Complete)
-
-- [x] Backup merge: `GUIDE.md` (3.5.0→3.5.3) + `definition-of-done.md` (3.0.2→3.0.3) accepted template-pure; `docs/testing.md` (3.0.4→3.0.5) merged with restored project content (`fa82c87`)
-- [x] Tracked `.ai-prime-manifest.json` update from the v3.7.7 run (`20ac94a`)
 
 **Watching**: next NordVPN release — the daily checker auto-builds/tests a dev image and opens a draft PR.
 

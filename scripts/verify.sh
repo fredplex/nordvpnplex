@@ -47,10 +47,10 @@ echo "--- Stateless checks ---"
 ACTUAL_VERSION="$(docker inspect "${IMAGE_REF}" \
   --format '{{range .Config.Env}}{{println .}}{{end}}' \
   | grep '^IMAGE_VERSION=' | cut -d= -f2 || echo 'ERROR')"
-if [[ "${ACTUAL_VERSION}" == "${EXPECTED_IMAGE_VERSION}" ]]; then
-  pass "IMAGE_VERSION env = ${EXPECTED_IMAGE_VERSION}"
+if [[ "${ACTUAL_VERSION}" == *"${EXPECTED_IMAGE_VERSION}"* ]]; then
+  pass "IMAGE_VERSION env contains ${EXPECTED_IMAGE_VERSION}"
 else
-  fail "IMAGE_VERSION env: expected '${EXPECTED_IMAGE_VERSION}', got '${ACTUAL_VERSION}'"
+  fail "IMAGE_VERSION env: expected it to contain '${EXPECTED_IMAGE_VERSION}', got '${ACTUAL_VERSION}'"
 fi
 
 # 2. nordvpn --version must report the pinned NORDVPN_VERSION

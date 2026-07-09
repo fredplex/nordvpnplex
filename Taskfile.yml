@@ -9,6 +9,8 @@ vars:
     sh: git log --format="%h" -n 1
   GIT_TAG:
     sh: git tag --points-at HEAD
+  IMAGE_VERSION:
+    sh: bash -c "grep 'ARG IMAGE_VERSION' Dockerfile | cut -d\' -f2"
 
 env:
   DOCKER_BUILDKIT: "1"
@@ -30,7 +32,7 @@ tasks:
     desc: |
             Build the docker image for testing
     cmds:
-      - docker build --platform linux/amd64 . -f  Dockerfile -t "{{.REGISTRY}}/{{.IMAGE}}:{{.GIT_HASH}}" --build-arg="IMAGE_VERSION={{.GIT_HASH}}"
+      - docker build --platform linux/amd64 . -f  Dockerfile -t "{{.REGISTRY}}/{{.IMAGE}}:{{.GIT_HASH}}" --build-arg="IMAGE_VERSION={{.IMAGE_VERSION}}-dev+{{.GIT_HASH}}"
 
   docker-push:
     deps:
