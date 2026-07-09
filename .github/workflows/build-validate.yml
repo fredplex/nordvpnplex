@@ -28,6 +28,12 @@ jobs:
         with:
           context: .
           platforms: linux/amd64
-          push: false
+          load: true
           build-args: |
             IMAGE_VERSION=ci-validation
+          tags: fredplex/nordvpn:temp-validate
+
+      - name: Run unified smoke tests (verify.sh)
+        run: |
+          NORDVPN_VERSION=$(grep "ARG NORDVPN_VERSION" Dockerfile | sed "s/ARG NORDVPN_VERSION='//;s/'$//")
+          bash scripts/verify.sh "fredplex/nordvpn:temp-validate" "${NORDVPN_VERSION}" "ci-validation"
