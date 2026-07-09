@@ -14,13 +14,16 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 |---|------|--------|
 | 1 | Phase A — Updated `00-version` shebang to import container environment variables | `1aca39d` |
 | 2 | Phase B — Generated `/build_version` file containing nordvpnplex and base image digest versions | `e919b52` |
-| 3 | Session close — current.md, active.md, SESSION_NOTES.md updated | this commit |
+| 3 | Revision 1 — Prepend semver version to local image versions and update verify.sh | `b7198ce` |
+| 4 | Session close — current.md, active.md, SESSION_NOTES.md updated | this commit |
 
 ### Key decisions
 
 - **Early s6 init environment loading**: Changed shebang in custom cont-init.d oneshot scripts to `/command/with-contenv` to guarantee environment variables are resolved before main services boot.
 - **Dockerfile scope expansion**: Redeclared `ARG BASE_DIGEST` after `FROM` inside the build context to allow shell access for writing it to `/build_version`.
 - **Branding-integrated version injection**: Written container metadata to `/build_version` to hook into the base image's standard branding log.
+- **Traceable local semver tagging (Revision 1)**: Integrated the formal release semver version (e.g. `5.5.4`) in local builds by prefixing it to the dev tag (`5.5.4-dev+<commit-hash>`). Sourced this version dynamically from the `Dockerfile` at build time.
+- **Relaxed verification validation (Revision 1)**: Updated `verify.sh` to validate the version using substring containment check, keeping compatibility across local and CI dev/prod build parameters.
 
 ### Stopping point
 
