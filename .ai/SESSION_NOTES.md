@@ -6,6 +6,44 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-07-09 (Build & Release Pipeline Review & Optimization)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Phase A — Fixed `task bump` doc-drift and stale examples in user-guide.md, build-and-publish.md, and quick-build-checklist.md | `4620248` |
+| 2 | Phase B — Parameterized base image digest via `ARG BASE_DIGEST` in Dockerfile and updated check-base workflows/scripts | `9f1b365` |
+| 3 | Phase C — Removed Changelog TODO placeholder and reminders from bump.sh and README.md | `4d66654` |
+| 4 | Phase D — Consolidated redundant sections in user-guide.md and linked to canonical build-and-publish.md | `57e724c` |
+| 5 | Phase E — Optimized GHA publish workflows to build once and push from runner's Docker daemon | `2f27a78` |
+| 6 | Phase F — Gated local Docker Hub push tasks with a confirmation script (confirm-push.sh) in Taskfile.yml | `c6ce3dd` |
+| 7 | Phase G — Consolidated version source-of-truth in Dockerfile, removing duplicates from README.md and CLAUDE.md | `180561f` |
+| 8 | Phase H — Cleaned up active.md release checklist and added concurrency groups to all workflows | `956bac2` |
+| 9 | Phase I — Configured PR validation workflow to run unified smoke tests (verify.sh) locally on the runner | `0092d81` |
+| 10 | Phase J — Added detailed "Versioning Design and Release Flow" documentation section to build-and-publish.md | `89cd08b` |
+| 11 | Session close — current.md, active.md, SESSION_NOTES.md updated | this commit |
+
+### Key decisions
+
+- Executed via **Autonomous mode** per `.ai/workflows/implementation.md`: all 10 implementation phases (A–J) were plan-approved up front, executed, verified, and committed sequentially.
+- **Base image dev-test fix (Finding 1)**: Parameterizing the base digest as `ARG BASE_DIGEST` in the Dockerfile lets `check-base-image.yml` test the *new* digest in `publish-dev.yml` before it's merged, preventing base dev builds from silently compiling against old cached digests.
+- **Build-once Tag-and-Push Optimization (Finding 5)**: Replaced `docker/build-push-action`'s duplicate rebuild-push step with simple `docker tag` and `docker push` commands on GHA runner to push the exact verified image bytes and halve build times.
+- **Gating direct pushes (Finding 6)**: Implemented an interactive terminal gating check script `confirm-push.sh` inside `Taskfile.yml` rather than deleting the direct local push commands outright, maintaining operational safety.
+- **Consolidated Versioning (Finding 7)**: Removed `CLAUDE.md` version block and `README.md` metadata/badge versions, making `Dockerfile` the single source of truth for release versions.
+
+### Stopping point
+
+- Working tree: clean of task work (10 commits on branch `docs/build-release-pipeline-review`).
+- Validation: local `scripts/check-base-image.sh` parser successfully verified to parse the new `ARG BASE_DIGEST` Dockerfile format. Workflows and documentation cross-references manually audited.
+
+### Fragile areas
+
+- **`confirm-push.sh` interactive terminal requirement**: The gate uses `[ -t 0 ]` to determine if a terminal is interactive. If run from a headless cron or script, local push will fail immediately (which acts as a safe default).
+- Carried forward: s6 init daemon capability constraints during stateless `task verify`; GHA commits showing Unverified due to missing commit_signing_key in the runner environment.
+
+---
+
 ## Session Close — 2026-07-05 (Build & Release Workflow Hardening)
 
 ### Completed this session

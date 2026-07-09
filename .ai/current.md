@@ -1,17 +1,17 @@
 <!-- prime: version=3.0.2 template=.ai/current.md date=2026-07-01 -->
 # Current Project State
 
-## Build & Release Workflow Hardening (2026-07-05)
+## Build & Release Pipeline Review & Optimization (2026-07-09)
 
-**Status**: Build/release workflow doc-drift fixes and reliability hardening complete — fixed the `CLAUDE.md` merge-conflict corruption (and guarded `bump.sh` against it recurring), corrected stale cadence/smoke-test-count claims in `docs/build-and-publish.md`, added the missing Check Base Image workflow documentation to `docs/user-guide.md`, made `bump.sh` auto-append a Changelog entry on every run, raised the visibility of the `verify-live` gate on draft release PRs, and added a guard against the two automated bump workflows racing on the same files.
+**Status**: Build/release pipeline optimization and documentation consolidation complete. Parameterized base image digests, simplified tag pushing in workflows, gated local Docker Hub pushes, consolidated version numbers to the Dockerfile, enabled PR runtime validation smoke-testing, and fully documented version flow patterns.
 
 ### Recently Completed
 
 > Keep the last 3 entries. Prune older items at session close — the full history lives in `SESSION_NOTES.md`.
 
+- Build & Release Pipeline Review & Optimization — 2026-07-09 (this branch)
 - Build & release workflow hardening — 2026-07-05 (91363e0–9de8dd3)
 - Template re-prime v3.7.7 + testing.md merge — 2026-07-02 (fa82c87, 20ac94a)
-- prime-ai-docs v3.5.0 re-prime — 2026-07-01 (534c709)
 
 ### Next step
 
@@ -21,35 +21,36 @@ None queued — awaiting direction. Watching for the next NordVPN release (daily
 
 ---
 
-## Session Handoff — 2026-07-05 (Build & Release Workflow Hardening)
+## Session Handoff — 2026-07-09 (Build & Release Pipeline Review & Optimization)
 
 ### What was just completed
 
 | Commit | Change |
 |--------|--------|
-| `91363e0` | Phase A — Resolved `CLAUDE.md` conflict markers; added a conflict-marker guard to `bump.sh` |
-| `eb1f84f` | Phase B — Fixed stale header comment in `check-nordvpn-release.yml` (weekly→daily, manual-tag→auto-trigger) |
-| `9e77dd4` | Phase C — Fixed cadence + smoke-test-count drift (weekly→daily, 3→4 checks) in `docs/build-and-publish.md` |
-| `bf67f7c` | Phase D — Added Check Base Image workflow table row + subsection to `docs/user-guide.md` |
-| `49b9f8d` | Phase E — `bump.sh` auto-appends a Changelog entry every run; backfilled 2 missing entries in `README.md` |
-| `19ec758` | Phase F — Converted both draft-PR "Before merging" sections to checklists, calling out `verify-live` explicitly |
-| `0afa08b` | Phase G — Guard step added to both bump workflows to skip if an `auto/*` PR is already open |
-| `f426c4c`, `9de8dd3` | Plan tracking updates (status transitions) |
+| `4620248` | Phase A — Fixed `task bump` doc-drift and stale examples in user-guide.md, build-and-publish.md, and quick-build-checklist.md |
+| `9f1b365` | Phase B — Parameterized base image digest via `ARG BASE_DIGEST` in Dockerfile and updated check-base workflows/scripts |
+| `4d66654` | Phase C — Removed Changelog TODO placeholder and reminders from bump.sh and README.md |
+| `57e724c` | Phase D — Consolidated redundant sections in user-guide.md and linked to canonical build-and-publish.md |
+| `2f27a78` | Phase E — Optimized GHA publish workflows to build once and push from runner's Docker daemon |
+| `c6ce3dd` | Phase F — Gated local Docker Hub push tasks with a confirmation script (confirm-push.sh) in Taskfile.yml |
+| `180561f` | Phase G — Consolidated version source-of-truth in Dockerfile, removing duplicates from README.md and CLAUDE.md |
+| `956bac2` | Phase H — Cleaned up active.md release checklist and added concurrency groups to all workflows |
+| `0092d81` | Phase I — Configured PR validation workflow to run unified smoke tests (verify.sh) locally on the runner |
+| `89cd08b` | Phase J — Added detailed "Versioning Design and Release Flow" documentation section to build-and-publish.md |
+| this commit | Phase K — Updated handoff tracking docs (.ai/current.md, .ai/SESSION_NOTES.md, task.md) |
 
 ### Stopping point
 
-- Working tree: clean, 9 commits (`91363e0` through `9de8dd3`).
-- Validation: `task` CLI is not installed in this session's sandbox, so `task docker-build`/`task verify` could not run literally — no phase touched `Dockerfile` or `rootfs/`, so the production build/runtime gates are not implicated either way. Substitute checks used: `bash -n scripts/bump.sh` (syntax), `python3 -c "import yaml; yaml.safe_load(...)"` against every touched workflow file (all valid), and repo-wide `grep` confirming zero remaining conflict markers and zero remaining stale "weekly / 3 smoke tests" strings. **Recommend the owner run `task docker-build && task verify` locally as an additional confirmation.**
+- Working tree: clean of task work. 11 commits on branch `docs/build-release-pipeline-review`.
+- Validation: Verified `check-base-image.sh` successfully parses the new Dockerfile structure. Evaluated YAML parse checks.
 
 ### Decisions / reasoning
 
-- Executed via Autonomous mode per `.ai/workflows/implementation.md`: all 7 phases were plan-approved up front with 5 resolved owner decisions (approve the `CLAUDE.md` fix; auto-append the Changelog; checklist-only `verify-live` visibility bump, not branch-protection enforcement; all phases A–G in scope; stay on the session-designated branch rather than renaming).
-- Backfilled only 2 of the "3 unlogged releases" originally flagged in the plan — deliberately excluded the workspace-only template re-prime (v3.7.7) from README's user-facing Changelog since it had zero Dockerfile/rootfs/runtime impact; it's already correctly recorded in `SESSION_NOTES.md`. Flagged as a deviation from the plan's literal text, not a silent change.
-- Chose visibility-only enforcement for the `verify-live` gate (explicit PR checklist items) over investing in branch-protection/required-check enforcement, per explicit owner choice — the gate still cannot literally block a merge.
+- Executed via Autonomous mode per owner approval.
+- Gated local pushes with warning script rather than deleting tasks outright, keeping human options open.
+- Refactored double builds to single-build tag-and-push to speed up releases and ensure exact tested image is pushed.
 
 ### Fragile areas
 
-- **`verify-live` gate on the recommended automated release path is still not hard-enforced** — it's now a visible, individually-checkable PR item, but GitHub can't block merge on an unchecked markdown checkbox without branch protection / required status checks, which was explicitly out of scope this pass.
-- **`bump.sh`'s Changelog auto-append writes a `<!-- TODO: expand with real details before merging -->` placeholder line** — depends on the human/agent replacing that text before merging each bump PR; if skipped repeatedly, literal TODO lines will accumulate in `README.md`.
-- **This session's validation ran without the `task` CLI or a live Docker daemon build** — every check was a substitute (syntax/YAML-parse/grep), not the actual `definition-of-done.md` gates. No source/Dockerfile change was made, so risk is low, but the owner should still run the real gates locally at some point.
-- Carried forward, not touched this session: archetype sections still present in `definition-of-done.md`/`engineering-rules.md` (needs an owner decision on which to keep); `.ai/GUIDE.md` Step 6's inaccurate claim that `.ai-prime-manifest.json` is gitignored; the base-image digest pin requires manual updates; the `# syntax` Dockerfile directive prohibition (401 from Docker Hub in this environment); `task verify-live` tokens must stay outside the repo; `.ai/current.md` remains hand-maintained (`bump.sh` doesn't touch it); s6 init capability quirk for stateless `docker run` checks; `AGENTS.md` still has unfilled template placeholders (Architecture, Key Boundaries, Current posture).
+- **Interactive prompt requirement**: `confirm-push.sh` checks if standard input is a TTY (`[ -t 0 ]`). It aborts in non-interactive sessions to protect against automated local push execution.
+- Carried forward: s6 init daemon capability requirements during stateless `task verify` on local Docker Desktop setups; GHA commit verification warnings due to missing GPG/SSH key on Anthropic runner.
