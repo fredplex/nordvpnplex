@@ -38,6 +38,7 @@ tasks:
     desc: |
             Push the docker image
     cmds:
+      - bash scripts/confirm-push.sh
       - docker push "{{.REGISTRY}}/{{.IMAGE}}:{{.GIT_HASH}}"
 
   docker-publish:
@@ -76,6 +77,7 @@ tasks:
         sh: grep "ARG IMAGE_VERSION" Dockerfile | sed "s/ARG IMAGE_VERSION='//;s/'$//"
       NORD_VER: '{{.NORDVPN_VERSION | default .DF_NORDVPN}}'
     cmds:
+      - bash scripts/confirm-push.sh
       - docker push "{{.REGISTRY}}/{{.IMAGE}}:dev"
       - docker push "{{.REGISTRY}}/{{.IMAGE}}:dev-{{.GIT_HASH}}"
       - docker push "{{.REGISTRY}}/{{.IMAGE}}:dev-{{.NORD_VER}}"
