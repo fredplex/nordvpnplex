@@ -1,13 +1,15 @@
 <!-- prime: version=3.0.0 template=.ai/plans/container-startup-version-logs.md date=2026-07-09 -->
-# Plan — Container Startup Version Logs
+# Plan — Container Startup Version Logs (Revision 1)
 
-This plan addresses the missing image version logs and defines how to print the base image version during container startup.
+This plan addresses the missing image version logs and defines how to print the base image version during container startup, using the formal semver wrapper version in local and release builds.
 
 ## Phases
 
 ### Phase A: Fix Custom Log Version
-- Update the shebang of `rootfs/etc/cont-init.d/00-version` to `#!/command/with-contenv bash` so that s6-overlay environment importer loads container environment variables.
-- Validation: Build image locally, run, and check that custom version outputs correct value (instead of being empty).
+- Update the shebang of `rootfs/etc/cont-init.d/00-version` to `#!/command/with-contenv bash`.
+- (Revision 1): Adjust `Taskfile.yml` to pass `{{.IMAGE_VERSION}}-dev+{{.GIT_HASH}}` to `IMAGE_VERSION` in `task docker-build` to preserve the semver version in local test runs.
+- (Revision 1): Adjust `scripts/verify.sh` to use substring containment for version verification.
+- Validation: Build image locally, run, and check that custom version outputs the full semver version string.
 
 ### Phase B: Print Base Image Version in Branding Block
 - Update `Dockerfile` to create a `/build_version` file during build, writing both `IMAGE_VERSION` and `BASE_DIGEST` to it.
