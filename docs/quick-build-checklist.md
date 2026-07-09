@@ -48,11 +48,11 @@ task verify
 **Expected output**:
 ```
 === Verifying fredplex/nordvpn:<hash> ===
-    NordVPN target: 4.5.0
+    NordVPN target: 5.2.0
 
 --- Stateless checks ---
   PASS  IMAGE_VERSION env = <hash>
-  PASS  nordvpn --version = 4.5.0
+  PASS  nordvpn --version = 5.2.0
   PASS  iptables OUTPUT policy DROP (kill-switch functional)
 
 --- Runtime check (daemon socket) ---
@@ -81,15 +81,15 @@ If a new version is available, GitHub will open a draft PR automatically. You ca
 If you want to bump immediately without waiting for the GitHub draft PR:
 
 ```powershell
-# Example: upgrade from 4.5.0 to 4.6.0, image version 5.5.0 to 5.6.0
-task bump NORDVPN_VERSION=4.6.0 IMAGE_VERSION=5.6.0
+# Example: upgrade from 5.2.0 to 5.3.0, image version 5.5.4 to 5.5.5
+task bump NORDVPN_VERSION=5.3.0 IMAGE_VERSION=5.5.5
 ```
 
 Review the `git diff` output. If it looks correct:
 
 ```powershell
-git add Dockerfile README.md CLAUDE.md .ai/current.md
-git commit -m "chore: bump NordVPN 4.5.0 → 4.6.0"
+git add Dockerfile README.md CLAUDE.md
+git commit -m "chore: bump NordVPN 5.2.0 → 5.3.0"
 ```
 
 Then proceed to "Release to Docker Hub" below.

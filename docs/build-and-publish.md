@@ -19,6 +19,7 @@ image appearing on Docker Hub. It is written for both humans and AI agents.
 6. [Manual triggers](#6-manual-triggers)
 7. [One-time setup: Docker Hub credentials in GitHub](#7-one-time-setup-docker-hub-credentials-in-github)
 8. [Troubleshooting](#8-troubleshooting)
+9. [Versioning design and release flow](#9-versioning-design-and-release-flow)
 
 ---
 
@@ -400,7 +401,7 @@ When the daily check detects a new version, it builds/verifies a dev container, 
 - Verify the VPN connects and network routing works as expected.
 
 **2. Review the draft PR on GitHub**
-- Check the file diff: `Dockerfile`, `README.md`, `CLAUDE.md`, `.ai/current.md`.
+- Check the file diff: `Dockerfile`, `README.md`, `CLAUDE.md`.
 - Confirm `IMAGE_VERSION` is correct (automation suggests a patch bump — modify in the PR if you want a minor/major bump instead).
 - Check the [NordVPN release notes](https://nordvpn.com/blog/nordvpn-linux-release-notes/) for breaking changes.
 
@@ -433,12 +434,12 @@ task check-version
 ```bash
 task bump NORDVPN_VERSION=4.6.0 IMAGE_VERSION=5.6.0
 ```
-This updates `Dockerfile`, `README.md`, `CLAUDE.md`, `.ai/current.md` and prints the diff.
+This updates `Dockerfile`, `README.md`, `CLAUDE.md` and prints the diff.
 
 **3. Commit and push**
 ```bash
-git add Dockerfile README.md CLAUDE.md .ai/current.md
-git commit -m "chore: bump NordVPN 4.5.0 → 4.6.0"
+git add Dockerfile README.md CLAUDE.md
+git commit -m "chore: bump NordVPN 5.2.0 → 5.3.0"
 git push origin main
 ```
 Merging or pushing directly to `main` triggers the automated release pipeline (runs build/smoke-tests/push and pushes the git tag).
@@ -579,3 +580,58 @@ files will be updated on merge by the PR's existing commits.
 ### Daily action opened a PR for an already-pinned version
 This can happen if the repo's default branch is ahead of the PR branch. Close the PR,
 pull the latest `main`, and re-run the workflow manually via the GitHub Actions UI.
+
+---
+
+## 9. Versioning design and release flow
+
+The project maintains a clear separation between the **upstream application version** and the **wrapper image version** to ensure container changes can be versioned and released independently of NordVPN client updates.
+
+### 9.1 Version Types
+
+1. **`NORDVPN_VERSION` (Client Application)**
+   - Represents the version of the official `nordvpn` Debian package (e.g., `5.2.0`).
+   - Managed in `Dockerfile` via `ARG NORDVPN_VERSION`.
+2. **`IMAGE_VERSION` (Container Wrapper)**
+   - Represents the release version of the Docker wrapper container itself (e.g., `5.5.4`).
+   - Managed in `Dockerfile` via `ARG IMAGE_VERSION`.
+   - Bumps on s6 configuration changes, base image updates, or package updates.
+
+### 9.2 Development vs. Production Versioning
+
+During development, pre-release, and automated validation, versioning rules differ from production to prevent bleeding-edge code from polluting production tags.
+
+| Environment | Tag / Version Format | s6 Init `IMAGE_VERSION` | Git Tagging | Target |
+|-------------|----------------------|--------------------------|-------------|--------|
+| **Development** | `:dev`, `:dev-<sha>`, `:dev-<nord-ver>`, `:<image-ver>-dev` | `<image-ver>-dev` (e.g., `5.5.4-dev`) | None | Docker Hub (testing/validation) |
+| **Production** | `:latest`, `:<image-ver>` (e.g., `5.5.4`) | `<image-ver>` (e.g., `5.5.4`) | Created (`5.5.4`) | Docker Hub (production release) |
+
+### 9.3 Detailed Version Lifecycle
+
+```mermaid
+graph TD
+    subgraph Dev Flow ["1. Development & GHA Verification"]
+        A[Check Version Cron / Manual] -->|New Version / Base Image| B(publish-dev.yml)
+        B -->|Builds container| C[Set s6 IMAGE_VERSION to image_ver-dev]
+        C -->|Publishes Dev tags| D["fredplex/nordvpn:dev<br>fredplex/nordvpn:dev-sha<br>fredplex/nordvpn:dev-nord_ver<br>fredplex/nordvpn:image_ver-dev"]
+    end
+
+    subgraph Prod Flow ["2. Release & Tag Promotion"]
+        E[Merge PR to main / Push tag] -->|Triggers publish.yml| F{Release Gate}
+        F -->|Stateless + Runtime Tests Pass| G[Set s6 IMAGE_VERSION to image_ver]
+        G -->|Publishes Release tags| H["fredplex/nordvpn:latest<br>fredplex/nordvpn:image_ver"]
+        H -->|Auto-creates Git Tag| I[Git Tag on HEAD e.g. 5.5.4]
+    end
+```
+
+1. **Daily version check / monthly base check**:
+   - Spawns `publish-dev.yml` with the suggested version.
+   - Puts `-dev` on the wrapper image version inside s6 overlay (e.g. `5.5.4-dev`).
+   - Pushes 4 dev tags to Docker Hub for user smoke-testing.
+   - Opens a draft PR.
+2. **Merging the PR / Tag push**:
+   - Triggers `publish.yml` release workflow.
+   - Builds the production image with the clean `IMAGE_VERSION` (e.g. `5.5.4`).
+   - Runs validation smoke tests locally on the runner.
+   - Promotes and tags as `:latest` and `:<image_version>` (e.g. `5.5.4`).
+   - Pushes the Git tag back to GitHub, completing the release.

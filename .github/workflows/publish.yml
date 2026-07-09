@@ -26,6 +26,10 @@ on:
         required: false
         default: ''
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -105,19 +109,14 @@ jobs:
         run: |
           bash scripts/verify.sh "fredplex/nordvpn:temp-release" "${{ steps.release_version.outputs.nordvpn_version }}" "${{ steps.release_version.outputs.image_version }}"
 
-      - name: Build and push release image
+      - name: Tag and push release image
         if: steps.release_version.outputs.release_needed == 'true'
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          platforms: linux/amd64
-          push: true
-          build-args: |
-            NORDVPN_VERSION=${{ steps.release_version.outputs.nordvpn_version }}
-            IMAGE_VERSION=${{ steps.release_version.outputs.image_version }}
-          tags: |
-            fredplex/nordvpn:latest
-            fredplex/nordvpn:${{ steps.release_version.outputs.image_version }}
+        run: |
+          docker tag fredplex/nordvpn:temp-release fredplex/nordvpn:latest
+          docker tag fredplex/nordvpn:temp-release fredplex/nordvpn:${{ steps.release_version.outputs.image_version }}
+          
+          docker push fredplex/nordvpn:latest
+          docker push fredplex/nordvpn:${{ steps.release_version.outputs.image_version }}
 
       # Creates the git tag AND a GitHub Release in one call. Publishing the
       # Release is what sends GitHub's native notification email to repo watchers

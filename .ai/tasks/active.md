@@ -9,6 +9,22 @@ Current work in progress.
 
 **None active — awaiting direction.** Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
 
+### Build & Release Pipeline Review & Optimization (Complete)
+
+- [x] Phase A — Fix `task bump` doc-drift and stale examples (`4620248`)
+- [x] Phase B — Parameterize and fix base-image dev-build workflow (`9f1b365`)
+- [x] Phase C — Remove TODO placeholders from `bump.sh` Changelog appends (`4d66654`)
+- [x] Phase D — Consolidate redundant documentation (`57e724c`)
+- [x] Phase E — Optimize publish workflows to build once and push (`2f27a78`)
+- [x] Phase F — Deprecate/gate direct-publish tasks in Taskfile (`c6ce3dd`)
+- [x] Phase G — Consolidate version source-of-truth (`180561f`)
+- [x] Phase H — Minor automated release checks and concurrency cleanup (`956bac2`)
+- [x] Phase I — Configured PR validation smoke-testing (`0092d81`)
+- [x] Phase J — Document version design and release flow (`89cd08b`)
+- [x] Phase K — Session handoff (this commit)
+
+All 11 phases complete. See `.ai/plans/archive/build-release-pipeline-review.md` for full detail.
+
 ### Build & release workflow hardening (Complete)
 
 - [x] Phase A — Fix `CLAUDE.md` conflict markers + add guard to `bump.sh` (`91363e0`)
@@ -25,49 +41,6 @@ All 7 phases complete. See `.ai/plans/archive/build-release-workflow-hardening.m
 
 - [x] Backup merge: `GUIDE.md` (3.5.0→3.5.3) + `definition-of-done.md` (3.0.2→3.0.3) accepted template-pure; `docs/testing.md` (3.0.4→3.0.5) merged with restored project content (`fa82c87`)
 - [x] Tracked `.ai-prime-manifest.json` update from the v3.7.7 run (`20ac94a`)
-
-### Fix check-base-image verify + docs (Complete)
-
-- [x] Phase A — Fix `publish-dev.yml` verify bug: split build into load+verify then push steps (`2febec9`)
-- [x] Phase B — Add base image explanation to `docs/architecture.md` + sync `.ai/memory/` (`6d1f7f5`)
-- [x] Phase C — Expand `docs/build-and-publish.md` §4.5 with "why" context (`63549bd`)
-- [x] Phase D — Cross-reference user-guide.md from new docs sections (`12ad5e6`)
-
-### prime-ai-docs v3.5.0 re-prime (Complete)
-
-- [x] Re-prime: GUIDE.md (3.4.0→3.5.0), implementation.md (3.0.4→3.1.0), session-close.md (3.0.6→3.0.7) (`534c709`)
-
-### prime-ai-docs v3.4.x template refresh (Complete)
-
-- [x] Resumed in-progress script run at GUIDE Step 5 — 6 template-pure files updated and committed (2026-07-01)
-
-### Base Image Refresh Cadence (Complete)
-
-- [x] **Phase A** — `scripts/check-base-image.sh` (2026-06-27)
-- [x] **Phase B** — `.github/workflows/check-base-image.yml` (2026-06-27)
-- [x] **Phase C** — `task check-base` entry in `Taskfile.yml` *(Taskfile edit explicitly approved)* (2026-06-27)
-- [x] **Phase D** — doc updates (2026-06-27)
-
-### Dockerfile Optimization (Complete)
-
-- [x] All 6 phases complete (2026-06-26)
-
-### prime-ai-docs v3.x template update (Complete)
-
-- [x] Template applied via `npx github:fredplex/vibe-coding-template .`
-- [x] Backup merge: all project-specific content restored from `.ai-prime-backup/2026-06-30-10-56-56/`
-
-### AGENTS.md improvements — gaps and doc-drift fixes (Complete)
-
-- [x] Phase 1 — `# syntax` directive constraint added to "Must not" list
-- [x] Phase 2 — Session close working rule added to Working Rules
-- [x] Phase 3 — `.gitignore` added to Project File Map
-- [x] Phase 4 — `current.md` fragile area note corrected
-
-### prime-ai-docs v3.4.1 re-prime (Complete)
-
-- [x] Dry-run: Re-prime scenario detected (4 would-update)
-- [x] Script run: AGENTS.md backup merge + 3 workflow files updated (23f4059)
 
 **Watching**: next NordVPN release — the daily checker auto-builds/tests a dev image and opens a draft PR.
 
@@ -99,12 +72,9 @@ All 7 phases complete. See `.ai/plans/archive/build-release-workflow-hardening.m
 
 **Checklist**:
 - [ ] Draft PR reviewed: confirm NORDVPN_VERSION and IMAGE_VERSION
-- [ ] PR merged
-- [ ] `git pull` locally
-- [ ] `task docker-build` succeeds
-- [ ] `task verify` passes all 4 checks
-- [ ] `task release` runs cleanly (tag created and pushed)
-- [ ] GitHub publish workflow completes; image appears on Docker Hub
+- [ ] PR merged (triggers GHA to build/verify/publish/tag)
+- [ ] `git pull` locally (pulls the GHA-created tag)
+- [ ] `task` output matches new version and shows tag on HEAD
 - [ ] `.ai/current.md` updated with new versions and date
 
 ### README.md rewrite (Tier 3 — deferred, not yet approved)

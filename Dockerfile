@@ -1,4 +1,5 @@
-FROM ghcr.io/linuxserver/baseimage-ubuntu:noble@sha256:99ecdba8aefe67d2961c5ffe703585587f523da66e93433520f8883c4a18b6fd
+ARG BASE_DIGEST='sha256:99ecdba8aefe67d2961c5ffe703585587f523da66e93433520f8883c4a18b6fd'
+FROM ghcr.io/linuxserver/baseimage-ubuntu:noble@${BASE_DIGEST}
 LABEL maintainer="fredplex@gmail.com"
 
 ARG NORDVPN_VERSION='5.2.0'
