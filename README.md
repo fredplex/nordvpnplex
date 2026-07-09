@@ -232,7 +232,7 @@ Nord Security companies are not responsible for and have no control over the nat
 
 ## Changelog
 
-- **2026-07-08** — Base image refresh — image 5.5.3 → 5.5.4 (NordVPN unchanged at 5.2.0) <!-- TODO: expand with real details before merging -->
+- **2026-07-08** — Base image refresh — image 5.5.3 → 5.5.4 (NordVPN unchanged at 5.2.0)
 - **2026-07-02** — NordVPN 5.1.0 → 5.2.0 (image → 5.5.3), via the automated daily version-check pipeline.
 - **2026-07-01** — Base image refresh: digest bump for `ghcr.io/linuxserver/baseimage-ubuntu:noble` (image 5.5.1 → 5.5.2), via the automated monthly base-image check pipeline. NordVPN version unchanged.
 - **2026-06-27** — Base image refresh cadence implemented: added monthly digest check workflow (`.github/workflows/check-base-image.yml`) and local diagnostics script (`scripts/check-base-image.sh` / `task check-base`) to detect base image updates, automate dev builds, and open draft PRs.

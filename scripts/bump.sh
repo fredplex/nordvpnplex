@@ -59,11 +59,8 @@ sed -i "s#ARG IMAGE_VERSION='[^']*'#ARG IMAGE_VERSION='${IMAGE_VERSION}'#" Docke
 sed -i "s#<!-- current-version:.*-->#<!-- current-version: nordvpn=${NORDVPN_VERSION} image=${IMAGE_VERSION} -->#" README.md
 sed -i "s#> \*\*Current image:\*\*.*#> **Current image:** fredplex/nordvpn:${IMAGE_VERSION} — NordVPN ${NORDVPN_VERSION}#" README.md
 
-# 2b. README.md — auto-append a Changelog placeholder (newest first) so a bump can
-# no longer silently skip logging. The one-line summary is generated from what
-# actually changed; flesh out the detail before merging the bump PR.
 sed -i "/^## Changelog\$/{n; a\\
-- **${TODAY}** — ${CHANGELOG_SUMMARY} <!-- TODO: expand with real details before merging -->
+- **${TODAY}** — ${CHANGELOG_SUMMARY}
 }" README.md
 
 # 3. CLAUDE.md — pinned version block
@@ -73,5 +70,4 @@ echo "All files updated. Review the diff before committing:"
 echo ""
 git diff
 echo ""
-echo "Reminder: replace the auto-generated Changelog TODO line in README.md with real details."
 echo "Reminder: update .ai/current.md by hand to reflect this bump (handoff state)."
