@@ -9,7 +9,7 @@
 
 > Keep the last 3 entries. Prune older items at session close — the full history lives in `SESSION_NOTES.md`.
 
-- Build & Release Pipeline Review & Optimization — 2026-07-09 (this branch)
+- Build & Release Pipeline Review & Optimization — 2026-07-09
 - Build & release workflow hardening — 2026-07-05 (91363e0–9de8dd3)
 - Template re-prime v3.7.7 + testing.md merge — 2026-07-02 (fa82c87, 20ac94a)
 
@@ -41,7 +41,7 @@ None queued — awaiting direction. Watching for the next NordVPN release (daily
 
 ### Stopping point
 
-- Working tree: clean of task work. 11 commits on branch `docs/build-release-pipeline-review`.
+- Working tree: clean of task work. 11 commits on the task branch.
 - Validation: Verified `check-base-image.sh` successfully parses the new Dockerfile structure. Evaluated YAML parse checks.
 
 ### Decisions / reasoning

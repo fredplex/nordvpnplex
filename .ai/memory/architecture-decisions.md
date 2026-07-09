@@ -74,6 +74,28 @@ No application-level caching — the container is stateless between restarts. Do
 docker build --no-cache --platform linux/amd64 . -f Dockerfile -t "fredplex/nordvpn:$(git log --format='%h' -n 1)"
 ```
 
+## Key Decisions (2026-07-09 Build & Release Pipeline Review & Optimization)
+
+### Decision: Parameterized base image digest pin
+
+**Choice**: Added `ARG BASE_DIGEST` in `Dockerfile` before the `FROM` line. Updated `check-base-image.yml` and `publish-dev.yml` to pass it, and modified `check-base-image.sh` to parse it.
+**Rationale**: In Monthly base-image updates, `publish-dev.yml` checks out `main` and builds/tests the image. Because the new digest pin was not yet in `main`'s `Dockerfile` at the time of the workflow run, the test built the *old* digest instead of the new one. Parameterization allows GHA to pass the new digest override at runtime.
+
+### Decision: Build once, tag and push
+
+**Choice**: Refactored `publish.yml` and `publish-dev.yml` to run a single `docker/build-push-action` build with `load: true` to test the local image. On success, simple `docker tag` and `docker push` commands are run from the runner's Docker daemon.
+**Rationale**: Previously, workflows built the container twice—once to test, once to push—wasting time and creating a cache divergence risk where the tested bytes might differ from the pushed bytes.
+
+### Decision: Direct push confirmation gating
+
+**Choice**: Added `confirm-push.sh` interactive script in `Taskfile.yml` for local push tasks.
+**Rationale**: Enforces that production release publishes go through GHA workflow CD, preventing accidental local pushes while preserving a gated fallback option.
+
+### Decision: Dockerfile as single source of truth for versioning
+
+**Choice**: Removed duplicate metadata version comments from `README.md` and `CLAUDE.md`, pointing them to the Dockerfile.
+**Rationale**: Shrinks the code-drift surface and simplifies version bump operations.
+
 ---
 
 ## Key Decisions (2026-07-05 Build & Release Workflow Hardening)
