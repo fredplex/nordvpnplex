@@ -95,7 +95,7 @@ All local operations use [Taskfile](https://taskfile.dev). Run from the repo roo
 |---------|---------|-------------------|
 | `task` | Print current git tag and hash | Anytime |
 | `task check-version` | Check NordVPN repo for newer versions | Before bumping |
-| `task bump NORDVPN_VERSION=x IMAGE_VERSION=y` | Apply version bump to all 5 locations | After confirming new version |
+| `task bump NORDVPN_VERSION=x IMAGE_VERSION=y` | Apply version bump to 3 files (Dockerfile, README, CLAUDE) | After confirming new version |
 | `task docker-build` | Build local test image (tagged with git hash) | After merging bump |
 | `task verify` | Smoke-test the local image (4 credentialless checks) | After docker-build |
 | `task verify-live TOKEN_FILE=<path>` | Real-token Spain egress test — mandatory pre-release gate | After verify passes, before release |
@@ -116,8 +116,8 @@ Prints the current git tag and commit hash. Requires the current commit to have 
 annotated tag — useful for confirming what version is checked out.
 
 ```
-Version 5.5.0
-GIT Commit a1b2c3d
+Version:    5.5.4
+GIT Commit: a1b2c3d
 ```
 
 ---
@@ -129,26 +129,24 @@ the latest available `.deb` version against the version pinned in `Dockerfile`. 
 exact `task bump` command to run if a newer version is available. No files are changed.
 
 ```
-Pinned:    4.5.0
-Available: 4.6.0
+Pinned:    5.2.0
+Available: 5.3.0
 
 New version available. Run:
-  task bump NORDVPN_VERSION=4.6.0 IMAGE_VERSION=5.6.0
+  task bump NORDVPN_VERSION=5.3.0 IMAGE_VERSION=5.5.5
 ```
 
 ---
 
 ### `task bump NORDVPN_VERSION=x.x.x IMAGE_VERSION=y.y.y`
 
-Updates all 5 version locations in one shot:
+Updates 3 version-pinned files in one shot:
 
 | File | Field |
 |------|-------|
-| `Dockerfile` line 6 | `ARG NORDVPN_VERSION='x.x.x'` |
-| `Dockerfile` line 7 | `ARG IMAGE_VERSION='x.x.x'` |
-| `README.md` | "Current version" line |
+| `Dockerfile` | `ARG NORDVPN_VERSION` and `ARG IMAGE_VERSION` |
+| `README.md` | "Current image" and version comments |
 | `CLAUDE.md` | `## Current Pinned Version` block |
-| `.ai/current.md` | all version fields |
 
 Before touching any file, the script verifies that
 `nordvpn_<NORDVPN_VERSION>_amd64.deb` exists in the official repo. It then prints a
@@ -193,11 +191,11 @@ Smoke-tests the locally built image with 4 credentialless checks (fake token, no
 Expected output on pass:
 ```
 === Verifying fredplex/nordvpn:<hash> ===
-    NordVPN target: 4.5.0
+    NordVPN target: 5.2.0
 
 --- Stateless checks ---
   PASS  IMAGE_VERSION env = <hash>
-  PASS  nordvpn --version = 4.5.0
+  PASS  nordvpn --version = 5.2.0
   PASS  iptables OUTPUT policy DROP (kill-switch functional)
 
 --- Runtime check (daemon socket) ---
@@ -443,8 +441,8 @@ Review the printed diff for correctness.
 
 **3. Commit and push**
 ```bash
-git add Dockerfile README.md CLAUDE.md .ai/current.md
-git commit -m "chore: bump NordVPN 4.5.0 → 4.6.0"
+git add Dockerfile README.md CLAUDE.md
+git commit -m "chore: bump NordVPN 5.2.0 → 5.3.0"
 git push origin main
 ```
 Merging to `main` will automatically trigger the release pipeline (which runs build/smoke-tests/push and pushes the git tag).

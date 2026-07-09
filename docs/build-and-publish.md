@@ -400,7 +400,7 @@ When the daily check detects a new version, it builds/verifies a dev container, 
 - Verify the VPN connects and network routing works as expected.
 
 **2. Review the draft PR on GitHub**
-- Check the file diff: `Dockerfile`, `README.md`, `CLAUDE.md`, `.ai/current.md`.
+- Check the file diff: `Dockerfile`, `README.md`, `CLAUDE.md`.
 - Confirm `IMAGE_VERSION` is correct (automation suggests a patch bump — modify in the PR if you want a minor/major bump instead).
 - Check the [NordVPN release notes](https://nordvpn.com/blog/nordvpn-linux-release-notes/) for breaking changes.
 
@@ -433,12 +433,12 @@ task check-version
 ```bash
 task bump NORDVPN_VERSION=4.6.0 IMAGE_VERSION=5.6.0
 ```
-This updates `Dockerfile`, `README.md`, `CLAUDE.md`, `.ai/current.md` and prints the diff.
+This updates `Dockerfile`, `README.md`, `CLAUDE.md` and prints the diff.
 
 **3. Commit and push**
 ```bash
-git add Dockerfile README.md CLAUDE.md .ai/current.md
-git commit -m "chore: bump NordVPN 4.5.0 → 4.6.0"
+git add Dockerfile README.md CLAUDE.md
+git commit -m "chore: bump NordVPN 5.2.0 → 5.3.0"
 git push origin main
 ```
 Merging or pushing directly to `main` triggers the automated release pipeline (runs build/smoke-tests/push and pushes the git tag).
