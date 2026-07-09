@@ -6,6 +6,32 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-07-09 (Container Startup Version Logs)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Phase A — Updated `00-version` shebang to import container environment variables | `1aca39d` |
+| 2 | Phase B — Generated `/build_version` file containing nordvpnplex and base image digest versions | `e919b52` |
+| 3 | Session close — current.md, active.md, SESSION_NOTES.md updated | this commit |
+
+### Key decisions
+
+- **Early s6 init environment loading**: Changed shebang in custom cont-init.d oneshot scripts to `/command/with-contenv` to guarantee environment variables are resolved before main services boot.
+- **Dockerfile scope expansion**: Redeclared `ARG BASE_DIGEST` after `FROM` inside the build context to allow shell access for writing it to `/build_version`.
+- **Branding-integrated version injection**: Written container metadata to `/build_version` to hook into the base image's standard branding log.
+
+### Stopping point
+
+- Working tree: clean.
+
+### Verification performed
+
+- Tested startup logs of the compiled container locally to confirm correct custom and base image version printing.
+
+---
+
 ## Session Close — 2026-07-09 (Build & Release Pipeline Review & Optimization)
 
 ### Completed this session
