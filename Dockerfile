@@ -2,6 +2,7 @@ ARG BASE_DIGEST='sha256:99ecdba8aefe67d2961c5ffe703585587f523da66e93433520f8883c
 FROM ghcr.io/linuxserver/baseimage-ubuntu:noble@${BASE_DIGEST}
 LABEL maintainer="fredplex@gmail.com"
 
+ARG BASE_DIGEST
 ARG NORDVPN_VERSION='5.2.0'
 ARG IMAGE_VERSION='5.5.4'
 ARG NORDVPN_RELEASE='1.0.0'
@@ -36,6 +37,10 @@ RUN apt-get update -y && \
         /var/cache/apt/archives/* \
         /var/lib/apt/lists/* \
         /var/tmp/*
+
+# Generate build version metadata for LSIO init branding
+RUN echo "nordvpnplex version: ${IMAGE_VERSION}" > /build_version && \
+    echo "base image digest: ${BASE_DIGEST}" >> /build_version
 
 COPY --chmod=0755 rootfs /
 
