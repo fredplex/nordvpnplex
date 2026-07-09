@@ -24,7 +24,7 @@ jobs:
       - name: Resolve digests
         id: check
         run: |
-          PINNED=$(grep "^FROM" Dockerfile | sed 's/.*@//')
+          PINNED=$(grep "ARG BASE_DIGEST" Dockerfile | sed "s/ARG BASE_DIGEST='//;s/'$//")
           LATEST=$(docker buildx imagetools inspect \
             ghcr.io/linuxserver/baseimage-ubuntu:noble \
             --format '{{.Manifest.Digest}}')
@@ -62,6 +62,7 @@ jobs:
     with:
       nordvpn_version: ${{ needs.check-base.outputs.current_nordvpn_version }}
       image_version: ${{ needs.check-base.outputs.suggested_image_version }}-dev
+      base_digest: ${{ needs.check-base.outputs.latest_digest }}
     secrets: inherit
 
   create-pr:
@@ -102,7 +103,7 @@ jobs:
         if: steps.guard.outputs.skip != 'true'
         run: |
           LATEST="${{ needs.check-base.outputs.latest_digest }}"
-          sed -i "s|@sha256:[a-f0-9]*|@${LATEST}|" Dockerfile
+          sed -i "s#ARG BASE_DIGEST='[^']*'#ARG BASE_DIGEST='${LATEST}'#" Dockerfile
 
       - name: Open draft PR
         if: steps.guard.outputs.skip != 'true'

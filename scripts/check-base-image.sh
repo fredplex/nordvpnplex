@@ -4,7 +4,7 @@ set -euo pipefail
 # Run from repo root. Requires: docker buildx
 
 IMAGE="ghcr.io/linuxserver/baseimage-ubuntu:noble"
-PINNED=$(grep "^FROM" Dockerfile | sed 's/.*@//')
+PINNED=$(grep "ARG BASE_DIGEST" Dockerfile | sed "s/ARG BASE_DIGEST='//;s/'$//")
 
 echo "Checking : ${IMAGE}"
 echo "Pinned   : ${PINNED}"
@@ -23,6 +23,6 @@ else
   echo "Review linuxserver.io release notes before bumping:"
   echo "  https://github.com/linuxserver/docker-baseimage-ubuntu/releases"
   echo ""
-  echo "To bump, run the GHA workflow or update Dockerfile line 1 to:"
-  echo "  FROM ghcr.io/linuxserver/baseimage-ubuntu:noble@${LATEST}"
+  echo "To bump, run the GHA workflow or update Dockerfile BASE_DIGEST line to:"
+  echo "  ARG BASE_DIGEST='${LATEST}'"
 fi
