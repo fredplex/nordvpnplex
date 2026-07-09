@@ -99,12 +99,9 @@ All 7 phases complete. See `.ai/plans/archive/build-release-workflow-hardening.m
 
 **Checklist**:
 - [ ] Draft PR reviewed: confirm NORDVPN_VERSION and IMAGE_VERSION
-- [ ] PR merged
-- [ ] `git pull` locally
-- [ ] `task docker-build` succeeds
-- [ ] `task verify` passes all 4 checks
-- [ ] `task release` runs cleanly (tag created and pushed)
-- [ ] GitHub publish workflow completes; image appears on Docker Hub
+- [ ] PR merged (triggers GHA to build/verify/publish/tag)
+- [ ] `git pull` locally (pulls the GHA-created tag)
+- [ ] `task` output matches new version and shows tag on HEAD
 - [ ] `.ai/current.md` updated with new versions and date
 
 ### README.md rewrite (Tier 3 — deferred, not yet approved)
