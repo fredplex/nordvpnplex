@@ -55,16 +55,10 @@ echo ""
 sed -i "s#ARG NORDVPN_VERSION='[^']*'#ARG NORDVPN_VERSION='${NORDVPN_VERSION}'#" Dockerfile
 sed -i "s#ARG IMAGE_VERSION='[^']*'#ARG IMAGE_VERSION='${IMAGE_VERSION}'#" Dockerfile
 
-# 2. README.md — machine-readable comment + human-readable line
-sed -i "s#<!-- current-version:.*-->#<!-- current-version: nordvpn=${NORDVPN_VERSION} image=${IMAGE_VERSION} -->#" README.md
-sed -i "s#> \*\*Current image:\*\*.*#> **Current image:** fredplex/nordvpn:${IMAGE_VERSION} — NordVPN ${NORDVPN_VERSION}#" README.md
-
+# 2. README.md — auto-append a Changelog entry (newest first)
 sed -i "/^## Changelog\$/{n; a\\
 - **${TODAY}** — ${CHANGELOG_SUMMARY}
 }" README.md
-
-# 3. CLAUDE.md — pinned version block
-sed -i "s#NordVPN: .*  |  Image tag: .*  |  Built: .*#NordVPN: ${NORDVPN_VERSION}  |  Image tag: fredplex/nordvpn:${IMAGE_VERSION}  |  Built: ${TODAY}#" CLAUDE.md
 
 echo "All files updated. Review the diff before committing:"
 echo ""

@@ -31,4 +31,4 @@ First write action: create a task branch — `type/name` — before any file edi
 
 ## Current Pinned Version
 
-NordVPN: 5.2.0  |  Image tag: fredplex/nordvpn:5.5.4  |  Built: 2026-07-08
+See [Dockerfile](Dockerfile) (`ARG NORDVPN_VERSION` and `ARG IMAGE_VERSION`).
