@@ -1,6 +1,6 @@
 # No Dev-Build-and-Test Cycle for Manual PRs — Findings, Recommendations, Plan
 
-Created: 2026-07-10 | Status: In progress (approved 2026-07-10 — Autonomous mode, all phases)
+Created: 2026-07-10 | Status: Complete
 
 ## Background — why this is needed
 
@@ -218,7 +218,7 @@ everything below was implemented.
 
 | Step | Description | Commit prefix | Status |
 |------|-------------|---------------|--------|
-| 1 | Phase 0 — refresh stale `:dev` tag (workflow run, no code commit); prerequisite `ARG BASE_DIGEST` grep bugfix | `fix(ci):` (bugfix); workflow run deferred to end | Bugfix done (`9768636`); live refresh deferred |
+| 1 | Phase 0 — refresh stale `:dev` tag (workflow run, no code commit); prerequisite `ARG BASE_DIGEST` grep bugfix | `fix(ci):` (bugfix); workflow run deferred to end | Done — bugfix `9768636`; `:dev` refreshed post-merge (run `29090534139`), verified `IMAGE_VERSION=5.5.5-dev`, `/build_version` present, `00-version` shebang fixed |
 | 2 | Phase 1 — auto-trigger pushable dev build for Dockerfile/rootfs PRs | `feat(ci):` | Done |
 | 3 | Phase 2 — post "Before merging" checklist on manual PRs + fix stale header comment | `feat(ci):` | Done (delivered inside Phase 1's commit `c49ee8b` — see note below) |
 | 4 | Phase 3 — documentation sync | `docs:` | Done |
