@@ -171,6 +171,12 @@ here.
 
 ### Phase 2 — Post the "Before merging" checklist on manual PRs, matching the automated-bump pattern
 
+**Delivered as part of Phase 1's commit (`c49ee8b`), not a separate commit**: the `comment`
+job (posting the checklist) and the header-comment fix were written together with the
+`dev-build` job since all three are one coherent edit to the same file/section — splitting
+them into an artificial second commit would have added no isolation value. No scope was cut;
+everything below was implemented.
+
 - **File**: `.github/workflows/build-validate.yml` (or a small follow-up step in the same job)
 - **Change**: once Phase 1's dev image is pushed, post/update a PR comment with the same
   checklist shape already used in `check-base-image.yml`'s and `check-nordvpn-release.yml`'s
@@ -214,8 +220,8 @@ here.
 |------|-------------|---------------|--------|
 | 1 | Phase 0 — refresh stale `:dev` tag (workflow run, no code commit); prerequisite `ARG BASE_DIGEST` grep bugfix | `fix(ci):` (bugfix); workflow run deferred to end | Bugfix done (`9768636`); live refresh deferred |
 | 2 | Phase 1 — auto-trigger pushable dev build for Dockerfile/rootfs PRs | `feat(ci):` | Done |
-| 3 | Phase 2 — post "Before merging" checklist on manual PRs + fix stale header comment | `feat(ci):` | Pending |
-| 4 | Phase 3 — documentation sync | `docs:` | Pending |
+| 3 | Phase 2 — post "Before merging" checklist on manual PRs + fix stale header comment | `feat(ci):` | Done (delivered inside Phase 1's commit `c49ee8b` — see note below) |
+| 4 | Phase 3 — documentation sync | `docs:` | Done |
 
 ---
 

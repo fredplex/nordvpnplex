@@ -59,7 +59,7 @@ Authoritative inventory of all features in **fredplex/nordvpn**.
 | `task check-base` | ✅ Implemented | Checks base image for newer digest via `docker buildx imagetools inspect`; `scripts/check-base-image.sh` |
 | `task bump` | ✅ Implemented | Single-command version bump; verifies package exists first |
 | `task release` | ✅ Implemented | Creates annotated git tag + pushes (retained as local release fallback) |
-| GitHub Actions: build-validate | ✅ Implemented | `docker build` on PR → main; no push |
+| GitHub Actions: build-validate | ✅ Implemented | `docker build` + full smoke-test suite on PR → main; IMAGE_VERSION-bump guard on runtime-affecting PRs; auto-triggers a pushable dev build + checklist for any PR changing Dockerfile/rootfs (see PR-triggered dev build row below) |
 | GitHub Actions: publish | ✅ Implemented | PR merge (main push), tag push, or manual: builds, tests, publishes to Docker Hub, then creates a GitHub Release (tag + native notification) |
 | GitHub Actions: check-nordvpn-release | ✅ Implemented | Daily cron: check repo, auto-run dev build & verify, open draft PR if successful |
 | GitHub Actions: check-base-image | ✅ Implemented | Monthly cron (1st at 09:00 UTC): check base digest, open draft PR + trigger dev build if changed |
@@ -69,6 +69,7 @@ Authoritative inventory of all features in **fredplex/nordvpn**.
 | `task dev-clean` | ✅ Implemented | Removes local `:dev` and `:dev-*` images |
 | GitHub Actions: publish-dev | ✅ Implemented | Manual/Auto trigger: builds, tests, pushes `:dev`, `:dev-<sha>`, `:dev-<version>` |
 | Release notifications (native) | ✅ Implemented | `publish.yml` creates a GitHub Release on success (emails repo watchers); GitHub Actions emails the owner on workflow failure. No SMTP, no secrets — uses `GITHUB_TOKEN`. One-time: Watch → Releases |
+| PR-triggered dev build (manual PRs) | ✅ Implemented | `build-validate.yml`'s `dev-build`/`comment` jobs: any same-repo PR that changes Dockerfile/rootfs and passes the version-bump guard gets a real pushed dev image (`:<version>-dev-pr<N>`, refreshes shared `:dev` too) and a "Before merging" test checklist — extends the dev-build-and-test cycle to `feature/*`/`fix/*` PRs, not just `auto/*` bump PRs |
 
 ---
 
