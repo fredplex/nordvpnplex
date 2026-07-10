@@ -131,16 +131,26 @@ here.
 
 ## Phases
 
-### Phase 0 — Refresh the stale `:dev` tag now (no code change)
+### Phase 0 — Refresh the stale `:dev` tag (no code change; execution deferred to end of run)
 
-- Manually trigger `publish-dev.yml` via `gh workflow run publish-dev.yml` (blank inputs —
-  uses pinned `NORDVPN_VERSION`/`IMAGE_VERSION` from `Dockerfile`, i.e. builds `5.5.5-dev`
-  from current `main`).
-- Validation: re-run the same inspection as Finding 2 against the refreshed `:dev` — confirm
-  `IMAGE_VERSION=5.5.5-dev`, `/build_version` present, `00-version` shebang fixed.
-- This can happen independently of owner approval on Phases 1–3, since it's a one-off
-  workflow run, not a code change — but included here for completeness/tracking. Will hold
-  for explicit approval since it does push to Docker Hub.
+- Manually trigger `publish-dev.yml` via `gh workflow run publish-dev.yml --ref main` (blank
+  inputs — uses pinned `NORDVPN_VERSION`/`IMAGE_VERSION` from `Dockerfile`, i.e. builds
+  `5.5.5-dev` from current `main`).
+- **Prerequisite bugfix discovered mid-run** (see commit `9768636`): the first attempt at this
+  phase failed — `publish-dev.yml`'s blank-`base_digest` fallback path
+  (`grep "ARG BASE_DIGEST" Dockerfile`) matched both the pinned `ARG BASE_DIGEST='...'` line
+  and the bare `ARG BASE_DIGEST` redeclare line added in `9f1b365`, breaking
+  `$GITHUB_OUTPUT` parsing. Fixed in the same 3 spots that shared the pattern
+  (`publish-dev.yml`, `check-base-image.yml`, `scripts/check-base-image.sh`) by matching only
+  `ARG BASE_DIGEST=`. This bug was dormant in production — `check-nordvpn-release.yml` and
+  `check-base-image.yml` would have hit it on their next real trigger.
+- **Execution deferred**: since `workflow_dispatch` runs use the workflow file from the ref
+  it's pointed at, testing the fix requires it to be pushed. Owner chose to defer Phase 0's
+  live re-run until this branch is pushed and merged at the end of this session, rather than
+  push mid-run.
+- Validation (once executed): re-run the same inspection as Finding 2 against the refreshed
+  `:dev` — confirm `IMAGE_VERSION=5.5.5-dev` (or newer, if Phases 1–3 have already shipped by
+  then), `/build_version` present, `00-version` shebang fixed.
 
 ### Phase 1 — Auto-trigger a pushable dev build for any PR that changes `Dockerfile` or `rootfs/**`
 
@@ -202,8 +212,8 @@ here.
 
 | Step | Description | Commit prefix | Status |
 |------|-------------|---------------|--------|
-| 1 | Phase 0 — refresh stale `:dev` tag (workflow run, no code commit) | — (workflow run) | Pending |
-| 2 | Phase 1 — auto-trigger pushable dev build for Dockerfile/rootfs PRs | `feat(ci):` | Pending |
+| 1 | Phase 0 — refresh stale `:dev` tag (workflow run, no code commit); prerequisite `ARG BASE_DIGEST` grep bugfix | `fix(ci):` (bugfix); workflow run deferred to end | Bugfix done (`9768636`); live refresh deferred |
+| 2 | Phase 1 — auto-trigger pushable dev build for Dockerfile/rootfs PRs | `feat(ci):` | Done |
 | 3 | Phase 2 — post "Before merging" checklist on manual PRs + fix stale header comment | `feat(ci):` | Pending |
 | 4 | Phase 3 — documentation sync | `docs:` | Pending |
 

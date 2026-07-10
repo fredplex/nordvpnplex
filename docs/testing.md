@@ -91,8 +91,15 @@ Current technology: NORDLYNX
    `rootfs/**`, its Dockerfile diff must bump `ARG IMAGE_VERSION` — otherwise the change
    would merge to `main` but never be published (`publish.yml`'s release gate only fires on
    a version-bump diff). See `docs/build-and-publish.md` §4.2 and §9.
-2. `docker build --platform linux/amd64` succeeds — catches Dockerfile errors and
-   `apt-get install` failures. No push.
+2. `docker build --platform linux/amd64` succeeds, then the full unified smoke-test suite
+   (`scripts/verify.sh`) runs against it — catches Dockerfile errors, `apt-get install`
+   failures, and functional regressions (kill switch, daemon socket), not just compile errors.
+3. **If `Dockerfile`/`rootfs/**` changed and the guard above passed**: a real pullable dev
+   image is built, smoke-tested, and pushed (`fredplex/nordvpn:<version>-dev-pr<N>`, plus the
+   shared `:dev` tag), and a "Before merging" checklist (pull, test on Unraid, run
+   `task verify-live`) is posted on the PR — the same dev-build-and-test cycle `auto/*`
+   version-bump PRs already got, now extended to manually created PRs too. Skipped for PRs
+   from forks. See `docs/build-and-publish.md` §4.2.
 
 ---
 

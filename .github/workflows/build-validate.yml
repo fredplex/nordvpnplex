@@ -1,11 +1,13 @@
 name: Build Validation
 
-# Runs docker build on every PR to main.
-# Build only — no registry login, no push.
-# Catches Dockerfile syntax errors, broken apt installs, and bad COPY paths early.
-# Also guards the release contract: publish.yml only releases on merges whose
-# Dockerfile diff bumps ARG IMAGE_VERSION, so a runtime-affecting PR without a
-# bump would land on main but never reach Docker Hub. Fail that here, at PR time.
+# Runs on every PR to main. Two things happen here:
+# 1. Guards the release contract: publish.yml only releases on merges whose Dockerfile
+#    diff bumps ARG IMAGE_VERSION, so a runtime-affecting PR without a bump would land on
+#    main but never reach Docker Hub. Fail that here, at PR time.
+# 2. Builds the image and runs the full unified smoke-test suite (scripts/verify.sh) —
+#    not just a compile check. If the PR also changes Dockerfile/rootfs, a pushable dev
+#    image is built and published (see the dev-build job below) so the owner can pull-test
+#    on real hardware before merging — the same cycle auto/* bump PRs already get.
 
 on:
   pull_request:
@@ -18,20 +20,28 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      runtime_changed: ${{ steps.guard.outputs.runtime_changed }}
+      dev_image_version: ${{ steps.guard.outputs.dev_image_version }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Guard — runtime changes must bump IMAGE_VERSION
+        id: guard
         run: |
           git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
           BASE="origin/${{ github.base_ref }}"
           RUNTIME_CHANGES="$(git diff --name-only "${BASE}" HEAD -- Dockerfile rootfs/)"
           if [[ -z "${RUNTIME_CHANGES}" ]]; then
+            echo "runtime_changed=false" >> "$GITHUB_OUTPUT"
             echo "No runtime-affecting files (Dockerfile, rootfs/) changed — guard not applicable."
             exit 0
           fi
+          echo "runtime_changed=true" >> "$GITHUB_OUTPUT"
+          PINNED_IMG=$(grep "ARG IMAGE_VERSION=" Dockerfile | sed "s/ARG IMAGE_VERSION='//;s/'$//")
+          echo "dev_image_version=${PINNED_IMG}-dev-pr${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
           if git diff "${BASE}" HEAD -- Dockerfile | grep -qE "^\+ARG IMAGE_VERSION="; then
             echo "Runtime-affecting change ships with an IMAGE_VERSION bump — OK:"
             echo "${RUNTIME_CHANGES}"
@@ -61,3 +71,50 @@ jobs:
         run: |
           NORDVPN_VERSION=$(grep "ARG NORDVPN_VERSION" Dockerfile | sed "s/ARG NORDVPN_VERSION='//;s/'$//")
           bash scripts/verify.sh "fredplex/nordvpn:temp-validate" "${NORDVPN_VERSION}" "ci-validation"
+
+  # Builds a real, pullable dev image for PRs that change the shipped image, so the owner
+  # can test on Unraid before merging — the dev-build-and-test cycle every runtime change
+  # should go through, not just auto/* version-bump PRs. Guarded to same-repo PRs only:
+  # pull_request doesn't leak secrets to fork PRs anyway, but this fails fast and clearly
+  # instead of a confusing failed Docker Hub login.
+  dev-build:
+    needs: build
+    if: needs.build.outputs.runtime_changed == 'true' && github.event.pull_request.head.repo.full_name == github.repository
+    uses: ./.github/workflows/publish-dev.yml
+    with:
+      image_version: ${{ needs.build.outputs.dev_image_version }}
+    secrets: inherit
+
+  # Posts the same "Before merging" checklist auto/* bump PRs already get in their PR body,
+  # so a human always knows to pull-test + run verify-live before merging a runtime change —
+  # regardless of whether the PR came from the daily/monthly cron or was hand-authored.
+  comment:
+    needs: [build, dev-build]
+    if: needs.build.outputs.runtime_changed == 'true' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Post dev-build checklist comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --edit-last --create-if-none --body "$(cat <<EOF
+          ## Dev build ready for testing
+
+          A development build has been built, smoke-tested, and published to Docker Hub for this PR:
+          - **This PR**: \`fredplex/nordvpn:${{ needs.build.outputs.dev_image_version }}\`
+          - **Moving dev tag**: \`fredplex/nordvpn:dev\`
+
+          ## Before merging
+          - [ ] Pull the dev build and test on Unraid:
+            \`\`\`bash
+            docker pull fredplex/nordvpn:${{ needs.build.outputs.dev_image_version }}
+            \`\`\`
+          - [ ] Update your test container to use this image and verify the VPN connects and traffic flows correctly.
+          - [ ] Ran \`task verify-live TOKEN_FILE=<path>\` against the dev image and confirmed Spain egress (the mandatory pre-release gate — automated smoke tests alone cannot validate tunnel connectivity).
+
+          ## After merging
+          Merging publishes to production only if this PR's Dockerfile diff bumps \`ARG IMAGE_VERSION\` (enforced by the guard above). If it doesn't yet, add one before merging: \`bash scripts/bump.sh <NORDVPN_VERSION> <new IMAGE_VERSION>\`.
+          EOF
+          )"
