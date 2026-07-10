@@ -28,7 +28,7 @@ jobs:
       - name: Resolve digests
         id: check
         run: |
-          PINNED=$(grep "ARG BASE_DIGEST" Dockerfile | sed "s/ARG BASE_DIGEST='//;s/'$//")
+          PINNED=$(grep "ARG BASE_DIGEST=" Dockerfile | sed "s/ARG BASE_DIGEST='//;s/'$//")
           LATEST=$(docker buildx imagetools inspect \
             ghcr.io/linuxserver/baseimage-ubuntu:noble \
             --format '{{.Manifest.Digest}}')

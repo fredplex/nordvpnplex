@@ -48,9 +48,15 @@ NordVPN package repo ──► Daily GitHub Action ──► Auto-builds Dev con
 | Gate | Why it exists / How it works |
 |---|---|
 | Review the draft PR | Confirm `IMAGE_VERSION` and `NORDVPN_VERSION`, check release notes. |
-| Test the Dev Build | Pull `fredplex/nordvpn:dev-<version>` to verify stability on Unraid. |
+| Test the Dev Build | Pull `fredplex/nordvpn:dev-<version>` (or `:<version>-dev-pr<N>` for a manually created PR — see [§4.2](#42-pr-build-validation)) to verify stability on Unraid. |
 | Merge the PR | Triggers the automated release pipeline (the primary deploy switch). |
 | CLI Fallback release | Pushing a tag locally (`task release`) still works to trigger production publish directly. |
+
+> **Every PR that changes `Dockerfile` or `rootfs/**` gets a dev-build-and-test cycle** —
+> not just the automated `auto/*` version-bump PRs. `build-validate.yml`'s `dev-build`/
+> `comment` jobs extend the same pattern to manually created `feature/*`/`fix/*` PRs (see
+> [§4.2](#42-pr-build-validation)). This was added 2026-07-10 after two manually created PRs
+> (#12, #14) shipped straight to production with no dev-image test cycle at all.
 
 ---
 
@@ -140,6 +146,14 @@ or similar errors. `task verify` and `task verify-live` work in Git Bash without
 - Agent shows the diff and waits for human approval.
 - Human commits and pushes to `main` to trigger the automated release pipeline.
 
+**Manually created `feature/*`/`fix/*` PRs that touch `Dockerfile`/`rootfs/**`**
+- Opening the PR triggers `build-validate.yml` as usual — plus, once the version-bump guard
+  passes, a real dev image is built and pushed (`fredplex/nordvpn:<version>-dev-pr<N>`) and a
+  "Before merging" checklist is posted on the PR.
+- Owner pulls the PR's dev image, tests on Unraid, runs `task verify-live`, then merges —
+  same review discipline as an automated bump PR, just triggered by a hand-authored PR
+  instead of a cron job. See [§4.2](#42-pr-build-validation).
+
 **What is never automated**
 - Merging the Pull Request.
 - Deciding when to promote the dev build to production.
@@ -219,6 +233,27 @@ The workflow builds the image, runs 4 unified smoke tests (IMAGE_VERSION label,
 `nordvpn --version`, iptables kill-switch, and nordvpnd socket presence), then pushes
 `:dev` and `:dev-<sha>` to Docker Hub. All steps are logged; a summary is printed at the end.
 
+#### PR-triggered dev builds (any PR that changes Dockerfile/rootfs)
+
+You do not need to manually trigger a dev build for a `feature/*`/`fix/*` PR — if it changes
+`Dockerfile` or `rootfs/**` and passes the `build-validate.yml` version-bump guard,
+`build-validate.yml` builds and pushes one automatically:
+
+- **Tag**: `fredplex/nordvpn:<pinned-image-version>-dev-pr<N>` (`<N>` = the PR number) — a
+  stable, PR-scoped tag that gets overwritten on every push to that PR, so you always pull
+  the latest state of that specific PR under review.
+- The shared moving `:dev` tag and `:dev-<sha>`/`:dev-<nordvpn_version>` are refreshed too, so
+  `:dev` always reflects the most recently tested candidate — from *any* PR, not just
+  automated bump PRs.
+- A "Before merging" checklist is posted as a PR comment (updated in place on subsequent
+  pushes, not re-posted) with the exact `docker pull` command for that PR's dev tag.
+- Skipped for PRs opened from a fork — `pull_request` doesn't expose Docker Hub secrets to
+  fork PRs anyway.
+
+This is what closes the gap that let PR #12 (2026-07-09) and PR #14 (2026-07-10) reach
+production with zero dev-image testing — both were manually created PRs, and until this was
+added, only `auto/*` version-bump PRs got a pushable dev image before merge.
+
 #### Consuming the dev image
 
 ```bash
@@ -238,6 +273,7 @@ Switch back to `fredplex/nordvpn:latest` when done testing.
 | Test a new NordVPN version before committing to a bump | `task dev-latest` → test → then `task bump` |
 | Validate container changes in Unraid without a release | `task dev-build` → `task dev-push` → test in Unraid |
 | Smoke-test a specific NordVPN version via CI | Actions → Publish Dev (type version) |
+| Opened a `feature/*`/`fix/*` PR that changes Dockerfile/rootfs | Automatic — pull the `:<version>-dev-pr<N>` tag posted on the PR |
 | Official release to all users | `task release` (production path — see §3 and §5) |
 
 ---
@@ -267,7 +303,7 @@ Five workflows run automatically or on-demand. None of them push a production im
 
 **File:** `.github/workflows/build-validate.yml`
 **Trigger:** Any pull request targeting `main`
-**What it does:**
+**What it does (`build` job, always runs):**
 - **Guard — runtime changes must bump `IMAGE_VERSION`** (runs first, fails fast):
   if the PR changes `Dockerfile` or `rootfs/**` but its Dockerfile diff does not bump
   `ARG IMAGE_VERSION`, the check fails. Rationale: `publish.yml` only releases on merges
@@ -275,13 +311,28 @@ Five workflows run automatically or on-demand. None of them push a production im
   so a runtime-affecting PR without a bump would land on `main` but never reach Docker Hub
   (this happened with PR #12 — see [§9](#9-versioning-design-and-release-flow)).
   Fix: run `bash scripts/bump.sh <NORDVPN_VERSION> <new IMAGE_VERSION>` in the PR.
-- Runs `docker build --platform linux/amd64`
-- No login, no push, no registry credentials needed
-- Fails the PR check if the Dockerfile has errors or `apt-get install` fails
+- Builds the image (`docker build --platform linux/amd64`) and runs the full unified
+  smoke-test suite (`scripts/verify.sh`) against it — not just a compile check.
+- No login, no push, no registry credentials needed for this job.
 
-**Human action required:** Fix the Dockerfile or scripts if the check fails before merging;
-if the guard fails, add an `IMAGE_VERSION` bump to the PR.
-**Secrets needed:** None.
+**What it does (`dev-build` + `comment` jobs, only if `Dockerfile`/`rootfs/**` changed and the
+guard above passed):**
+- **`dev-build`**: calls `publish-dev.yml` (reusable workflow) to build, smoke-test, and push
+  a real pullable dev image — `fredplex/nordvpn:<pinned-version>-dev-pr<N>`, plus refreshing
+  the shared moving `:dev` tag and `:dev-<sha>`/`:dev-<nordvpn_version>`. Skipped for PRs from
+  forks (`pull_request` doesn't leak secrets to forks anyway; this fails fast and clearly
+  instead of a confusing failed Docker Hub login). **Uses `DOCKER_USERNAME`/`DOCKER_TOKEN`.**
+- **`comment`**: posts (or updates, via `--edit-last`) the same "Before merging" checklist
+  auto/* bump PRs already get in their PR body — pull the dev image, test on Unraid, run
+  `task verify-live`. This closes the gap where manually created `feature/*`/`fix/*` PRs
+  previously reached production (see PR #12/#14, 2026-07-09/10) with no dev-image test cycle
+  at all, only this compile+smoke-test job.
+
+**Human action required:** Fix the Dockerfile or scripts if the `build` job fails; if the
+guard fails, add an `IMAGE_VERSION` bump to the PR; if `dev-build`/`comment` ran, pull-test the
+dev image and run `task verify-live` before merging (per the posted checklist).
+**Secrets needed:** `DOCKER_USERNAME`/`DOCKER_TOKEN` — only consumed by `dev-build`, and only
+for same-repo PRs that change `Dockerfile`/`rootfs/**`.
 
 ---
 

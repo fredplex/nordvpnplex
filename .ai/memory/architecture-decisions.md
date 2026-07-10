@@ -109,6 +109,18 @@ docker build --no-cache --platform linux/amd64 . -f Dockerfile -t "fredplex/nord
 
 ---
 
+## Key Decisions (2026-07-10 Dev Build Gate for Manual PRs)
+
+### Decision: only `auto/*` version-bump PRs got a dev-build-and-test cycle — manually created PRs shipped to production with no pullable image and no real-tunnel test
+
+**Context**: PR #12 and PR #14 (both manually created `feature/*`/`fix/*` branches) merged to production with only `build-validate.yml`'s compile-check + fake-token smoke test — no dev image was ever pushed for either, so nobody could pull-test on real Unraid hardware or run `task verify-live` before they shipped. Only the two cron-triggered workflows (`check-nordvpn-release.yml`, `check-base-image.yml`) called `publish-dev.yml` before opening their PRs. Confirmed live: `:dev` was directly inspected and found to be missing `/build_version` and still carrying the broken pre-fix `00-version` shebang — i.e. `:dev` reproduced the exact bug this investigation started from, because it's a single moving tag only repointed as a side effect of the two cron workflows firing, with no relationship to arbitrary merges.
+**Choice**: Extended `build-validate.yml` with two new jobs — `dev-build` (calls `publish-dev.yml` to build/smoke-test/push a real image, tagged `:<pinned-version>-dev-pr<N>`, refreshing the shared `:dev`/`:dev-<sha>`/`:dev-<nordvpn_version>` tags too) and `comment` (posts/updates the same "Before merging" checklist `auto/*` PRs already get) — gated on the existing IMAGE_VERSION-bump guard passing and the PR being same-repo (not a fork).
+**Rationale**: The owner's explicit direction was that *any* change reaching production should go through a dev-build-and-test cycle, not just the two automated bump paths. Reusing `publish-dev.yml` as-is (just choosing a distinct `image_version` input) avoided duplicating its build/tag/smoke-test logic. Updating the shared `:dev` tag on *any* qualifying PR (not just `auto/*`) is what actually fixes the staleness problem going forward, not just once.
+**Gotcha — dormant bug found and fixed along the way**: manually triggering `publish-dev.yml` to test this (Phase 0 of the same plan) failed immediately — the Dockerfile's `ARG BASE_DIGEST` redeclare line (added in `9f1b365`, needed to make the ARG visible inside a later `RUN`) made `grep "ARG BASE_DIGEST" Dockerfile` match two lines, breaking `$GITHUB_OUTPUT` parsing whenever `base_digest` wasn't explicitly overridden. This is the *default* code path for `check-nordvpn-release.yml`'s call to `publish-dev.yml` — meaning the next real NordVPN version release would have broken the daily automation's draft-PR flow. Also broke `check-base-image.yml`'s own digest comparison (silently — `task check-base` would always report "update available," even when current) since neither had been exercised since `9f1b365` landed. Fixed by matching `ARG BASE_DIGEST=` (the assignment) instead of the bare string, in all 3 affected spots (`publish-dev.yml`, `check-base-image.yml`, `scripts/check-base-image.sh`).
+**Gotcha — tag naming**: the per-PR tag scheme (`<pinned-version>-dev-pr<N>`) deliberately avoids the `-dev` (no suffix) pattern `auto/*` PRs use, so a manual PR's dev build never collides with or gets confused with an automated bump PR's dev build even if both are open concurrently.
+
+---
+
 ## Key Decisions (2026-07-05 Build & Release Workflow Hardening)
 
 ### Decision: bump.sh refuses to edit files with unresolved conflict markers
