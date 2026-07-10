@@ -3,6 +3,9 @@ name: Build Validation
 # Runs docker build on every PR to main.
 # Build only — no registry login, no push.
 # Catches Dockerfile syntax errors, broken apt installs, and bad COPY paths early.
+# Also guards the release contract: publish.yml only releases on merges whose
+# Dockerfile diff bumps ARG IMAGE_VERSION, so a runtime-affecting PR without a
+# bump would land on main but never reach Docker Hub. Fail that here, at PR time.
 
 on:
   pull_request:
@@ -19,6 +22,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Guard — runtime changes must bump IMAGE_VERSION
+        run: |
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          BASE="origin/${{ github.base_ref }}"
+          RUNTIME_CHANGES="$(git diff --name-only "${BASE}" HEAD -- Dockerfile rootfs/)"
+          if [[ -z "${RUNTIME_CHANGES}" ]]; then
+            echo "No runtime-affecting files (Dockerfile, rootfs/) changed — guard not applicable."
+            exit 0
+          fi
+          if git diff "${BASE}" HEAD -- Dockerfile | grep -qE "^\+ARG IMAGE_VERSION="; then
+            echo "Runtime-affecting change ships with an IMAGE_VERSION bump — OK:"
+            echo "${RUNTIME_CHANGES}"
+          else
+            echo "::error::This PR changes the shipped image (Dockerfile and/or rootfs/) without bumping ARG IMAGE_VERSION in the Dockerfile."
+            echo "::error::Merges to main only publish when the Dockerfile diff contains an IMAGE_VERSION bump — without one, this change lands on main but never reaches Docker Hub (see docs/build-and-publish.md §9)."
+            echo "::error::Fix: bash scripts/bump.sh <NORDVPN_VERSION> <new IMAGE_VERSION>"
+            echo "Runtime-affecting files changed:"
+            echo "${RUNTIME_CHANGES}"
+            exit 1
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

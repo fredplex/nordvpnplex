@@ -15,7 +15,7 @@ Debugged missing startup version logs on Unraid: Docker Hub `latest` (5.5.4, pub
 `.ai/plans/version-logs-release-gap.md`.
 
 - [x] Phase A — image-only bump 5.5.4 → 5.5.5 (ship the stranded feature)
-- [ ] Phase B — PR guard: runtime changes must bump IMAGE_VERSION (hard fail)
+- [x] Phase B — PR guard: runtime changes must bump IMAGE_VERSION (hard fail)
 - [ ] Phase C — bump.sh changelog wording + stale version-doc cleanup
 
 ### Container Startup Version Logs (Complete)

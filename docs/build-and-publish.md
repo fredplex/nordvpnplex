@@ -268,11 +268,19 @@ Five workflows run automatically or on-demand. None of them push a production im
 **File:** `.github/workflows/build-validate.yml`
 **Trigger:** Any pull request targeting `main`
 **What it does:**
+- **Guard — runtime changes must bump `IMAGE_VERSION`** (runs first, fails fast):
+  if the PR changes `Dockerfile` or `rootfs/**` but its Dockerfile diff does not bump
+  `ARG IMAGE_VERSION`, the check fails. Rationale: `publish.yml` only releases on merges
+  whose Dockerfile diff bumps a version pin (see [§4.3](#43-tag-triggered--main-branch-triggered-publish)),
+  so a runtime-affecting PR without a bump would land on `main` but never reach Docker Hub
+  (this happened with PR #12 — see [§9](#9-versioning-design-and-release-flow)).
+  Fix: run `bash scripts/bump.sh <NORDVPN_VERSION> <new IMAGE_VERSION>` in the PR.
 - Runs `docker build --platform linux/amd64`
 - No login, no push, no registry credentials needed
 - Fails the PR check if the Dockerfile has errors or `apt-get install` fails
 
-**Human action required:** Fix the Dockerfile or scripts if the check fails before merging.
+**Human action required:** Fix the Dockerfile or scripts if the check fails before merging;
+if the guard fails, add an `IMAGE_VERSION` bump to the PR.
 **Secrets needed:** None.
 
 ---
