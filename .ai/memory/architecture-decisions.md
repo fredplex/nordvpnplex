@@ -98,6 +98,17 @@ docker build --no-cache --platform linux/amd64 . -f Dockerfile -t "fredplex/nord
 
 ---
 
+## Key Decisions (2026-07-10 Version Logs Release Gap)
+
+### Decision: publish.yml's release gate only fires on a version-bump diff — runtime changes without one are silently stranded on `main`
+
+**Context**: The startup version-log feature (PR #12, merged 2026-07-09) changed `Dockerfile` and `rootfs/**` but did not bump `ARG IMAGE_VERSION`. `publish.yml`'s "Resolve release versions" step only sets `release_needed=true` on a `main` push when the merge diff matches `^\+ARG (NORDVPN|IMAGE)_VERSION=`; PR #12's diff didn't match, so the workflow ran, logged "No version bump detected in Dockerfile. Bypassing production release.", and exited green without publishing. The feature sat on `main`, invisible in every published image, until an unrelated bump happened to carry it out — discovered only because an owner compared a running container's digest against Docker Hub `latest` and found they matched (which only proves the server runs current `latest`, not that `latest` contains a given merge).
+**Choice**: Added a hard-fail guard to `build-validate.yml` (runs first, before the build) that fails any PR touching `Dockerfile` or `rootfs/**` whose Dockerfile diff does not also bump `ARG IMAGE_VERSION`.
+**Rationale**: The release gate's behavior (bump-diff-triggered publish) is correct and intentional — the gap was that nothing enforced the *contract's inverse* at PR time, so violating it failed silently instead of loudly. A hard fail matches the fact that any Dockerfile/rootfs change alters shipped image bytes; there is no legitimate reason to merge one without a corresponding release.
+**Gotcha**: This is a durable rule for *any* future PR that touches `Dockerfile` or `rootfs/**`, not just release-pipeline work — it will fail in CI (not silently vanish) if the bump is missing. Fix: `bash scripts/bump.sh <NORDVPN_VERSION> <new IMAGE_VERSION> [ChangelogSummary]`. Full detail: `docs/build-and-publish.md` §4.2 and §9.
+
+---
+
 ## Key Decisions (2026-07-05 Build & Release Workflow Hardening)
 
 ### Decision: bump.sh refuses to edit files with unresolved conflict markers

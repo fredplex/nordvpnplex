@@ -7,16 +7,19 @@ Current work in progress.
 
 ## Current Status
 
-### Version Logs Release Gap (In progress — branch `fix/version-logs-release-gap`)
+**None active — awaiting direction.** Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
+
+### Version Logs Release Gap (Complete)
 
 Debugged missing startup version logs on Unraid: Docker Hub `latest` (5.5.4, published
-2026-07-08 from PR #9) predates the feature (PR #12, merged 2026-07-09 without an
-`IMAGE_VERSION` bump — publish gate correctly bypassed). Plan:
-`.ai/plans/version-logs-release-gap.md`.
+2026-07-08 from PR #9) predated the feature (PR #12, merged 2026-07-09 without an
+`IMAGE_VERSION` bump — publish gate correctly bypassed).
 
-- [x] Phase A — image-only bump 5.5.4 → 5.5.5 (ship the stranded feature)
-- [x] Phase B — PR guard: runtime changes must bump IMAGE_VERSION (hard fail)
-- [x] Phase C — bump.sh changelog wording + stale version-doc cleanup
+- [x] Phase A — image-only bump 5.5.4 → 5.5.5 (ship the stranded feature) (`9b60b5f`)
+- [x] Phase B — PR guard: runtime changes must bump IMAGE_VERSION (hard fail) (`fbdacc1`)
+- [x] Phase C — bump.sh changelog wording + stale version-doc cleanup (`faf5e8e`)
+
+All 3 phases complete. See `.ai/plans/version-logs-release-gap.md` for full detail.
 
 ### Container Startup Version Logs (Complete)
 
@@ -98,6 +101,6 @@ All 7 phases complete. See `.ai/plans/archive/build-release-workflow-hardening.m
 
 ## Recently Completed
 
+- **Version Logs Release Gap** (2026-07-10) — debugged why the startup version-log feature never reached Docker Hub (`latest` predated its merge); shipped it via an image-only bump, added a hard-fail PR guard against future bump-less runtime changes, and cleaned up `bump.sh`/stale version docs (`203e92a`–`faf5e8e`)
 - **Build & release workflow hardening** (2026-07-05) — fixed `CLAUDE.md` conflict-marker corruption + guarded `bump.sh` against it; corrected doc-drift (cadence, smoke-test count); added Check Base Image workflow docs; auto-appending Changelog; `verify-live` checklist visibility; concurrent-bump-PR race guard (`91363e0`–`0afa08b`)
 - **Template re-prime v3.7.7 + testing.md merge** (2026-07-02) — GUIDE.md (3.5.0→3.5.3) + definition-of-done.md (3.0.2→3.0.3) accepted template-pure; docs/testing.md (3.0.4→3.0.5) merged with restored NordVPN-specific content (`fa82c87`, `20ac94a`)
-- **prime-ai-docs v3.5.0 re-prime** (2026-07-01) — GUIDE.md (3.4.0→3.5.0), implementation.md (3.0.4→3.1.0), session-close.md (3.0.6→3.0.7) (`534c709`)
