@@ -1,6 +1,6 @@
 # No Dev-Build-and-Test Cycle for Manual PRs — Findings, Recommendations, Plan
 
-Created: 2026-07-10 | Status: Pending review
+Created: 2026-07-10 | Status: In progress (approved 2026-07-10 — Autonomous mode, all phases)
 
 ## Background — why this is needed
 
@@ -185,27 +185,27 @@ here.
 
 ---
 
-## Open Questions for owner
+## Decisions (resolved by owner, 2026-07-10)
 
-1. **Tag naming/semantics for Phase 1**: should the shared moving `:dev` tag be updated by
-   *any* qualifying PR (auto/* bumps **and** manual feature/fix PRs), giving it consistent
-   "most recently tested candidate" semantics regardless of origin? Recommendation: **yes** —
-   this is what actually fixes Finding 2 going forward, not just once. Alongside that, add a
-   per-PR tag (e.g. `:dev-pr<N>`) so a specific PR under review isn't silently overwritten if
-   another PR's CI run lands mid-review.
-2. **Merge gate strength**: keep the "Before merging" checklist as an unenforced markdown
-   checkbox (matches the existing, deliberate 2026-07-05 decision — Finding 4), or revisit
-   branch protection / required status checks now that the dev-build step will exist for
-   every PR shape, not just two? Recommendation: keep it a checklist for this plan (stay
-   consistent, avoid re-opening a separately-decided question) — flagging only, not proposing
-   a change.
-3. **Scope of Phase 1's trigger**: only PRs that change `Dockerfile`/`rootfs/**` (recommended
-   — avoids a pointless rebuild+push for docs-only PRs, reuses the exact diff logic that
-   already exists), or every PR regardless of files touched?
-4. **Phase 0 timing**: trigger the one-off `:dev` refresh immediately on approval of this plan
-   (independent of whether Phases 1–3 are approved), or bundle it as the first successful run
-   of the new Phase 1 pipeline once that lands? Recommendation: do it now — it's a completely
-   independent, low-risk fix for an actively misleading tag.
+1. **Tag semantics — yes**: the shared moving `:dev` tag is updated by *any* qualifying PR
+   (auto/* bumps **and** manual feature/fix PRs), plus a per-PR tag (e.g. `:dev-pr<N>`) so a
+   specific PR under review isn't silently overwritten by another PR's concurrent CI run.
+2. **Merge gate strength — agreed with recommendation**: keep the "Before merging" checklist
+   as an unenforced markdown checkbox; branch protection / required status checks stay out of
+   scope for this plan (consistent with the 2026-07-05 decision — Finding 4).
+3. **Trigger scope — agreed with recommendation**: Phase 1 only fires for PRs that change
+   `Dockerfile`/`rootfs/**` (reusing the existing diff-detection), not every PR.
+4. **Phase 0 timing — do it now**: the one-off `:dev` refresh runs immediately as part of this
+   execution, independent of Phases 1–3.
+
+## Execution Order
+
+| Step | Description | Commit prefix | Status |
+|------|-------------|---------------|--------|
+| 1 | Phase 0 — refresh stale `:dev` tag (workflow run, no code commit) | — (workflow run) | Pending |
+| 2 | Phase 1 — auto-trigger pushable dev build for Dockerfile/rootfs PRs | `feat(ci):` | Pending |
+| 3 | Phase 2 — post "Before merging" checklist on manual PRs + fix stale header comment | `feat(ci):` | Pending |
+| 4 | Phase 3 — documentation sync | `docs:` | Pending |
 
 ---
 
