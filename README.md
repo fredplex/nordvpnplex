@@ -230,6 +230,7 @@ Nord Security companies are not responsible for and have no control over the nat
 
 ## Changelog
 
+- **2026-07-10** — Image 5.5.4 → 5.5.5 — ship container startup version logs (custom version banner + base image version in the LSIO branding block; NordVPN unchanged at 5.2.0)
 - **2026-07-08** — Base image refresh — image 5.5.3 → 5.5.4 (NordVPN unchanged at 5.2.0)
 - **2026-07-02** — NordVPN 5.1.0 → 5.2.0 (image → 5.5.3), via the automated daily version-check pipeline.
 - **2026-07-01** — Base image refresh: digest bump for `ghcr.io/linuxserver/baseimage-ubuntu:noble` (image 5.5.1 → 5.5.2), via the automated monthly base-image check pipeline. NordVPN version unchanged.

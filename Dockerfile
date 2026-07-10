@@ -4,7 +4,7 @@ LABEL maintainer="fredplex@gmail.com"
 
 ARG BASE_DIGEST
 ARG NORDVPN_VERSION='5.2.0'
-ARG IMAGE_VERSION='5.5.4'
+ARG IMAGE_VERSION='5.5.5'
 ARG NORDVPN_RELEASE='1.0.0'
 
 # OCI standard image labels — externally queryable without running the container:
