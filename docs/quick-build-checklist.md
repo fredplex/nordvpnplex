@@ -88,7 +88,7 @@ task bump NORDVPN_VERSION=5.3.0 IMAGE_VERSION=5.5.5
 Review the `git diff` output. If it looks correct:
 
 ```powershell
-git add Dockerfile README.md CLAUDE.md
+git add Dockerfile README.md
 git commit -m "chore: bump NordVPN 5.2.0 → 5.3.0"
 ```
 

@@ -6,6 +6,77 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-07-10 (Version Logs Release Gap)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Onboarding pass; debugged why the startup version-log feature (merged 2026-07-09) never reached the running Unraid image despite matching Docker Hub's digest; wrote `.ai/plans/version-logs-release-gap.md` with findings and a 3-phase remediation plan | — |
+| 2 | Owner approved all 3 phases (Autonomous mode), chose hard-fail for the guard, and included Phase C | — |
+| 3 | Phase A — bumped `IMAGE_VERSION` 5.5.4 → 5.5.5 to ship the stranded feature; corrected the auto-generated Changelog wording | `9b60b5f` |
+| 4 | Phase B — added a hard-fail guard to `build-validate.yml`: fails any PR changing `Dockerfile`/`rootfs/**` without an `IMAGE_VERSION` bump; documented in `docs/build-and-publish.md` §4.2 and §9 | `fbdacc1` |
+| 5 | Phase C — `bump.sh` gained an optional `CHANGELOG_SUMMARY` third argument; swept 14 files for the stale "bump.sh edits CLAUDE.md" claim and the rotated base-image digest citation | `faf5e8e` |
+| 6 | Session close — current.md, active.md, SESSION_NOTES.md updated | this commit |
+
+### Key decisions
+
+- **Root cause was a release-pipeline gap, not a code or environment bug**: the owner's digest
+  check on Unraid was accurate but answered the wrong question — it confirmed the server was
+  running current `latest`, not that `latest` contained the feature. It didn't: `latest` was
+  built from PR #9 on 2026-07-08, one day before the feature merged in PR #12 on 2026-07-09.
+  PR #12's Dockerfile diff added `ARG BASE_DIGEST` (redeclare) and a `/build_version` RUN step
+  but no `ARG IMAGE_VERSION` bump, so `publish.yml`'s release gate logged "No version bump
+  detected in Dockerfile. Bypassing production release." and pushed nothing — confirmed by
+  pulling the actual `gh run view` logs for that run, not just reading the workflow source.
+- **Fixed forward with a normal version bump (Phase A)** rather than any special-case release
+  path — the same mechanism every other release uses.
+- **Systemic fix (Phase B) is a hard fail, not a warning** (owner's explicit choice): any
+  Dockerfile/rootfs change alters shipped image bytes, so a runtime change silently stranded
+  on `main` is a correctness gap, not a style preference. The guard's logic was validated
+  against real git history — replayed against PR #12's actual diff (fails, as intended), this
+  branch's diff (passes), and a docs-only commit (skipped as not applicable) — not just
+  written and trusted.
+- **`bump.sh`'s new third argument is additive**: the two automated call sites
+  (`check-nordvpn-release.yml`, `check-base-image.yml`) still call it with 2 arguments and
+  produce unchanged wording; only manual/feature bumps need to pass the new summary.
+- **Doc-sync swept slightly wider than the plan's literal list, within Phase C's scope**: the
+  stale "bump.sh edits CLAUDE.md" claim existed in 9 places (all fixed, plus both cron workflow
+  comments), and 3 more present-tense docs cited the pre-refresh base image digest — corrected
+  to point at `ARG BASE_DIGEST` in the Dockerfile so future digest refreshes can't re-stale them.
+
+### Stopping point
+
+- Working tree: clean, 4 commits on the task branch plus this close commit.
+- Validation: `task docker-build` and `task verify` (3 passed / 0 failed / 1 known WARN) re-run
+  on HEAD as the final pre-integration gate, per the session-close protocol.
+
+### Verification performed
+
+- Static gate (`task docker-build`) and runtime gate (`task verify`) both re-run on the final
+  commit, not just after Phase A.
+- Manually started a container from the Phase A image and inspected `docker logs` to confirm
+  both version banners print (`NordVPN Docker Client v.5.5.5-dev+<hash>` and the
+  `nordvpnplex version:` / `base image digest:` lines in the LSIO branding block) — the
+  original bug report's reproduction, now passing.
+- Phase B guard logic exercised against 3 real historical diffs (not just reasoned about).
+- Phase C `bump.sh` changelog paths (2-arg and 3-arg) functionally tested in a disposable
+  scratch git repo, not just read.
+
+### Fragile areas
+
+- **Local `bash` PATH ambiguity in this session's shell**: Windows' `C:\WINDOWS\system32\bash.exe`
+  (WSL) resolved ahead of Git Bash on `PATH` in some PowerShell invocations; WSL's `docker` CLI
+  can't see Docker Desktop's local image cache, so `task verify` failed there with a false
+  "image not found" until `C:\Program Files\Git\bin` was prepended to `PATH` for the session.
+  Environment quirk, not a repo issue — flagging in case it recurs for the next session.
+- Carried forward, unchanged this session: s6 init daemon capability constraints during
+  stateless `task verify` on local Docker Desktop setups; `AGENTS.md` still has unfilled
+  template placeholders (Architecture, Key Boundaries, Current posture — flagged during this
+  session's onboarding pass, not addressed as out of scope for this task).
+
+---
+
 ## Session Close — 2026-07-09 (Container Startup Version Logs)
 
 ### Completed this session

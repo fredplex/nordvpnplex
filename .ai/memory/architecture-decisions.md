@@ -98,6 +98,17 @@ docker build --no-cache --platform linux/amd64 . -f Dockerfile -t "fredplex/nord
 
 ---
 
+## Key Decisions (2026-07-10 Version Logs Release Gap)
+
+### Decision: publish.yml's release gate only fires on a version-bump diff — runtime changes without one are silently stranded on `main`
+
+**Context**: The startup version-log feature (PR #12, merged 2026-07-09) changed `Dockerfile` and `rootfs/**` but did not bump `ARG IMAGE_VERSION`. `publish.yml`'s "Resolve release versions" step only sets `release_needed=true` on a `main` push when the merge diff matches `^\+ARG (NORDVPN|IMAGE)_VERSION=`; PR #12's diff didn't match, so the workflow ran, logged "No version bump detected in Dockerfile. Bypassing production release.", and exited green without publishing. The feature sat on `main`, invisible in every published image, until an unrelated bump happened to carry it out — discovered only because an owner compared a running container's digest against Docker Hub `latest` and found they matched (which only proves the server runs current `latest`, not that `latest` contains a given merge).
+**Choice**: Added a hard-fail guard to `build-validate.yml` (runs first, before the build) that fails any PR touching `Dockerfile` or `rootfs/**` whose Dockerfile diff does not also bump `ARG IMAGE_VERSION`.
+**Rationale**: The release gate's behavior (bump-diff-triggered publish) is correct and intentional — the gap was that nothing enforced the *contract's inverse* at PR time, so violating it failed silently instead of loudly. A hard fail matches the fact that any Dockerfile/rootfs change alters shipped image bytes; there is no legitimate reason to merge one without a corresponding release.
+**Gotcha**: This is a durable rule for *any* future PR that touches `Dockerfile` or `rootfs/**`, not just release-pipeline work — it will fail in CI (not silently vanish) if the bump is missing. Fix: `bash scripts/bump.sh <NORDVPN_VERSION> <new IMAGE_VERSION> [ChangelogSummary]`. Full detail: `docs/build-and-publish.md` §4.2 and §9.
+
+---
+
 ## Key Decisions (2026-07-05 Build & Release Workflow Hardening)
 
 ### Decision: bump.sh refuses to edit files with unresolved conflict markers
@@ -106,11 +117,11 @@ docker build --no-cache --platform linux/amd64 . -f Dockerfile -t "fredplex/nord
 **Rationale**: `CLAUDE.md` carried unresolved git conflict markers on `main` for over a week after a bad merge (`5c8b103`, 2026-07-01) — `bump.sh`'s blind `sed` kept silently rewriting a version line sandwiched inside the broken block on every subsequent release instead of failing loudly.
 **Gotcha**: If a future `task bump` run errors with "has unresolved merge conflict markers", the file genuinely has a broken merge — resolve it manually before retrying, do not bypass the guard.
 
-### Decision: bump.sh auto-appends a Changelog placeholder on every run
+### Decision: bump.sh auto-appends a Changelog entry on every run
 
-**Choice**: `bump.sh` captures the outgoing `NORDVPN_VERSION`/`IMAGE_VERSION` before editing, derives a one-line summary (NordVPN bump vs. base-image-only refresh), and appends it under `README.md`'s `## Changelog` (newest first) with a `<!-- TODO: expand with real details before merging -->` marker.
+**Choice**: `bump.sh` captures the outgoing `NORDVPN_VERSION`/`IMAGE_VERSION` before editing, derives a one-line summary (NordVPN bump vs. base-image-only refresh vs. caller-supplied wording), and appends it under `README.md`'s `## Changelog` (newest first). The `<!-- TODO -->` placeholder was dropped in the 2026-07-09 pipeline review; since 2026-07-10 an optional third argument (`CHANGELOG_SUMMARY`) sets the wording.
 **Rationale**: The Changelog constraint in `CLAUDE.md` had gone stale for over a week because nothing wrote to it automatically — both human and automated bump paths skipped it every time.
-**Gotcha**: The appended line is a placeholder, not a finished entry — replace the TODO text with real detail before merging each bump PR, or literal TODO lines will accumulate in `README.md`.
+**Gotcha**: Image-only bumps without the third argument default to "Base image refresh" wording — correct for the automated monthly base flow, wrong for feature/fix bumps, so pass a summary when bumping to ship container changes (e.g. `bash scripts/bump.sh 5.2.0 5.5.5 "ship container startup version logs"`).
 
 ### Decision: both automated bump workflows guard against concurrent `auto/*` PRs
 

@@ -268,11 +268,19 @@ Five workflows run automatically or on-demand. None of them push a production im
 **File:** `.github/workflows/build-validate.yml`
 **Trigger:** Any pull request targeting `main`
 **What it does:**
+- **Guard — runtime changes must bump `IMAGE_VERSION`** (runs first, fails fast):
+  if the PR changes `Dockerfile` or `rootfs/**` but its Dockerfile diff does not bump
+  `ARG IMAGE_VERSION`, the check fails. Rationale: `publish.yml` only releases on merges
+  whose Dockerfile diff bumps a version pin (see [§4.3](#43-tag-triggered--main-branch-triggered-publish)),
+  so a runtime-affecting PR without a bump would land on `main` but never reach Docker Hub
+  (this happened with PR #12 — see [§9](#9-versioning-design-and-release-flow)).
+  Fix: run `bash scripts/bump.sh <NORDVPN_VERSION> <new IMAGE_VERSION>` in the PR.
 - Runs `docker build --platform linux/amd64`
 - No login, no push, no registry credentials needed
 - Fails the PR check if the Dockerfile has errors or `apt-get install` fails
 
-**Human action required:** Fix the Dockerfile or scripts if the check fails before merging.
+**Human action required:** Fix the Dockerfile or scripts if the check fails before merging;
+if the guard fails, add an `IMAGE_VERSION` bump to the PR.
 **Secrets needed:** None.
 
 ---
@@ -294,6 +302,14 @@ Five workflows run automatically or on-demand. None of them push a production im
    - `fredplex/nordvpn:latest`
    - `fredplex/nordvpn:<tag>` (e.g. `fredplex/nordvpn:5.6.0`)
 6. Creates a **GitHub Release** for the version tag (only if not already existing) — this is what sends the native success notification (see [§4.6 Release notifications](#46-release-notifications))
+
+> **Release gate on `main` pushes**: for trigger 2, the workflow runs on any `main` push
+> touching `Dockerfile`, but it **only releases when the merge diff bumps
+> `ARG NORDVPN_VERSION` or `ARG IMAGE_VERSION`** — otherwise it logs
+> "No version bump detected in Dockerfile. Bypassing production release." and exits
+> green without publishing anything. A runtime change merged without a bump therefore
+> does not ship (see the rule in [§9](#9-versioning-design-and-release-flow)); the
+> [§4.2](#42-pr-build-validation) guard fails that PR shape before it can merge.
 
 **Human action required:** Merge the draft PR (which modifies `Dockerfile`) or create/push a git tag.
 **Secrets needed:** `DOCKER_USERNAME` and `DOCKER_TOKEN` (see [Section 7](#7-one-time-setup-docker-hub-credentials-in-github)).
@@ -344,7 +360,7 @@ For full dev workflow documentation, see [§3.5 Dev workflow](#35-dev-workflow).
 1. Resolves the latest digest for `ghcr.io/linuxserver/baseimage-ubuntu:noble` without pulling the image.
 2. Compares the latest digest against the pinned digest in the `FROM` line of the `Dockerfile`.
 3. If a mismatch is detected (newer base image is available):
-   - Bumps `IMAGE_VERSION` in the `Dockerfile`, `README.md`, and `CLAUDE.md` using `scripts/bump.sh` (patch increment).
+   - Bumps `IMAGE_VERSION` in the `Dockerfile` and auto-appends a `README.md` Changelog entry using `scripts/bump.sh` (patch increment).
    - Bumps the digest pin in the `Dockerfile` to the new digest.
    - Triggers the dev build workflow (`publish-dev.yml`) to build and verify a pre-tested dev image (e.g. `dev-<version>`, `<image_version>-dev`).
    - Opens a **draft PR** on branch `auto/base-image-<suggested_image_version>`.
@@ -401,7 +417,7 @@ When the daily check detects a new version, it builds/verifies a dev container, 
 - Verify the VPN connects and network routing works as expected.
 
 **2. Review the draft PR on GitHub**
-- Check the file diff: `Dockerfile`, `README.md`, `CLAUDE.md`.
+- Check the file diff: `Dockerfile`, `README.md`.
 - Confirm `IMAGE_VERSION` is correct (automation suggests a patch bump — modify in the PR if you want a minor/major bump instead).
 - Check the [NordVPN release notes](https://nordvpn.com/blog/nordvpn-linux-release-notes/) for breaking changes.
 
@@ -434,11 +450,18 @@ task check-version
 ```bash
 task bump NORDVPN_VERSION=4.6.0 IMAGE_VERSION=5.6.0
 ```
-This updates `Dockerfile`, `README.md`, `CLAUDE.md` and prints the diff.
+This updates `Dockerfile` and `README.md` (Changelog entry) and prints the diff.
+
+For a feature/fix bump (image-only, not a base refresh), call the script directly and pass
+a Changelog summary as the third argument — otherwise the entry defaults to
+"Base image refresh" wording:
+```bash
+bash scripts/bump.sh 5.2.0 5.5.5 "ship container startup version logs"
+```
 
 **3. Commit and push**
 ```bash
-git add Dockerfile README.md CLAUDE.md
+git add Dockerfile README.md
 git commit -m "chore: bump NordVPN 5.2.0 → 5.3.0"
 git push origin main
 ```
@@ -586,6 +609,15 @@ pull the latest `main`, and re-run the workflow manually via the GitHub Actions 
 ## 9. Versioning design and release flow
 
 The project maintains a clear separation between the **upstream application version** and the **wrapper image version** to ensure container changes can be versioned and released independently of NordVPN client updates.
+
+> **Rule — runtime changes ship only via version bumps.** Any PR that changes the shipped
+> image (`Dockerfile`, `rootfs/**`) must also bump `ARG IMAGE_VERSION`. The publish
+> workflow's release gate ([§4.3](#43-tag-triggered--main-branch-triggered-publish))
+> bypasses `main` merges whose diff has no version bump, so a bump-less runtime change
+> lands on `main` but never reaches Docker Hub — it stays stranded until the next
+> unrelated bump happens to carry it out. Enforced at PR time by the Build Validation
+> guard ([§4.2](#42-pr-build-validation)). Lesson from PR #12 (2026-07-09): the startup
+> version-log feature merged without a bump and silently never shipped.
 
 ### 9.1 Version Types
 

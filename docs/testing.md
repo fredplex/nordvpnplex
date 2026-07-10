@@ -86,7 +86,13 @@ Current technology: NORDLYNX
 
 **Workflow**: `.github/workflows/build-validate.yml`
 **Trigger**: PR → main
-**What it checks**: `docker build --platform linux/amd64` succeeds — catches Dockerfile errors and `apt-get install` failures. No push.
+**What it checks**:
+1. **Version-bump guard** (runs first, fails fast): if the PR changes `Dockerfile` or
+   `rootfs/**`, its Dockerfile diff must bump `ARG IMAGE_VERSION` — otherwise the change
+   would merge to `main` but never be published (`publish.yml`'s release gate only fires on
+   a version-bump diff). See `docs/build-and-publish.md` §4.2 and §9.
+2. `docker build --platform linux/amd64` succeeds — catches Dockerfile errors and
+   `apt-get install` failures. No push.
 
 ---
 

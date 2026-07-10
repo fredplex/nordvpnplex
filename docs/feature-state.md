@@ -44,7 +44,7 @@ Authoritative inventory of all features in **fredplex/nordvpn**.
 | OCI image labels | ✅ Implemented | `org.opencontainers.image.*` labels queryable via `docker inspect` |
 | `ENV IMAGE_VERSION` | ✅ Implemented | Available inside container at runtime; set at build time |
 | Docker HEALTHCHECK | ✅ Implemented | `--interval=60s --start-period=45s`; surfaces tunnel state to Docker engine and Unraid dashboard; transitions `starting → healthy` in ~5s with NordLynx |
-| Base image digest pin | ✅ Implemented | `noble@sha256:53411508…` — prevents silent base image changes; enforces the no-base-bump constraint |
+| Base image digest pin | ✅ Implemented | `ARG BASE_DIGEST` in the Dockerfile (refreshed monthly via `check-base-image.yml`) — prevents silent base image changes; enforces the no-base-bump constraint |
 
 ---
 
