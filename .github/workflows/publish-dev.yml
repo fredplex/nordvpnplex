@@ -80,7 +80,7 @@ jobs:
           if [[ -n "${{ inputs.base_digest }}" ]]; then
             echo "base_digest=${{ inputs.base_digest }}" >> "$GITHUB_OUTPUT"
           else
-            PINNED_DIGEST=$(grep "ARG BASE_DIGEST" Dockerfile | sed "s/ARG BASE_DIGEST='//;s/'$//")
+            PINNED_DIGEST=$(grep "ARG BASE_DIGEST=" Dockerfile | sed "s/ARG BASE_DIGEST='//;s/'$//")
             echo "base_digest=${PINNED_DIGEST}" >> "$GITHUB_OUTPUT"
           fi
 

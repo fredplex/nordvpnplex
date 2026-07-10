@@ -4,7 +4,7 @@ set -euo pipefail
 # Run from repo root. Requires: docker buildx
 
 IMAGE="ghcr.io/linuxserver/baseimage-ubuntu:noble"
-PINNED=$(grep "ARG BASE_DIGEST" Dockerfile | sed "s/ARG BASE_DIGEST='//;s/'$//")
+PINNED=$(grep "ARG BASE_DIGEST=" Dockerfile | sed "s/ARG BASE_DIGEST='//;s/'$//")
 
 echo "Checking : ${IMAGE}"
 echo "Pinned   : ${PINNED}"
