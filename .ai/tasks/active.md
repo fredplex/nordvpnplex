@@ -9,6 +9,20 @@ Current work in progress.
 
 **None active — awaiting direction.** Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
 
+### Dev Build Gate for Manual PRs (Complete)
+
+Manually created `feature/*`/`fix/*` PRs that change `Dockerfile`/`rootfs/**` now get the
+same dev-build-and-test cycle `auto/*` bump PRs already had — a real pushed dev image
+(`:<version>-dev-pr<N>`, refreshing shared `:dev`) plus a "Before merging" checklist.
+Triggered by discovering `:dev` had gone stale and was reproducing the exact bug from the
+Version Logs Release Gap task below (missing `/build_version`, broken `00-version` shebang).
+
+- [x] Phase 0 — refresh stale `:dev` tag + fix dormant `ARG BASE_DIGEST` grep bug (`9768636`; live refresh post-merge, run `29090534139`)
+- [x] Phase 1+2 — `dev-build`/`comment` jobs in `build-validate.yml` (`c49ee8b`)
+- [x] Phase 3 — documentation sync (`693b7ad`)
+
+All phases complete. See `.ai/plans/archive/dev-build-gate-for-manual-prs.md` for full detail.
+
 ### Version Logs Release Gap (Complete)
 
 Debugged missing startup version logs on Unraid: Docker Hub `latest` (5.5.4, published
@@ -19,7 +33,7 @@ Debugged missing startup version logs on Unraid: Docker Hub `latest` (5.5.4, pub
 - [x] Phase B — PR guard: runtime changes must bump IMAGE_VERSION (hard fail) (`fbdacc1`)
 - [x] Phase C — bump.sh changelog wording + stale version-doc cleanup (`faf5e8e`)
 
-All 3 phases complete. See `.ai/plans/version-logs-release-gap.md` for full detail.
+All 3 phases complete. See `.ai/plans/archive/version-logs-release-gap.md` for full detail.
 
 ### Container Startup Version Logs (Complete)
 
@@ -101,6 +115,6 @@ All 7 phases complete. See `.ai/plans/archive/build-release-workflow-hardening.m
 
 ## Recently Completed
 
+- **Dev Build Gate for Manual PRs** (2026-07-10) — extended the dev-build-and-test cycle to manually created PRs (previously only `auto/*` bump PRs got one); found and fixed a dormant `ARG BASE_DIGEST` grep bug that would have broken the next real NordVPN release's automation (`c954b27`–`693b7ad`)
 - **Version Logs Release Gap** (2026-07-10) — debugged why the startup version-log feature never reached Docker Hub (`latest` predated its merge); shipped it via an image-only bump, added a hard-fail PR guard against future bump-less runtime changes, and cleaned up `bump.sh`/stale version docs (`203e92a`–`faf5e8e`)
 - **Build & release workflow hardening** (2026-07-05) — fixed `CLAUDE.md` conflict-marker corruption + guarded `bump.sh` against it; corrected doc-drift (cadence, smoke-test count); added Check Base Image workflow docs; auto-appending Changelog; `verify-live` checklist visibility; concurrent-bump-PR race guard (`91363e0`–`0afa08b`)
-- **Template re-prime v3.7.7 + testing.md merge** (2026-07-02) — GUIDE.md (3.5.0→3.5.3) + definition-of-done.md (3.0.2→3.0.3) accepted template-pure; docs/testing.md (3.0.4→3.0.5) merged with restored NordVPN-specific content (`fa82c87`, `20ac94a`)
