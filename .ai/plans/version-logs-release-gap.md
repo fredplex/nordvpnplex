@@ -153,7 +153,7 @@ pin has since been refreshed to `@sha256:99ecdba8…` (PR #9). The constraint's 
 |------|-------------|---------------|--------|
 | 1 | Phase A — image-only bump 5.5.4 → 5.5.5 (ship the stranded feature) | `chore(release):` | Done |
 | 2 | Phase B — PR guard: runtime changes must bump IMAGE_VERSION (hard fail) | `feat(ci):` | Done |
-| 3 | Phase C — bump.sh changelog wording + stale version-doc cleanup | `chore(tooling):` | Pending |
+| 3 | Phase C — bump.sh changelog wording + stale version-doc cleanup | `chore(tooling):` | Done |
 
 ---
 

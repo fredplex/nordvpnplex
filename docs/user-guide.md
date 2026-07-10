@@ -140,13 +140,12 @@ New version available. Run:
 
 ### `task bump NORDVPN_VERSION=x.x.x IMAGE_VERSION=y.y.y`
 
-Updates 3 version-pinned files in one shot:
+Updates the version-pinned files in one shot:
 
 | File | Field |
 |------|-------|
-| `Dockerfile` | `ARG NORDVPN_VERSION` and `ARG IMAGE_VERSION` |
-| `README.md` | "Current image" and version comments |
-| `CLAUDE.md` | `## Current Pinned Version` block |
+| `Dockerfile` | `ARG NORDVPN_VERSION` and `ARG IMAGE_VERSION` (the single version source of truth) |
+| `README.md` | auto-appended `## Changelog` entry (newest first) |
 
 Before touching any file, the script verifies that
 `nordvpn_<NORDVPN_VERSION>_amd64.deb` exists in the official repo. It then prints a
@@ -155,6 +154,13 @@ Before touching any file, the script verifies that
 Both arguments are required:
 ```bash
 task bump NORDVPN_VERSION=4.6.0 IMAGE_VERSION=5.6.0
+```
+
+For a feature/fix bump (image-only, not a base refresh), call the script directly and
+pass a Changelog summary as the third argument — otherwise the auto-appended entry
+defaults to "Base image refresh" wording:
+```bash
+bash scripts/bump.sh 5.2.0 5.5.5 "ship container startup version logs"
 ```
 
 ---

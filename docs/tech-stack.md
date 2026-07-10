@@ -17,7 +17,7 @@ Technology choices, rationale, and dependency versions for **fredplex/nordvpn**.
 
 | Technology | Version | Role | Rationale |
 |------------|---------|------|-----------|
-| `ghcr.io/linuxserver/baseimage-ubuntu:noble` | noble@sha256:53411508… (digest-pinned) | Base image | Brings s6-overlay, well-maintained, sensible defaults; digest pin enforces the "no silent base bump" constraint |
+| `ghcr.io/linuxserver/baseimage-ubuntu:noble` | digest-pinned — see `ARG BASE_DIGEST` in the Dockerfile | Base image | Brings s6-overlay, well-maintained, sensible defaults; digest pin enforces the "no silent base bump" constraint |
 | NordVPN Linux client | 5.1.0 (pinned) | VPN client | Official Debian package from NordVPN's own repo |
 | WireGuard / NordLynx | included with NordVPN | VPN protocol (default) | Lower latency than OpenVPN |
 | OpenVPN | included with NordVPN | VPN protocol (alt) | Fallback; set via `TECHNOLOGY=OpenVPN` |
@@ -62,14 +62,14 @@ No unit test framework — the project is shell scripts + a Dockerfile. The two-
 | Taskfile (`task`) | 3.x | Local task runner: `task docker-build`, `task verify`, `task verify-live`, `task release`, etc. |
 | Bash | system | `scripts/*.sh` — bump.sh, check-version.sh, verify.sh, connect-test.sh, check-base-image.sh |
 | curl | system | Package verification + version check — used in check-version.sh and bump.sh |
-| sed / grep | system | File editing in bump.sh — edits Dockerfile, README.md, CLAUDE.md |
+| sed / grep | system | File editing in bump.sh — edits Dockerfile, README.md |
 
 ---
 
 ## Key Version Constraints
 
 - **NordVPN version** is pinned in `Dockerfile ARG NORDVPN_VERSION`. Do not bump without verifying the `.deb` exists at `https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/`.
-- **Base image** (`ghcr.io/linuxserver/baseimage-ubuntu:noble`) is **digest-pinned** (`@sha256:53411508…`). Do not change the digest without explicit owner instruction. A monthly base-refresh cadence (check-base-image.yml) automates detection, dev testing, and draft PRs.
+- **Base image** (`ghcr.io/linuxserver/baseimage-ubuntu:noble`) is **digest-pinned** (`ARG BASE_DIGEST` in the Dockerfile). Do not change the digest without explicit owner instruction. A monthly base-refresh cadence (check-base-image.yml) automates detection, dev testing, and draft PRs.
 - **No Renovate** — `renovate.json` has been removed. No automated dependency PRs.
 
 ---

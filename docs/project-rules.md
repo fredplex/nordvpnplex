@@ -39,7 +39,7 @@ Product vision, boundaries, and governance for **fredplex/nordvpn**.
 
 The following state-changing operations are currently approved:
 
-- **Version bumps** — `task bump NORDVPN_VERSION=x IMAGE_VERSION=y`; edits Dockerfile, README.md, CLAUDE.md; requires owner confirmation of both version strings first. `.ai/current.md` is updated by hand.
+- **Version bumps** — `task bump NORDVPN_VERSION=x IMAGE_VERSION=y`; edits Dockerfile and README.md (Changelog); requires owner confirmation of both version strings first. `.ai/current.md` is updated by hand.
 - **rootfs/ script edits** — cont-init.d, services.d, usr/bin; show diff before applying
 - **Documentation updates** — AGENTS.md, CLAUDE.md, docs/, .ai/ files
 - **GitHub Actions workflow edits** — when explicitly requested by owner

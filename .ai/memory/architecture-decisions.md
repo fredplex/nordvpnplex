@@ -106,11 +106,11 @@ docker build --no-cache --platform linux/amd64 . -f Dockerfile -t "fredplex/nord
 **Rationale**: `CLAUDE.md` carried unresolved git conflict markers on `main` for over a week after a bad merge (`5c8b103`, 2026-07-01) — `bump.sh`'s blind `sed` kept silently rewriting a version line sandwiched inside the broken block on every subsequent release instead of failing loudly.
 **Gotcha**: If a future `task bump` run errors with "has unresolved merge conflict markers", the file genuinely has a broken merge — resolve it manually before retrying, do not bypass the guard.
 
-### Decision: bump.sh auto-appends a Changelog placeholder on every run
+### Decision: bump.sh auto-appends a Changelog entry on every run
 
-**Choice**: `bump.sh` captures the outgoing `NORDVPN_VERSION`/`IMAGE_VERSION` before editing, derives a one-line summary (NordVPN bump vs. base-image-only refresh), and appends it under `README.md`'s `## Changelog` (newest first) with a `<!-- TODO: expand with real details before merging -->` marker.
+**Choice**: `bump.sh` captures the outgoing `NORDVPN_VERSION`/`IMAGE_VERSION` before editing, derives a one-line summary (NordVPN bump vs. base-image-only refresh vs. caller-supplied wording), and appends it under `README.md`'s `## Changelog` (newest first). The `<!-- TODO -->` placeholder was dropped in the 2026-07-09 pipeline review; since 2026-07-10 an optional third argument (`CHANGELOG_SUMMARY`) sets the wording.
 **Rationale**: The Changelog constraint in `CLAUDE.md` had gone stale for over a week because nothing wrote to it automatically — both human and automated bump paths skipped it every time.
-**Gotcha**: The appended line is a placeholder, not a finished entry — replace the TODO text with real detail before merging each bump PR, or literal TODO lines will accumulate in `README.md`.
+**Gotcha**: Image-only bumps without the third argument default to "Base image refresh" wording — correct for the automated monthly base flow, wrong for feature/fix bumps, so pass a summary when bumping to ship container changes (e.g. `bash scripts/bump.sh 5.2.0 5.5.5 "ship container startup version logs"`).
 
 ### Decision: both automated bump workflows guard against concurrent `auto/*` PRs
 

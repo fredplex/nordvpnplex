@@ -80,7 +80,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Both this workflow and check-base-image.yml bump Dockerfile/README.md/CLAUDE.md
+          # Both this workflow and check-base-image.yml bump Dockerfile/README.md
           # via scripts/bump.sh. If one's PR is still open, don't open a second — it would
           # conflict with or silently clobber the first PR's version fields.
           EXISTING=$(gh pr list --state open --json number,headRefName,url --jq '[.[] | select(.headRefName | startswith("auto/"))]')
