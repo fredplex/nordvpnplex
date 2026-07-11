@@ -11,6 +11,7 @@ Full session detail (decisions, validation, follow-ups) lives in `SESSION_NOTES.
 > Newest at top. Move items here from `active.md` `## Recently Completed` at session close when the list exceeds 3 entries.
 > Format: `- Task name (commit, YYYY-MM-DD)`
 
+- Build & release workflow hardening (`91363e0`–`0afa08b`, 2026-07-05)
 - Template re-prime v3.7.7 + testing.md merge (fa82c87, 2026-07-02)
 - prime-ai-docs v3.5.0 re-prime (534c709, 2026-07-01)
 - Fix check-base-image verify + docs (2febec9–c8a099d, 2026-07-01)

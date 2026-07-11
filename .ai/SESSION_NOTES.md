@@ -6,6 +6,47 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+
+## Session Close — 2026-07-12 (AGENTS.md scaffold fill)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Onboarding pass — identified five unfilled `<placeholder>` stubs in `AGENTS.md` as the session task | — |
+| 2 | Filled all five stubs in `AGENTS.md`: tech stack line, current posture, Architecture section (release data flow diagram + container startup sequence + key rules), Key Boundaries (Product Posture approved/not-approved + Architecture Boundaries must/must-not), and File Structure table | (this commit) |
+| 3 | Session close — current.md, active.md, SESSION_NOTES.md updated | this commit |
+
+### Key decisions
+
+- **Sourced every claim directly from existing authoritative docs** (`docs/architecture.md`,
+  `docs/project-rules.md`, `.ai/memory/project-state.md`) to prevent new drift from being
+  introduced during a scaffolding fill.
+- **Did not fill the `echo ok` install/dev-server Commands rows** — those are the correct
+  no-op stubs for this project (no install step, no dev server) and are intentional.
+- **Release data flow kept condensed** relative to `docs/architecture.md`'s full diagram —
+  AGENTS.md is an agent entry point, not a full architecture reference; the canonical detail
+  lives in `docs/architecture.md`.
+
+### Stopping point
+
+- Working tree: clean after this commit.
+- Static gate (`task docker-build`) could not run — Docker Desktop daemon not running
+  locally. Docs-only change (AGENTS.md only); CI guards will re-validate when a runtime
+  change is made later.
+- Validation: test gate not required (no logic/templates/runtime behavior changed).
+
+### Fragile areas
+
+- **Docker Desktop daemon not running locally this session** — `task docker-build` could
+  not execute. Not a repo issue; flagged in case it recurs.
+- Carried forward: three still-open Dockerfile findings in
+  `.ai/plans/dockerfile-followup-review.md` await owner direction (Phase 1 is Tier 1
+  safe-win; Phases 2 & 3 need owner decision).
+- Carried forward: s6 init daemon capability requirements during stateless `task verify`.
+- Carried forward: local `bash` PATH ambiguity on Windows (WSL `bash.exe` vs Git Bash).
+
+
 ## Session Close — 2026-07-11 (Dockerfile Follow-up Review)
 
 ### Completed this session

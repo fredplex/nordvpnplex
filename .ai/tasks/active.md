@@ -7,7 +7,17 @@ Current work in progress.
 
 ## Current Status
 
-**Plan pending review — awaiting direction.** The Dockerfile Follow-up Review plan (`.ai/plans/dockerfile-followup-review.md`) captures three still-open Dockerfile findings and tiers them; Tier 2 items gate implementation behind owner input. Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
+**None active — awaiting direction.** AGENTS.md scaffold fill complete. Dockerfile Follow-up Review plan (`.ai/plans/dockerfile-followup-review.md`) has three still-open findings; Tier 2 items need owner input before implementation. Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
+
+### AGENTS.md Scaffold Fill (Complete)
+
+Replaced all five `<placeholder>` template stubs in `AGENTS.md` with project-specific
+content: tech stack, current posture, Architecture section (release data flow + startup
+sequence + key rules), Key Boundaries (approved/not-approved + must/must-not), and File
+Structure table.
+
+- [x] Fill stubs sourced from `docs/architecture.md`, `docs/project-rules.md`, `.ai/memory/project-state.md` (this commit)
+
 
 ### Dev Build Gate for Manual PRs (Complete)
 
@@ -115,6 +125,6 @@ All 7 phases complete. See `.ai/plans/archive/build-release-workflow-hardening.m
 
 ## Recently Completed
 
+- **AGENTS.md scaffold fill** (2026-07-12) — replaced all five `<placeholder>` template stubs in `AGENTS.md` with project-specific content (this commit)
 - **Dev Build Gate for Manual PRs** (2026-07-10) — extended the dev-build-and-test cycle to manually created PRs (previously only `auto/*` bump PRs got one); found and fixed a dormant `ARG BASE_DIGEST` grep bug that would have broken the next real NordVPN release's automation (`c954b27`–`693b7ad`)
 - **Version Logs Release Gap** (2026-07-10) — debugged why the startup version-log feature never reached Docker Hub (`latest` predated its merge); shipped it via an image-only bump, added a hard-fail PR guard against future bump-less runtime changes, and cleaned up `bump.sh`/stale version docs (`203e92a`–`faf5e8e`)
-- **Build & release workflow hardening** (2026-07-05) — fixed `CLAUDE.md` conflict-marker corruption + guarded `bump.sh` against it; corrected doc-drift (cadence, smoke-test count); added Check Base Image workflow docs; auto-appending Changelog; `verify-live` checklist visibility; concurrent-bump-PR race guard (`91363e0`–`0afa08b`)

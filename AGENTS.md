@@ -37,39 +37,56 @@ task verify    # Runtime / E2E gate
 
 **nordvpnplex** — Custom NordVPN Docker image for Unraid NAS systems
 
-**Tech stack**: Docker, Ubuntu Noble, NordVPN, WireGuard/NordLynx, s6-overlay, Taskfile
+**Tech stack**: Docker, Ubuntu Noble (linuxserver.io base), NordVPN Linux client (Debian pkg), WireGuard/NordLynx, s6-overlay, Taskfile, GitHub Actions
 
-**Current posture**: <read-mostly observability | controlled mutations | full CRUD | etc.>
+**Current posture**: Stable maintenance — update NordVPN client version as new packages release, verify, publish. No active feature development. Human-in-the-loop release gate (owner PR merge → GHA CD).
 
 ---
 
 ## Architecture
 
-<Replace this section with your actual data flow. Choose the pattern that fits your project:>
+This is a **Docker container build project** — not a web app or API. No Node.js, no database, no REST surface.
 
-**Web app / BFF**:
+### Release data flow
 ```
-Browser → API Routes → Domain Layer → External Services / Database
+NordVPN Debian repo ──► Daily GHA (check-nordvpn-release.yml)
+                                │ (if update found)
+                                ▼
+                       GHA auto dev-build + smoke tests
+                                │
+                                ▼
+                        GHA opens draft PR ──► Owner reviews & merges
+                                                        │
+                                                        ▼
+                                            GHA publish.yml (CD)
+                                                        │
+                                          ┌─────────────┴──────────────┐
+                                          ▼                            ▼
+                                      Docker Hub                GitHub Release
+                                  :latest, :<version>          (tag + email notify)
 ```
 
-**API / backend service**:
+### Container startup sequence
 ```
-Client → Route handlers → Service layer → Adapters → Database / External APIs
+Docker starts container
+        │
+s6-overlay (PID 1)
+        │
+cont-init.d (in filename order):
+  00-firewall  → iptables OUTPUT = DROP  ← kill switch fires FIRST
+  00-version   → print IMAGE_VERSION banner
+  10-tun / 20-inet / 20-inet6 / 30-route / 30-route6 / 40-allowlist
+        │
+services.d/nordvpn/run → nordvpnd daemon (s6-supervised)
+        │
+CMD: nord_login → nord_config → nord_connect → nord_watch
 ```
 
-**CLI / scripting tool**:
-```
-CLI entry → Command layer → Core logic → File system / APIs
-```
-
-**Library / SDK**:
-```
-Public API surface → Implementation modules → Platform adapters
-```
-
-**Key rules** (replace with your own):
-- <Constraint 1 — e.g. "no external calls from the UI layer">
-- <Constraint 2>
+**Key rules**:
+- Kill switch (`00-firewall`) fires before the VPN connects — traffic stays blocked on startup failure
+- Human PR merge is the only release gate — no automated image push to Docker Hub
+- `NordVPN_VERSION` must be pinned to a real `.deb` in the official apt repo
+- LF line endings in all `rootfs/` scripts (CRLF causes `bad interpreter`)
 
 See `docs/architecture.md` for the full architecture reference.
 
@@ -118,22 +135,34 @@ mandatory vs. conditional each session — do not treat this list as a per-sessi
 ### Product Posture
 
 ✅ **Approved**:
-- <list approved operations, e.g. "read-only observability", "user CRUD", "order placement">
+- Version bumps via `task bump` (NordVPN client version and/or IMAGE_VERSION)
+- `rootfs/` script edits (cont-init.d, services.d, usr/bin)
+- Documentation updates (AGENTS.md, CLAUDE.md, docs/, .ai/)
+- GitHub Actions workflow edits (when explicitly requested)
+- Local dev builds (`task docker-build`) and smoke tests (`task verify`)
 
-🚫 **Not approved** (unless separately approved with full governance):
-- <list forbidden operations, e.g. "database admin", "infrastructure control", "AI-driven actions">
+🚫 **Not approved** (requires explicit owner approval):
+- Automated image push to Docker Hub without human-created git tag
+- Base image digest bump without explicit owner instruction
+- `Taskfile.yml` modifications (beyond the two approved changes: `DOCKER_BUILDKIT=1` env + `task verify-live`)
+- Auto-merging any PR
+- Adding Node.js/npm tooling, Renovate, or automated dependency bumps
+- Web UI, management interface, or multi-user support
 
 ### Architecture Boundaries
 
 ✅ **Must**:
-- <constraint 1 — e.g. "all writes use atomic tmp-then-rename" or "secrets stay server-side">
-- <constraint 2 — e.g. "domain layer has no framework imports" or "no external calls from the UI layer">
-- <constraint 3>
+- Kill switch (`cont-init.d/00-firewall`) must fire before nordvpnd starts — iptables OUTPUT = DROP before any VPN traffic
+- `NordVPN_VERSION` must be pinned to a real `.deb` in the official NordVPN apt repo
+- LF line endings enforced in all `rootfs/` scripts (`.gitattributes` handles checkout; verify on Windows)
+- `DOCKER_BUILDKIT=1` set for all local builds (`COPY --chmod=0755` requires it)
+- Any `Dockerfile` or `rootfs/**` change merged to `main` must include an `IMAGE_VERSION` bump (hard-fail CI guard in `build-validate.yml`)
 
 🚫 **Must not**:
-- <forbidden pattern 1 — e.g. "client calls external APIs directly" or "write files outside targetDir">
-- <forbidden pattern 2>
-- Add mutations without approval gate
+- Push to Docker Hub without owner-merged PR triggering GHA CD (or explicit owner `task release`)
+- Add a `# syntax` directive to the Dockerfile (triggers 401 from Docker Hub for the BuildKit frontend)
+- Remove `curl` from the image (`nord_watch` uses it at runtime to poll `CHECK_CONNECTION_URL`)
+- Add mutations without owner approval gate
 
 ---
 
@@ -195,7 +224,14 @@ Do not skip either step, even for small tasks. The branch protects `main`; the p
 
 ### File Structure
 ```
-<source>/             # Application source (e.g. src/, lib/, cmd/, <package_name>/)
+Dockerfile            # Image definition — base, NordVPN install, rootfs copy, HEALTHCHECK, CMD
+rootfs/               # Everything copied into the container at build time
+  etc/cont-init.d/    # s6 one-shot init scripts (firewall, version banner, network, allowlist)
+  etc/services.d/     # s6 long-running service (nordvpnd daemon)
+  usr/bin/            # CMD scripts: nord_login, nord_config, nord_connect, nord_watch
+scripts/              # Host-side tooling: bump.sh, verify.sh, check-base-image.sh, etc.
+.github/workflows/    # GHA pipelines: build-validate, publish, publish-dev, check-nordvpn-release, check-base-image
+Taskfile.yml          # Task runner: docker-build, verify, bump, release, check-version, check-base
 docs/                 # Product documentation (comprehensive reference)
 .ai/                  # Agent workspace (distilled working context)
 ```
