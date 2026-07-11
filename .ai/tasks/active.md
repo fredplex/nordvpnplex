@@ -7,7 +7,7 @@ Current work in progress.
 
 ## Current Status
 
-**None active — awaiting direction.** Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
+**Plan pending review — awaiting direction.** The Dockerfile Follow-up Review plan (`.ai/plans/dockerfile-followup-review.md`) captures three still-open Dockerfile findings and tiers them; Tier 2 items gate implementation behind owner input. Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
 
 ### Dev Build Gate for Manual PRs (Complete)
 

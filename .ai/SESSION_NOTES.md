@@ -6,6 +6,73 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 
 ---
 
+## Session Close — 2026-07-11 (Dockerfile Follow-up Review)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Owner asked whether `Dockerfile` (52 lines, current `HEAD`) is well-built. Reviewed `Dockerfile`, `README.md` changelog (2026-06-26 entry), and the two prior optimization plans (`dockerfile-optimization.md`, `dockerfile-optimizations-1.md`, both completed 2026-06-26) | — |
+| 2 | Wrote `.ai/plans/dockerfile-followup-review.md` — distinguishes 9 already-completed items (out-of-scope) from 3 still-open findings (in scope), tiers them, and lays out a 3-phase implementation with approval gates for the Tier 2 items | `825740e` |
+| 3 | Session close — current.md, active.md, SESSION_NOTES.md updated | this commit |
+
+### Findings (still-open, captured in the plan)
+
+| # | Finding | Tier |
+|---|---|---|
+| 1 | Missing `--no-install-recommends` on `apt-get install` (Dockerfile:25) — recommended-but-not-required packages are pulled into the image, enlarging size and attack surface | 1 (safe, reversible) |
+| 2 | `apt-get upgrade -y` contradicts the digest-pinned base (`BASE_DIGEST`, Dockerfile:1-2) — runtime no longer matches the pinned base after every build | 2 (owner tradeoff: reproducibility vs. security patching; matches the Future Work note in `.ai/current.md`) |
+| 3 | Shell-form `CMD` chain (Dockerfile:52) leaves `nord_watch` unable to receive `SIGTERM` — PID 1 is `/bin/sh`, which doesn't forward signals; container hits the 10s kill timeout on `docker stop` instead of a graceful disconnect | 2 (owner choice: s6 services migration vs. exec-form `CMD` half-measure) |
+
+### Key decisions
+
+- **Reviewed the Dockerfile in context, not isolation**: cross-referenced the 2026-06-26
+  changelog entry and both prior optimization plans to avoid re-listing already-landed work
+  (libc6 removal, `COPY --chmod=0755`, `wireguard` → `wireguard-tools`, `ARG NORDVPN_RELEASE`
+  extraction, shebang fixes, `.dockerignore` expansion, `HEALTHCHECK`, hardened curl fetch).
+  Nine items are explicitly out-scoped as already-done.
+- **Tier 2 items gated behind owner approval** — the follow-up plan does not pre-decide
+  `apt-get upgrade` removal (matches the Future Work note in `.ai/current.md` that parks
+  that decision until the base-refresh cadence has run a few times) or the `CMD`
+  signal-handling fix (s6 services migration is an architectural change; the plan offers
+  Option A full fix and Option B exec-form half-measure and asks the owner to choose).
+- **Plan flagged a changelog/source mismatch** the 2026-06-26 entry claims `net-tools`/
+  `iputils-ping` were removed; the current `Dockerfile:25` still installs them. Out of scope
+  for the plan itself — per AGENTS.md, source is runtime truth; flagged so the next
+  maintainer trusts source over the changelog summary.
+- **Static gate could not run (Docker Desktop daemon down)** — owner approved proceeding
+  with closing because the session's only change is a docs-only plan markdown file; no
+  `Dockerfile` or `rootfs/**` touched. CI guards on future runtime changes will re-validate.
+
+### Stopping point
+
+- Working tree: clean. One commit made this session (`825740e`).
+- Validation: static gate (`task docker-build`) could not run locally — Docker Desktop
+  daemon not running. Test gate not required (no logic/templates/runtime behavior changed).
+  Owner explicitly approved proceeding with closing despite the failing static gate.
+
+### Verification performed
+
+- Re-read `Dockerfile` (52 lines, current `HEAD`).
+- Cross-referenced the 2026-06-26 changelog entry and both prior optimization plans to
+  establish what's already done.
+- Confirmed the 2026-06-26 changelog discrepancy (claims `net-tools`/`iputils-ping` removed;
+  Dockerfile still installs them) by inspecting the source itself, not the changelog
+  summary.
+
+### Fragile areas
+
+- **Docker Desktop daemon not running locally** — final pre-integration static gate
+  (`task docker-build`) could not execute. Not a repo issue; flagged in case it recurs
+  for the next session that needs to validate a runtime change.
+- Carried forward, unchanged this session: s6 init daemon capability requirements during
+  stateless `task verify` on local Docker Desktop setups; local `bash` PATH ambiguity
+  on Windows (WSL `bash.exe` vs Git Bash — prepend `C:\Program Files\Git\bin` to `PATH`);
+  `AGENTS.md` still has unfilled template placeholders (Architecture, Key Boundaries,
+  Current posture — pre-existing, not part of this session's scope).
+
+---
+
 ## Session Close — 2026-07-10 (Version Logs Release Gap)
 
 ### Completed this session
