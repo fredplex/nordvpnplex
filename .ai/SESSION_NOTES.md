@@ -7,6 +7,70 @@ Each entry: `## Session Close — YYYY-MM-DD (task name)`
 ---
 
 
+## Session Close — 2026-07-15 (Concurrency Deadlock Fix)
+
+### Completed this session
+
+| # | Item | Commit |
+|---|------|--------|
+| 1 | Onboarding pass — confirmed `main` at `0099815`, clean tree, no task branch yet | — |
+| 2 | Reviewed the failed `check-base-image.yml` GHA run; identified the root cause as a concurrency-group collision between caller (`check-base-image.yml`) and reusable callee (`publish-dev.yml`) caused by `github.workflow` evaluating to the caller's name inside `workflow_call` context | — |
+| 3 | Found that the prior session (commit `0099815`) had already committed a plan for this (`concurrency-deadlock-fix.md`); reviewed it and proposed five revisions | — |
+| 4 | Owner approved revising the plan first; revised `.ai/plans/concurrency-deadlock-fix.md` (strengthened root-cause explanation, added `check-nordvpn-release.yml` to affected workflows + concrete edits + acceptance criteria, rewrote validation section for pre-merge limitation, added session-close + archive step, dropped `github.repository` prefix from Option A group strings) | `566074a` |
+| 5 | Owner approved the revised plan in Autonomous mode; Phase 1 — normalized concurrency groups in all three workflows (`check-base-image.yml`, `check-nordvpn-release.yml`, `publish-dev.yml`) to unique workflow-specific prefixes with guard comments | `ee11afb` |
+| 6 | Session close — current.md, active.md, SESSION_NOTES.md updated, plan archived | this commit |
+
+### Key decisions
+
+- **All three workflows fixed in one commit, not just the observed failure** —
+  `check-nordvpn-release.yml` has the identical `${{ github.workflow }}-${{ github.ref }}`
+  pattern and calls `publish-dev.yml` the same way (lines 59-66). It has not tripped yet only
+  because the daily cron usually finds no NordVPN update and short-circuits at the
+  `check-version` job before the `publish-dev` job runs. Fixing only `check-base-image.yml`
+  would ship a known-broken sibling that deadlocks on the first real NordVPN release day.
+- **`github.repository` prefix dropped from group strings** — this is a single-repo workflow
+  with no fork-based runs, so the prefix only added noise to the group string shown in the
+  Actions UI. Final group keys: `check-base-image-${{ github.ref }}`,
+  `check-nordvpn-release-${{ github.ref }}`, `publish-dev-${{ github.ref }}`.
+- **Guard comment added at each `concurrency:` block** — three-line comment explaining that
+  group keys must stay unique across caller + reusable workflows because `github.workflow`
+  evaluates to the caller's name inside a called workflow. Prevents the pattern being
+  copy-pasted back into a future workflow.
+- **Validation is by absence post-merge, not by a positive pre-merge test** — the deadlock
+  only manifests on `refs/heads/main` (the group includes `github.ref`), so a feature-branch
+  test resolves to a different group and cannot reproduce it. Post-merge verification:
+  trigger each workflow via `workflow_dispatch` on `main` and confirm no deadlock
+  cancellation over the next few cron cycles.
+
+### Stopping point
+
+- Working tree: clean after this commit. Two commits on the task branch this session
+  (`566074a` plan revision, `ee11afb` implementation), plus this close commit.
+- Static gate (`task docker-build`) could not run — Docker Desktop daemon not running
+  locally. CI YAML-only change (no `Dockerfile` or `rootfs/**` touched); CI guards on GitHub
+  re-validate when the workflows next run. Owner approved proceeding on this basis in prior
+  sessions (2026-07-11, 2026-07-12) for the same daemon-down condition.
+
+### Verification performed
+
+- YAML syntax: all three workflow files parse cleanly (`python3.14 -c "import yaml; ..."`).
+- Group-key uniqueness: confirmed by grep — three distinct group strings, no collisions.
+- No `Dockerfile` or `rootfs/**` files in the Phase 1 diff (`git diff --name-only HEAD`).
+
+### Fragile areas
+
+- **Docker Desktop daemon not running locally this session** — `task docker-build` could not
+  execute as the final pre-integration gate. Not a repo issue; flagged in case it recurs.
+- **Concurrency fix verified by absence post-merge** — the deadlock only manifests on
+  `refs/heads/main`, so a branch-based test cannot reproduce it. Post-merge: trigger each
+  workflow via `workflow_dispatch` on `main` and confirm no deadlock cancellation over the
+  next few cycles.
+- Carried forward, unchanged this session: Dockerfile Follow-up Review still-open findings
+  (three items in `.ai/plans/dockerfile-followup-review.md`) awaiting owner direction; s6
+  init daemon capability requirements during stateless `task verify` on local Docker Desktop
+  setups; local `bash` PATH ambiguity on Windows (WSL `bash.exe` vs Git Bash).
+
+
 ## Session Close — 2026-07-12 (AGENTS.md scaffold fill)
 
 ### Completed this session
