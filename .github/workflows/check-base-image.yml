@@ -6,7 +6,10 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Group key must stay unique across caller + reusable workflows.
+  # github.workflow evaluates to the caller's name inside a called workflow,
+  # so a shared formula here and in publish-dev.yml causes a deadlock.
+  group: check-base-image-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

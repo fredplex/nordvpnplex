@@ -7,7 +7,15 @@ Current work in progress.
 
 ## Current Status
 
-**None active — awaiting direction.** AGENTS.md scaffold fill complete. Dockerfile Follow-up Review plan (`.ai/plans/dockerfile-followup-review.md`) has three still-open findings; Tier 2 items need owner input before implementation. Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
+**Active — Concurrency Deadlock Fix** (Autonomous mode, branch `fix/concurrency-deadlock`). Implementing `.ai/plans/concurrency-deadlock-fix.md` — Phase 1 (normalize concurrency groups across `check-base-image.yml`, `check-nordvpn-release.yml`, `publish-dev.yml`) committed. Awaiting pre-push approval. Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
+
+### Concurrency Deadlock Fix
+
+Fix the GitHub Actions concurrency-group deadlock between `check-base-image.yml` (caller) and `publish-dev.yml` (reusable callee) — `github.workflow` evaluates to the caller's name inside a called workflow, so both landed in the same group `Check Base Image-refs/heads/main`. `check-nordvpn-release.yml` has the same latent bug. All three workflows move to unique group keys.
+
+- [x] Phase 0 — Revise plan with review recs (`566074a`)
+- [x] Phase 1 — Normalize concurrency groups in all three workflows + guard comments
+- [ ] Phase 2 — Session close + archive plan
 
 ### AGENTS.md Scaffold Fill (Complete)
 

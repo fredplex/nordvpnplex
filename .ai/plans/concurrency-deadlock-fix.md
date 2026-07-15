@@ -1,5 +1,7 @@
 # GitHub Actions Concurrency Deadlock: Assessment, Findings, and Fix Plan
 
+**Created**: 2026-07-15 | **Status**: In progress
+
 ## Assessment
 
 A GitHub Actions workflow run in `fredplex/nordvpnplex` was canceled with:
