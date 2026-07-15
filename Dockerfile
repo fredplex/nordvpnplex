@@ -1,10 +1,10 @@
-ARG BASE_DIGEST='sha256:99ecdba8aefe67d2961c5ffe703585587f523da66e93433520f8883c4a18b6fd'
+ARG BASE_DIGEST='sha256:876dee739176903a54f8a639ea4f4a1b63d36b1ec8dc7295ed57419c0252bd6d'
 FROM ghcr.io/linuxserver/baseimage-ubuntu:noble@${BASE_DIGEST}
 LABEL maintainer="fredplex@gmail.com"
 
 ARG BASE_DIGEST
 ARG NORDVPN_VERSION='5.2.0'
-ARG IMAGE_VERSION='5.5.5'
+ARG IMAGE_VERSION='5.5.6'
 ARG NORDVPN_RELEASE='1.0.0'
 
 # OCI standard image labels — externally queryable without running the container:
