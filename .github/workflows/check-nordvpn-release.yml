@@ -12,7 +12,10 @@ on:
   workflow_dispatch:         # Allow manual trigger from GitHub Actions UI
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Group key must stay unique across caller + reusable workflows.
+  # github.workflow evaluates to the caller's name inside a called workflow,
+  # so a shared formula here and in publish-dev.yml causes a deadlock.
+  group: check-nordvpn-release-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

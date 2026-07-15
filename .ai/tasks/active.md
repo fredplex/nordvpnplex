@@ -7,7 +7,17 @@ Current work in progress.
 
 ## Current Status
 
-**None active — awaiting direction.** AGENTS.md scaffold fill complete. Dockerfile Follow-up Review plan (`.ai/plans/dockerfile-followup-review.md`) has three still-open findings; Tier 2 items need owner input before implementation. Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
+**None active — awaiting direction.** Concurrency Deadlock Fix complete. Dockerfile Follow-up Review plan (`.ai/plans/dockerfile-followup-review.md`) has three still-open findings; Tier 2 items need owner input before implementation. Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
+
+### Concurrency Deadlock Fix (Complete)
+
+Fixed the GitHub Actions concurrency-group deadlock between `check-base-image.yml` (caller) and `publish-dev.yml` (reusable callee) — `github.workflow` evaluates to the caller's name inside a called workflow, so both landed in the same group `Check Base Image-refs/heads/main`. `check-nordvpn-release.yml` had the same latent bug. All three workflows moved to unique group keys with guard comments.
+
+- [x] Phase 0 — Revise plan with review recs (`566074a`)
+- [x] Phase 1 — Normalize concurrency groups in all three workflows + guard comments (`ee11afb`)
+- [x] Phase 2 — Session close + archive plan (this commit)
+
+All phases complete. See `.ai/plans/archive/concurrency-deadlock-fix.md` for full detail.
 
 ### AGENTS.md Scaffold Fill (Complete)
 
@@ -125,6 +135,6 @@ All 7 phases complete. See `.ai/plans/archive/build-release-workflow-hardening.m
 
 ## Recently Completed
 
+- **Concurrency Deadlock Fix** (2026-07-15) — fixed the GHA concurrency-group deadlock between `check-base-image.yml`/`check-nordvpn-release.yml` (callers) and `publish-dev.yml` (reusable callee) by moving all three to unique workflow-specific group keys; `github.workflow` evaluated to the caller's name inside the called workflow, causing both to share the group `Check Base Image-refs/heads/main` (`566074a`–`ee11afb`)
 - **AGENTS.md scaffold fill** (2026-07-12) — replaced all five `<placeholder>` template stubs in `AGENTS.md` with project-specific content (this commit)
 - **Dev Build Gate for Manual PRs** (2026-07-10) — extended the dev-build-and-test cycle to manually created PRs (previously only `auto/*` bump PRs got one); found and fixed a dormant `ARG BASE_DIGEST` grep bug that would have broken the next real NordVPN release's automation (`c954b27`–`693b7ad`)
-- **Version Logs Release Gap** (2026-07-10) — debugged why the startup version-log feature never reached Docker Hub (`latest` predated its merge); shipped it via an image-only bump, added a hard-fail PR guard against future bump-less runtime changes, and cleaned up `bump.sh`/stale version docs (`203e92a`–`faf5e8e`)

@@ -39,7 +39,11 @@ on:
         default: ''
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Group key must stay unique across caller + reusable workflows.
+  # github.workflow evaluates to the caller's name inside this called workflow,
+  # so a shared formula with check-base-image.yml / check-nordvpn-release.yml
+  # causes a deadlock. Use this workflow's own name as the prefix.
+  group: publish-dev-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
