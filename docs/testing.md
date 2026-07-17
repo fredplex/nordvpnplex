@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.5 template=docs/testing.md date=2026-07-02 -->
+<!-- prime: version=3.0.5 template=docs/testing.md date=2026-07-17 -->
 # Testing
 
 Testing strategy, framework configuration, and coverage expectations for **nordvpnplex**.

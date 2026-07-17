@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.0 template=docs/tech-stack.md date=2026-06-30 -->
+<!-- prime: version=3.0.0 template=docs/tech-stack.md date=2026-07-17 -->
 # Tech Stack
 
 Technology choices, rationale, and dependency versions for **fredplex/nordvpn**.

@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.0 template=docs/project-rules.md date=2026-06-30 -->
+<!-- prime: version=3.0.0 template=docs/project-rules.md date=2026-07-17 -->
 # Project Rules
 
 Product vision, boundaries, and governance for **fredplex/nordvpn**.

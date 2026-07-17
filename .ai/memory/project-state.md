@@ -1,9 +1,9 @@
-<!-- prime: version=3.0.0 template=.ai/memory/project-state.md date=2026-06-30 -->
+<!-- prime: version=3.0.0 template=.ai/memory/project-state.md date=2026-07-17 -->
 # Project State
 
-Current product posture and approved scope for **nordvpn**.
+Current product posture and approved scope for **nordvpnplex**.
 
-**Last Updated**: 2026-07-05
+**Last Updated**: 2026-07-17
 
 ---
 

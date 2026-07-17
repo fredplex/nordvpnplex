@@ -1,17 +1,12 @@
-<!-- prime: version=3.0.2 template=.ai/current.md date=2026-07-01 -->
+<!-- prime: version=3.0.3 template=.ai/current.md date=2026-07-17 -->
 # Current Project State
 
-## Concurrency Deadlock Fix (2026-07-15)
+## Active Initiative — None
 
-**Status**: Concurrency deadlock fix complete. All three workflows (`check-base-image.yml`, `check-nordvpn-release.yml`, `publish-dev.yml`) moved to unique workflow-specific concurrency group keys with guard comments, resolving the caller/callee deadlock where `github.workflow` evaluated to the caller's name inside the reusable `publish-dev.yml` and caused both to share the group `Check Base Image-refs/heads/main`. `check-nordvpn-release.yml` had the same latent bug and was fixed in the same change.
+**Status**: No active implementation initiative. Concurrency Deadlock Fix (2026-07-15) is complete — all three workflows (`check-base-image.yml`, `check-nordvpn-release.yml`, `publish-dev.yml`) moved to unique workflow-specific concurrency group keys with guard comments, resolving the caller/callee deadlock where `github.workflow` evaluated to the caller's name inside the reusable `publish-dev.yml` and caused both to share the group `Check Base Image-refs/heads/main`. `check-nordvpn-release.yml` had the same latent bug and was fixed in the same change.
 
-### Recently Completed
-
-> Keep the last 3 entries. Prune older items at session close — the full history lives in `SESSION_NOTES.md`.
-
-- Concurrency Deadlock Fix — 2026-07-15
-- AGENTS.md scaffold fill — 2026-07-12
-- Dockerfile Follow-up Review — 2026-07-11
+> Recent completions live in `.ai/tasks/active.md` (last 3) and `SESSION_NOTES.md` (full
+> history) — this file does not duplicate them.
 
 ### Next step
 
@@ -28,6 +23,9 @@ from the Dockerfile to honor the digest-pinned base image.
 ---
 
 ## Session Handoff — 2026-07-15 (Concurrency Deadlock Fix)
+
+> Commit-level completion records live in `SESSION_NOTES.md` — this section records only
+> the stopping point, decisions, and fragile areas.
 
 ### What was just completed
 

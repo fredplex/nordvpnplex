@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.0 template=.ai/memory/architecture-decisions.md date=2026-06-30 -->
+<!-- prime: version=3.0.0 template=.ai/memory/architecture-decisions.md date=2026-07-17 -->
 # Architecture Decisions
 
 Key architectural choices that define how this codebase works.

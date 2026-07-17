@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.0 template=.ai/SESSION_NOTES.md date=2026-06-30 -->
+<!-- prime: version=3.0.0 template=.ai/SESSION_NOTES.md date=2026-07-17 -->
 # Session Notes
 
 Append-only log of session closes. Newest entry at the top.

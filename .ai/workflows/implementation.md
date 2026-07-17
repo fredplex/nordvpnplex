@@ -1,4 +1,4 @@
-<!-- prime: version=3.1.0 template=.ai/workflows/implementation.md date=2026-07-01 -->
+<!-- prime: version=3.2.0 template=.ai/workflows/implementation.md date=2026-07-17 -->
 # Implementation Workflow
 
 Plan → Code → Test → Validate cycle for effective development.
@@ -174,7 +174,7 @@ When executing a multi-phase plan, choose one of two modes:
 | Mode | Use when | Human gates |
 |------|----------|-------------|
 | **Supervised** — Single Phase, Human-Gated | High-risk or unfamiliar change; first implementation of a pattern; plan has open questions; you want to review each phase's diff before it commits | After each phase (commit + push) |
-| **Autonomous** — Auto-Execute Full Plan | Well-understood, low-risk change; plan is complete and deterministic; all phases are routine; you want minimal interruptions | Before the final push only |
+| **Autonomous** — Auto-Execute Full Plan | Well-understood, low-risk change; plan is complete and deterministic; all phases are routine; you want minimal interruptions | At session close — single integration approval |
 
 When uncertain, default to Supervised — it costs one extra approval per phase but preserves oversight on any unexpected finding.
 
@@ -200,20 +200,20 @@ Use this mode when executing one phase at a time with human approval before each
    - **Rollback commands**: [commands]
    Do not commit a failing phase unless the human explicitly approves it.
 5. **Clean build artifacts** — revert compile-time edits by build tools if present; do not revert unrelated files.
-6. **Update tracking and documentation** — update the plan's `Status` to `In progress` (if not already); mark phase complete in the plan + `.ai/tasks/active.md`, setting this phase's `Execution Order` row `Status` to `Done`. Check whether every row in the `Execution Order` table is now `Done` — if so, this is the **final phase**; carry that forward to step 9. If this phase altered behavior, architecture, features, rules, tech stack, or user-facing workflows: **update both the affected `docs/` file and its `.ai/` working copy — required, not optional, in this same commit** (see *Documentation Sync* above for the pairs table).
+6. **Update tracking and documentation** — update the plan's `Status` to `In progress` (if not already); mark phase complete in the plan + `.ai/tasks/active.md`, setting this phase's `Execution Order` row `Status` to `Done`. Check whether every row in the `Execution Order` table is now `Done` — if so, this is the **final phase**: set the plan's top-level `Status: Complete` in this same commit. `Complete` records **work state** — all phases implemented, validated, and committed; delivery to `main` is recorded by git alone, at session close. If this phase altered behavior, architecture, features, rules, tech stack, or user-facing workflows: **update both the affected `docs/` file and its `.ai/` working copy — required, not optional, in this same commit** (see *Documentation Sync* above for the pairs table).
 7. **Stage and formulate** — first apply the doc-sync checklist, then stage.
    - **Apply the doc-sync pairs table from the *Documentation Sync* section above** — for every row whose topic this phase touched, update the listed `docs/` file **and** its `.ai/` working copy in this same commit. If the phase touched no listed topic, skip doc-sync.
 
    Stage only phase files + docs/tracking updates; write a proposed commit message with a semantic prefix that references the phase (number/name) and formulate the push command.
 8. **Stop — request explicit human approval** before commit and push. Stop calling tools and end your turn; do not run the commit or push until the human approves in a new turn.
-9. **Execute** — once approved, commit and push to the task branch. **If step 6 found this was the final phase**, mark the plan's top-level `Status: Complete` now that the push has succeeded. If the human rejects the push, leave `Status: In progress` and report that delivery did not happen; do not mark `Complete` for work that was not pushed — the next session can retry delivery from the same branch.
+9. **Execute** — once approved, commit and push to the task branch. If the human rejects the push, leave the commit local and report — the branch can be pushed later or at session close.
 10. **Report** — commit hash, committed files, validation summary, remaining local changes, and the plan's `Status` transition if it just became `Complete` — **wait for instructions**.
 
 ---
 
 ### Autonomous — Auto-Execute Full Plan
 
-Use this mode when the plan is approved and you want the agent to execute all phases in sequence, committing after each, only stopping before the final push.
+Use this mode when the plan is approved and you want the agent to execute all phases in sequence, committing after each. There is **no push in this mode** — the branch is delivered once, at session close.
 
 **Before starting:**
 - Confirm the plan is already approved by the human.
@@ -234,7 +234,7 @@ Use this mode when the plan is approved and you want the agent to execute all ph
      - **Relevant output** (first 20 lines or the key error block): [output]
      - **Rollback commands**: `git reset --hard HEAD && git clean -fd` (this phase only) or `git reset --hard <pre-run-hash> && git clean -fd` (full initiative) — print but **do not execute**; wait for human instructions.
 4. **Clean build artifacts** if present — do not revert unrelated files.
-5. **Update tracking and documentation** — update the plan's `Status` to `In progress` (if not already); mark phase complete in plan + `active.md`. If this phase altered behavior, architecture, features, rules, tech stack, or user-facing workflows: **update both the affected `docs/` file and its `.ai/` working copy in this same commit — required, not optional** (see *Documentation Sync* above).
+5. **Update tracking and documentation** — update the plan's `Status` to `In progress` (if not already); mark phase complete in plan + `active.md`. If every `Execution Order` row is now `Done`, set the plan's top-level `Status: Complete` in this same commit — `Complete` records **work state** (implemented, validated, committed); delivery is git's record, at session close. If this phase altered behavior, architecture, features, rules, tech stack, or user-facing workflows: **update both the affected `docs/` file and its `.ai/` working copy in this same commit — required, not optional** (see *Documentation Sync* above).
 6. **Stage and commit** — first apply the doc-sync checklist, then stage.
    - **Apply the doc-sync pairs table from the *Documentation Sync* section above** — for every row whose topic this phase touched, update the listed `docs/` file **and** its `.ai/` working copy in this same commit. If the phase touched no listed topic, skip doc-sync.
 
@@ -243,16 +243,12 @@ Use this mode when the plan is approved and you want the agent to execute all ph
 
 **After all phases complete:**
 
-1. Print a full run summary: all phases, commit hashes, any warnings. The plan's
-   `Status` stays `In progress` until delivery is confirmed below — do not mark it
-   `Complete` yet.
-2. Formulate the push command.
-3. **Stop — request explicit human approval before push.**
-4. Once approved: push the task branch; report the final pushed state.
-5. **Mark the plan `Status: Complete`** — only after the push succeeds. If the human
-   rejects the push, leave the plan `In progress` and report that delivery did not
-   happen; do not mark `Complete` for work that was not pushed. The next session can
-   retry delivery from the same branch.
+1. Print a full run summary: all phases, commit hashes, any warnings, and the plan's
+   final `Status`.
+2. **Do not push. Execution ends here.** Delivery to `main` happens exactly once, via
+   the Handoff & Session Close Protocol (`.ai/workflows/session-close.md`) — await the
+   session-close prompt. An early push of the task branch (CI, backup) happens only on
+   explicit human request.
 
 ---
 
@@ -261,4 +257,5 @@ Use this mode when the plan is approved and you want the agent to execute all ph
 When the session ends, follow the **Handoff & Session Close Protocol** in
 `.ai/workflows/session-close.md` — it covers the verification gates, handoff-doc updates
 (`current.md`, `SESSION_NOTES.md`, `active.md`), the memory check, documentation sync, and the
-human-approved merge-to-main sequence.
+human-approved integration to `main` — the single point in the workflow where the branch is
+delivered.

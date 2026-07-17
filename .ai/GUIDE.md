@@ -1,4 +1,4 @@
-<!-- prime: version=3.5.3 template=.ai/GUIDE.md date=2026-07-02 -->
+<!-- prime: version=3.5.3 template=.ai/GUIDE.md date=2026-07-17 -->
 # AI Workspace Guide
 
 > **You are an AI coding agent.** This file is written for you. Read it when setting up

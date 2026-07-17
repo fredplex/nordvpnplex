@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.3 template=.ai/workflows/definition-of-done.md date=2026-07-02 -->
+<!-- prime: version=3.0.4 template=.ai/workflows/definition-of-done.md date=2026-07-17 -->
 # Definition of Done
 
 The single gate every change passes before it is "done": the validation commands, the Done
@@ -36,7 +36,7 @@ A task is complete when:
 - [ ] Matching `.ai/` working copy updated in the same change — no doc drift (see *Documentation Sync* in `implementation.md`).
 - [ ] If scaffold file count changed: `AGENTS.md` Key rules prose **and** file-structure table verified current against manifest.
 - [ ] If user-facing behavior, CLI flags, or invocation changed: `README.md` updated in the same commit.
-- [ ] Human approval obtained before commit, push, or merge.
+- [ ] Human approval obtained at the mode's defined gate — per phase in Supervised mode; at session-close integration in Autonomous mode.
 
 ---
 

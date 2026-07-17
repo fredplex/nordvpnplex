@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.1 template=CLAUDE.md date=2026-07-01 -->
+<!-- prime: version=3.0.1 template=CLAUDE.md date=2026-07-17 -->
 # CLAUDE.md
 
 This file is read automatically by Claude Code at the start of every session.

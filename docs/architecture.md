@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.0 template=docs/architecture.md date=2026-06-30 -->
+<!-- prime: version=3.0.0 template=docs/architecture.md date=2026-07-17 -->
 # Architecture
 
 Core architecture philosophy, layer discipline, and design decisions for **fredplex/nordvpn**.

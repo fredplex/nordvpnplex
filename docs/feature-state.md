@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.0 template=docs/feature-state.md date=2026-06-30 -->
+<!-- prime: version=3.0.0 template=docs/feature-state.md date=2026-07-17 -->
 # Feature State
 
 Authoritative inventory of all features in **fredplex/nordvpn**.
@@ -18,7 +18,7 @@ Authoritative inventory of all features in **fredplex/nordvpn**.
 
 ---
 
-## Core Container Features
+## Core Features
 
 | Feature | Status | Notes |
 |---------|--------|-------|

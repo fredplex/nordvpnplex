@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.0 template=.ai/tasks/completed.md date=2026-07-01 -->
+<!-- prime: version=3.0.0 template=.ai/tasks/completed.md date=2026-07-17 -->
 # Completed Tasks
 
 Lightweight task archive. One line per task — name, commit hash, date.

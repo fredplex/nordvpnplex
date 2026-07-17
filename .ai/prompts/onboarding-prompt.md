@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.0 template=.ai/prompts/onboarding-prompt.md date=2026-06-30 -->
+<!-- prime: version=3.0.0 template=.ai/prompts/onboarding-prompt.md date=2026-07-17 -->
 # Onboarding Prompt
 
 Welcome to **nordvpnplex**. You are pair programming with me.

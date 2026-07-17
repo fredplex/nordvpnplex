@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.3 template=AGENTS.md date=2026-07-01 -->
+<!-- prime: version=3.0.3 template=AGENTS.md date=2026-07-17 -->
 # AGENTS.md
 
 Main entry point for coding agents working in this repository.

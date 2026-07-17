@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.0 template=.ai/README.md date=2026-06-30 -->
+<!-- prime: version=3.0.0 template=.ai/README.md date=2026-07-17 -->
 # Agent Workspace
 
 Welcome to the `.ai/` directory — the operational context for working on **nordvpnplex**.

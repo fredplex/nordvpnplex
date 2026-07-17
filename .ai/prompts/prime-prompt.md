@@ -1,4 +1,4 @@
-<!-- prime: version=3.3.0 template=.ai/prompts/prime-prompt.md date=2026-06-30 -->
+<!-- prime: version=3.3.0 template=.ai/prompts/prime-prompt.md date=2026-07-17 -->
 # Prime Prompt — Agent-Driven Re-prime
 
 You are about to update or re-prime the AI agent workspace for this repository.

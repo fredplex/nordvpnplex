@@ -1,4 +1,4 @@
-<!-- prime: version=3.0.1 template=.ai/workflows/onboarding.md date=2026-06-30 -->
+<!-- prime: version=3.0.2 template=.ai/workflows/onboarding.md date=2026-07-17 -->
 # Onboarding Workflow
 
 How to start working effectively in this codebase.
@@ -53,12 +53,10 @@ SESSION_NOTES entries beyond the most recent unless the active task explicitly r
   under Fragile Areas. Do not fix it during this read-only pass.
 - **State conflicts**: if `current.md`, `git`, `tasks/active.md`, and `SESSION_NOTES.md`
   disagree, report the mismatch. Do not resolve it — surface it.
-- **Stale merge-pipeline state**: if `current.md` or `active.md` describe an "awaiting
-  merge review" or "awaiting approval" state, cross-reference `git log` to determine whether
-  the branch has already been merged. This is a known pattern from the PR flow close protocol —
-  handoff docs are committed before the human merges, so "awaiting" language can bake into
-  `main`. Flag under Fragile Areas and treat the docs as stale if `git log` confirms the
-  merge has landed.
+- **Stale merge-pipeline state (legacy repos)**: repos primed with older template versions
+  may carry "awaiting merge/approval" language baked into handoff docs by the old close
+  protocol. If `current.md` or `active.md` describe delivery state, cross-check `git log`;
+  if the merge already landed, treat the docs as stale and flag under Fragile Areas.
 - **Stale docs identified during onboarding**: log under Fragile Areas in your report. Do not
   fix during the read-only pass. If the human confirms a stale-doc fix is the session task,
   create a task entry in `active.md` and branch before touching anything. If the human
