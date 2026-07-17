@@ -7,7 +7,24 @@ Current work in progress.
 
 ## Current Status
 
-**None active — awaiting direction.** Concurrency Deadlock Fix complete. Dockerfile Follow-up Review plan (`.ai/plans/dockerfile-followup-review.md`) has three still-open findings; Tier 2 items need owner input before implementation. Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
+**None active — awaiting direction.** AI Docs Re-prime + Backup Merge complete. Dockerfile Follow-up Review plan (`.ai/plans/dockerfile-followup-review.md`) has three still-open findings; Tier 2 items need owner input before implementation. Watching for NordVPN releases and base image digest updates (both automated via GHA cron).
+
+### AI Docs Re-prime + Backup Merge (Complete)
+
+Re-primed the `.ai/`/`docs/` agent workspace to vibe-coding-template v3.7.9. The re-prime
+run regenerated all 29 non-stub files from raw templates (manifest showed `fromVersion:
+"0.0.0"` for every file, not a genuine 0.0.0→N upgrade), wiping real project-specific content
+back to generic scaffold placeholders — including deleting `CLAUDE.md`'s entire Constraints
+section outright. Merged the real content back in from the pre-update backup per
+`.ai/GUIDE.md` Part 3.
+
+- [x] Onboarding pass identified the mid-re-prime state and the content loss (—)
+- [x] Merged backup content into `AGENTS.md`, `CLAUDE.md`, `docs/*`, `.ai/memory/*`,
+      `.ai/rules/*`, `.ai/current.md`, `.ai/tasks/*`, `.ai/SESSION_NOTES.md`, `.ai/README.md` (`0543cd7`)
+- [x] Session close (this commit)
+
+All phases complete. No formal plan file was used for this task — it followed
+`.ai/GUIDE.md`'s prescribed re-prime steps directly.
 
 ### Concurrency Deadlock Fix (Complete)
 
@@ -135,6 +152,6 @@ All 7 phases complete. See `.ai/plans/archive/build-release-workflow-hardening.m
 
 ## Recently Completed
 
+- **AI Docs Re-prime + Backup Merge** (2026-07-17) — re-primed the `.ai/`/`docs/` workspace to vibe-coding-template v3.7.9 and merged real project-specific content back in from the pre-update backup after the re-prime run had overwritten it with generic scaffold placeholders (`0543cd7`)
 - **Concurrency Deadlock Fix** (2026-07-15) — fixed the GHA concurrency-group deadlock between `check-base-image.yml`/`check-nordvpn-release.yml` (callers) and `publish-dev.yml` (reusable callee) by moving all three to unique workflow-specific group keys; `github.workflow` evaluated to the caller's name inside the called workflow, causing both to share the group `Check Base Image-refs/heads/main` (`566074a`–`ee11afb`)
 - **AGENTS.md scaffold fill** (2026-07-12) — replaced all five `<placeholder>` template stubs in `AGENTS.md` with project-specific content (this commit)
-- **Dev Build Gate for Manual PRs** (2026-07-10) — extended the dev-build-and-test cycle to manually created PRs (previously only `auto/*` bump PRs got one); found and fixed a dormant `ARG BASE_DIGEST` grep bug that would have broken the next real NordVPN release's automation (`c954b27`–`693b7ad`)

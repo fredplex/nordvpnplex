@@ -42,26 +42,11 @@ A task is complete when:
 
 ## Review Checklist
 
-Choose the archetype section that matches this project and delete the others:
-
-### Web UI / BFF Archetype — *delete if N/A*
-- [ ] Client components import only feature hooks and shared UI primitives (no backend service SDKs).
-- [ ] Feature hooks call same-origin API routes only.
-- [ ] No secrets or internal credentials are leaked to the browser bundle.
-- [ ] Every dynamic badge, counter, and status indicator has a `data-testid="{entity}-{id}-{element}"` in the same commit.
-- [ ] Browser verification completed (null, empty, and happy paths).
-
-### API / Backend Service Archetype — *delete if N/A*
-- [ ] API routes validate and sanitize inputs at the entry boundary.
-- [ ] API responses normalize data and redact internal database or server fields.
-- [ ] Secrets stay server-side (retrieved from secure env variables).
-- [ ] Boundary timeouts are bounded on external calls.
-
-### CLI / Library / SDK Archetype — *delete if N/A*
-- [ ] All dependencies are language built-ins or explicitly approved packages.
-- [ ] File writes are atomic (safe temp-and-rename).
-- [ ] Scoped file operations stay strictly inside the target directory boundary.
-- [ ] Generators are side-effect free and output generic code.
+### Container / Docker Build Archetype
+- [ ] `task docker-build` completes without errors on the local machine.
+- [ ] `task verify` passes all 4 credentialless smoke tests.
+- [ ] iptables OUTPUT policy is DROP inside the container (kill-switch functional).
+- [ ] nordvpnd socket present at `/run/nordvpn/nordvpnd.sock` after startup.
 
 ---
 
