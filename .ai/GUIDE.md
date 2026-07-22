@@ -1,4 +1,4 @@
-<!-- prime: version=3.5.3 template=.ai/GUIDE.md date=2026-07-17 -->
+<!-- prime: version=3.5.4 template=.ai/GUIDE.md date=2026-07-22 -->
 # AI Workspace Guide
 
 > **You are an AI coding agent.** This file is written for you. Read it when setting up
@@ -204,11 +204,13 @@ Read Part 3 of this file — it is the authoritative merge reference. Execute it
 
 #### Step 6 — Commit the generated files
 
-First ensure `.ai-prime-backup/` is gitignored — **read `.gitignore` first**; only append
-the line if it is not already present (never overwrite the file):
+First ensure both runtime artifacts are gitignored — **read `.gitignore` first**; never
+overwrite the file:
 
 ```bash
+touch .gitignore
 grep -qxF '.ai-prime-backup/' .gitignore || echo '.ai-prime-backup/' >> .gitignore
+grep -qxF '.ai-prime-manifest.json' .gitignore || echo '.ai-prime-manifest.json' >> .gitignore
 ```
 
 Then stage and commit the workspace files, including `.ai-prime-versions.json` — it is
@@ -220,8 +222,17 @@ git add .ai/ docs/ AGENTS.md CLAUDE.md .gitignore .ai-prime-versions.json
 git commit -m "chore: prime AI agent workspace via vibe-coding-template"
 ```
 
-Do not stage `.ai-prime-backup/` or `.ai-prime-manifest.json` — both are gitignored runtime
-artifacts (a per-run backup directory and a per-run log), unlike `.ai-prime-versions.json`.
+Do not stage `.ai-prime-backup/` or `.ai-prime-manifest.json` — both are runtime artifacts,
+not durable state:
+
+- `.ai-prime-backup/` — per-run backup of files replaced by the script
+- `.ai-prime-manifest.json` — per-run log of what this particular invocation did
+  (timestamp, mode, targetDir, full per-file results). Useful for debugging, but every
+  re-prime produces a new one — tracking it would dirty the tree on every run.
+
+In contrast, `.ai-prime-versions.json` is durable state (per-file versions, context values,
+content hashes) that survives clone/CI and is read back by future runs — it is tracked
+by design.
 
 ---
 
@@ -335,7 +346,7 @@ npx github:fredplex/vibe-coding-template . --yes --name "My App" ...
 ```
 
 When files are updated, a timestamped backup is written to `.ai-prime-backup/{timestamp}/`.
-Add `.ai-prime-backup/` to your `.gitignore`.
+Add `.ai-prime-backup/` and `.ai-prime-manifest.json` to your `.gitignore`.
 
 #### Saved context replay
 

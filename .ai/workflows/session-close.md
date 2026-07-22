@@ -1,4 +1,4 @@
-<!-- prime: version=3.1.0 template=.ai/workflows/session-close.md date=2026-07-17 -->
+<!-- prime: version=3.1.1 template=.ai/workflows/session-close.md date=2026-07-22 -->
 # Session Close Workflow
 
 The Handoff & Session Close Protocol — triggered by `.ai/prompts/session-close-prompt.md`.
@@ -75,13 +75,38 @@ Run these steps in order at the end of a working session.
 
 9. **Integrate to main — with human approval**
    - **This is the only point in the entire workflow where the task branch is integrated to
-     `main` — and in Autonomous mode, the only push.** Plan execution never delivers; this step does.
+     `main` — and in Autonomous mode, the only push of the task branch.** Plan execution never delivers; this step does.
    - Stage and commit all remaining handoff files, docs, and notes to the task branch.
-   - Choose the integration path and confirm it with the human:
-     - **PR flow (recommended for protected repos):** push the task branch, then request human review and a Pull Request. Do **not** check out `main` locally. No stash needed.
-     - **Local merge flow:** if the working tree is still dirty after committing handoff files, run `git stash` to prevent checkout blocks; then checkout `main` → pull → merge task branch → push `main` → `git stash pop` → delete the task branch.
-   - **If a merge conflict occurs:** stop immediately. Do not attempt to auto-resolve. Report the conflicting files and the merge command that was run. Wait for explicit human instructions before making any further changes.
-   - Stop and request explicit human approval before executing the chosen path.
-   - Once approved, execute it and report the result.
+
+   **9a. Integrate (choose one path, human-gated):**
+   - **PR flow (recommended for protected repos):** push the task branch; if `gh` is
+     available run `gh pr create`, otherwise ask the human to open the Pull Request.
+     Do **not** check out `main` locally at this point. Wait for the human to confirm
+     the PR has merged on the remote before running 9b.
+   - **Local merge flow:** if the working tree is still dirty after committing handoff
+     files, run `git stash` to prevent checkout blocks; then checkout `main` → pull →
+     merge task branch → push `main` → `git stash pop`. Deletion of the task branch is
+     performed by 9b, not here.
+   - **If a merge conflict occurs:** stop immediately. Do not attempt to auto-resolve.
+     Report the conflicting files and the merge command that was run. Wait for explicit
+     human instructions before making any further changes.
+   - Stop and request explicit human approval before executing the chosen path. Once
+     approved, execute 9a and report the result.
+
+   **9b. Post-integration cleanup (shared, both paths):** once the chosen integration
+   has landed (for the local-merge path, immediately after 9a; for the PR path, after
+   the human confirms the PR merged), bring the local repo back to a canonical state:
+   1. `git fetch origin --prune`
+   2. `git checkout main`
+   3. `git pull --ff-only` — if this fails, local `main` has diverged from `origin/main`;
+      stop and report (do not `--hard` reset; treat it like a merge-conflict escalation).
+   4. `git branch -d <task-branch>` (uses safe `-d` which refuses unmerged branches)
+   5. `git push origin --delete <task-branch>` — only if `origin/<task-branch>` still
+      exists after the prune (the PR path's branch is usually auto-deleted by the remote
+      on merge; the local-merge path's remote branch survives and must be removed here).
+   6. `git stash pop` — only if a stash was created in 9a (local-merge path may have
+      stashed; the PR path does not stash, so skip).
+   - The 9a approval covers 9b as well — no second human gate for the cleanup tail.
+     Report the final local/remote branch state as part of the step-10 summary.
 
 10. **Final summary** — stopping point, validation results, final merge commit hash, and pushed branch state.
